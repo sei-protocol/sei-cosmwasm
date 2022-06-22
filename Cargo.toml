@@ -1,0 +1,10 @@
+[workspace]
+## add packages/*
+members = ["contracts/*"]
+
+[profile.release.package.sei-cosmwasm]
+opt-level = 3
+debug = false
+debug-assertions = false
+codegen-units = 1
+incremental = false
