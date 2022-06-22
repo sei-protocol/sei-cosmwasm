@@ -1,0 +1,16 @@
+[package]
+name = "sei-cosmwasm"
+version = "0.1.0"
+edition = "2018"
+readme = "README.md"
+
+[features]
+backtraces = ["cosmwasm-std/backtraces"]
+
+[dependencies]
+cosmwasm-std = "1.0.0"
+schemars = "0.8.3"
+serde = { version = "1.0.127", default-features = false, features = ["derive"] }
+
+[dev-dependencies]
+cosmwasm-schema = "1.0.0"

@@ -12,10 +12,16 @@
 # macOS
 .DS_Store
 
+# generated schemas
+packages/*/schema
+contracts/*/schema
+
 # IDEs
 *.iml
 .idea
 
-# contract artifacts
+# Build artifacts
 *.wasm
-*/artifacts/checksums.txt
+hash.txt
+contracts.txt
+artifacts/

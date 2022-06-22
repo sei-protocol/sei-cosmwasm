@@ -1,7 +1,6 @@
 [package]
 name = "sei-tester"
 version = "0.1.0"
-authors = ["Uday Patil <udpatil@gmail.com>"]
 edition = "2018"
 
 exclude = [
@@ -40,6 +39,7 @@ optimize = """docker run --rm -v "$(pwd)":/code \
 """
 
 [dependencies]
+sei-cosmwasm = { path = "../../packages/sei-cosmwasm", version = "0.1.0" }
 cosmwasm-std = "1.0.0"
 cosmwasm-storage = "1.0.0"
 cw-storage-plus = "0.13.2"
