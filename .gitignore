@@ -1,8 +1,10 @@
 # Build results
-/target
+**/target/
 
 # Cargo+Git helper file (https://github.com/rust-lang/cargo/blob/0.44.1/src/cargo/sources/git/utils.rs#L320-L327)
 .cargo-ok
+
+**/Cargo.lock
 
 # Text file backups
 **/*.rs.bk
@@ -13,3 +15,7 @@
 # IDEs
 *.iml
 .idea
+
+# contract artifacts
+*.wasm
+*/artifacts/checksums.txt

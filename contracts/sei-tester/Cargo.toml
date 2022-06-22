@@ -1,5 +1,5 @@
 [package]
-name = "sei-cosmwasm"
+name = "sei-tester"
 version = "0.1.0"
 authors = ["Uday Patil <udpatil@gmail.com>"]
 edition = "2018"
