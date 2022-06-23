@@ -7,7 +7,7 @@ pub use msg::{SeiMsg, SeiMsgWrapper};
 pub use querier::SeiQuerier;
 pub use query::{
     ExchangeRateItem, ExchangeRatesResponse,
-    SeiQuery, SeiQueryWrapper,
+    SeiQuery, SeiQueryWrapper, ContractInfoResponse
 };
 pub use route::SeiRoute;
 
