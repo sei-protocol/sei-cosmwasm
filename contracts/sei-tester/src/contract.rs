@@ -1,6 +1,6 @@
 use cosmwasm_std::{
     to_binary, Deps, DepsMut, Env, MessageInfo, QueryResponse, Response, StdError,
-    StdResult,
+    StdResult, entry_point,
 };
 
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
@@ -8,6 +8,7 @@ use sei_cosmwasm::{
     ExchangeRatesResponse, SeiMsgWrapper, SeiQuerier, ContractInfoResponse, SeiQueryWrapper
 };
 
+#[entry_point]
 pub fn instantiate(
     _deps: DepsMut,
     _env: Env,
@@ -17,6 +18,7 @@ pub fn instantiate(
     Ok(Response::new())
 }
 
+#[entry_point]
 pub fn execute(
     _deps: DepsMut,
     _env: Env,
@@ -26,6 +28,7 @@ pub fn execute(
     match msg {}
 }
 
+#[entry_point]
 pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult<QueryResponse> {
     match msg {
         QueryMsg::ExchangeRates{} => to_binary(&query_exchange_rates(deps)?),
