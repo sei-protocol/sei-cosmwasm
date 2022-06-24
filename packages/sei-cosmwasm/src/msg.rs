@@ -2,7 +2,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::route::SeiRoute;
-use cosmwasm_std::{CosmosMsg};
+use cosmwasm_std::{CosmosMsg, CustomMsg};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
@@ -11,6 +11,9 @@ pub struct SeiMsgWrapper {
     pub route: SeiRoute,
     pub msg_data: SeiMsg,
 }
+
+// implement custom query
+impl CustomMsg for SeiMsgWrapper {}
 
 // this is a helper to be able to return these as CosmosMsg easier
 impl From<SeiMsgWrapper> for CosmosMsg<SeiMsgWrapper> {

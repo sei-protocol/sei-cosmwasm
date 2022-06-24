@@ -2,7 +2,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::route::SeiRoute;
-use cosmwasm_std::{CustomQuery, Decimal};
+use cosmwasm_std::{CustomQuery, Decimal, Uint64};
 
 /// SeiQueryWrapper is an override of QueryRequest::Custom to access Sei-specific modules
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -27,16 +27,22 @@ pub enum SeiQuery {
 
 /// ExchangeRateItem is data format returned from OracleRequest::ExchangeRates query
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct ExchangeRateItem {
-    pub quote_denom: String,
+pub struct OracleExchangeRate {
     pub exchange_rate: Decimal,
+    pub last_update: Uint64,
+}
+
+/// ExchangeRateItem is data format returned from OracleRequest::ExchangeRates query
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct DenomOracleExchangeRatePair {
+    pub denom: String,
+    pub oracle_exchange_rate: OracleExchangeRate,
 }
 
 /// ExchangeRatesResponse is data format returned from OracleRequest::ExchangeRates query
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct ExchangeRatesResponse {
-    pub base_denom: String,
-    pub exchange_rates: Vec<ExchangeRateItem>,
+    pub denom_oracle_exchange_rate_pairs: Vec<DenomOracleExchangeRatePair>,
 }
 
 /// ContractInfoResponse is data format returned from WasmRequest::ContractInfo query
