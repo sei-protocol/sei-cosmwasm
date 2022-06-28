@@ -62,11 +62,17 @@ jobs:
           command: clippy
           args: -- -D warnings
 
-      - name: Generate Schema
+      - name: Generate Schema For sei-tester
         uses: actions-rs/cargo@v1
         with:
           command: schema
-          args: --locked
+          args: -p sei-tester
+
+      - name: Generate Schema For sei-cosmwasm
+        uses: actions-rs/cargo@v1
+        with:
+          command: schema
+          args: -p sei-tester
 
       - name: Schema Changes
         # fails if any changes not committed

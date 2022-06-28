@@ -15,6 +15,7 @@
 # generated schemas
 packages/*/schema
 contracts/*/schema
+schema
 
 # IDEs
 *.iml
