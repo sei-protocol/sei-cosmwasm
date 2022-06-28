@@ -2,7 +2,7 @@ use cosmwasm_std::{QuerierWrapper, StdResult};
 
 use crate::query::{
     ExchangeRatesResponse,
-    SeiQuery, SeiQueryWrapper, ContractInfoResponse,
+    SeiQuery, SeiQueryWrapper,
 };
 use crate::route::SeiRoute;
 
@@ -20,20 +20,6 @@ impl<'a> SeiQuerier<'a> {
         let request = SeiQueryWrapper{
             route: SeiRoute::Oracle,
             query_data: SeiQuery::ExchangeRates {},
-        }.into();
-
-        self.querier.query(&request)
-    }
-
-    pub fn query_contract_info<T: Into<String>>(
-        &self,
-        contract_address: T,
-    ) -> StdResult<ContractInfoResponse> {
-        let request = SeiQueryWrapper {
-            route: SeiRoute::Wasm,
-            query_data: SeiQuery::ContractInfo {
-                contract_address: contract_address.into(),
-            },
         }.into();
 
         self.querier.query(&request)

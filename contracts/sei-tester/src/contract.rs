@@ -5,7 +5,7 @@ use cosmwasm_std::{
 
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 use sei_cosmwasm::{
-    ExchangeRatesResponse, SeiMsgWrapper, SeiQuerier, ContractInfoResponse, SeiQueryWrapper,
+    ExchangeRatesResponse, SeiMsgWrapper, SeiQuerier, SeiQueryWrapper,
 };
 
 #[entry_point]
@@ -32,7 +32,6 @@ pub fn execute(
 pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult<QueryResponse> {
     match msg {
         QueryMsg::ExchangeRates{} => to_binary(&query_exchange_rates(deps)?),
-        QueryMsg::ContractInfo{contract_addr} => to_binary(&query_contract_info(deps, contract_addr)?),
     }
 }
 
@@ -41,17 +40,6 @@ pub fn query_exchange_rates(
 ) -> StdResult<ExchangeRatesResponse> {
     let querier = SeiQuerier::new(&deps.querier);
     let res: ExchangeRatesResponse = querier.query_exchange_rates()?;
-
-    Ok(res)
-}
-
-pub fn query_contract_info(
-    deps: Deps<SeiQueryWrapper>,
-    contract_address: String,
-) -> StdResult<ContractInfoResponse> {
-    let validated_addr = deps.api.addr_validate(&contract_address)?;
-    let querier = SeiQuerier::new(&deps.querier);
-    let res: ContractInfoResponse = querier.query_contract_info(validated_addr.clone())?;
 
     Ok(res)
 }

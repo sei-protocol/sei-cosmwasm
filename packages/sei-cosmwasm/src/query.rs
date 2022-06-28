@@ -44,12 +44,3 @@ pub struct DenomOracleExchangeRatePair {
 pub struct ExchangeRatesResponse {
     pub denom_oracle_exchange_rate_pairs: Vec<DenomOracleExchangeRatePair>,
 }
-
-/// ContractInfoResponse is data format returned from WasmRequest::ContractInfo query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct ContractInfoResponse {
-    pub address: String,
-    pub creator: String,
-    pub code_id: u64,
-    pub admin: Option<String>,
-}
