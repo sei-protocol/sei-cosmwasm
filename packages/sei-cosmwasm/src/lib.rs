@@ -11,6 +11,7 @@ pub use query::{
 };
 pub use route::SeiRoute;
 
+// TODO: properly support this requirement behavior in sei-chain
 // // This export is added to all contracts that import this package, signifying that they require
 // // "sei" support on the chain they run on.
 // #[no_mangle]
