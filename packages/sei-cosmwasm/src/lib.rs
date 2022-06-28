@@ -6,8 +6,8 @@ mod route;
 pub use msg::{SeiMsg, SeiMsgWrapper};
 pub use querier::SeiQuerier;
 pub use query::{
-    DenomOracleExchangeRatePair, OracleExchangeRate, ExchangeRatesResponse,
-    SeiQuery, SeiQueryWrapper
+    DenomOracleExchangeRatePair, ExchangeRatesResponse, OracleExchangeRate, SeiQuery,
+    SeiQueryWrapper,
 };
 pub use route::SeiRoute;
 

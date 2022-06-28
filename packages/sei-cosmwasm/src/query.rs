@@ -20,9 +20,7 @@ impl CustomQuery for SeiQueryWrapper {}
 #[serde(rename_all = "snake_case")]
 pub enum SeiQuery {
     ExchangeRates {},
-    ContractInfo {
-        contract_address: String,
-    },
+    ContractInfo { contract_address: String },
 }
 
 /// ExchangeRateItem is data format returned from OracleRequest::ExchangeRates query
