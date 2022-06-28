@@ -14,7 +14,7 @@ docker run --rm -v "$(pwd)":/code \
 ## Testing with LocalSei
 
 ### Store Contract Code
-`seid tx wasm store artifacts/sei_tester.wasm -y --from uday --chain-id sei -b block --gas=3000000 --fees=1000sei`
+`seid tx wasm store artifacts/sei_tester.wasm -y --from <account> --chain-id <name> -b block --gas=3000000 --fees=1000sei`
 
 Make sure to note the code ID for the contract from the tx response. You can also find it in the list of uploaded code with this query:
 
