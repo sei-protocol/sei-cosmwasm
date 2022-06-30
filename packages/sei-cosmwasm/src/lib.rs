@@ -7,7 +7,7 @@ pub use msg::{SeiMsg, SeiMsgWrapper};
 pub use querier::SeiQuerier;
 pub use query::{
     DenomOracleExchangeRatePair, ExchangeRatesResponse, OracleExchangeRate, SeiQuery,
-    SeiQueryWrapper,
+    SeiQueryWrapper, OracleTwapsResponse,
 };
 pub use route::SeiRoute;
 

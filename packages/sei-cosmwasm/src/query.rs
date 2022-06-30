@@ -20,7 +20,9 @@ impl CustomQuery for SeiQueryWrapper {}
 #[serde(rename_all = "snake_case")]
 pub enum SeiQuery {
     ExchangeRates {},
-    ContractInfo { contract_address: String },
+    OracleTwaps{
+        lookback_seconds: i64,
+    }
 }
 
 /// ExchangeRateItem is data format returned from OracleRequest::ExchangeRates query
@@ -41,4 +43,17 @@ pub struct DenomOracleExchangeRatePair {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct ExchangeRatesResponse {
     pub denom_oracle_exchange_rate_pairs: Vec<DenomOracleExchangeRatePair>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct OracleTwap {
+    denom: String,
+    twap: Decimal,
+    lookback_seconds: i64,
+}
+
+/// OracleTwapsResponse is data format returned from OracleRequest::ExchangeRates query
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct OracleTwapsResponse {
+    pub oracle_twaps: Vec<OracleTwap>,
 }

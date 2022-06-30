@@ -1,6 +1,6 @@
 use cosmwasm_std::{QuerierWrapper, StdResult};
 
-use crate::query::{ExchangeRatesResponse, SeiQuery, SeiQueryWrapper};
+use crate::query::{ExchangeRatesResponse, OracleTwapsResponse, SeiQuery, SeiQueryWrapper};
 use crate::route::SeiRoute;
 
 /// This is a helper wrapper to easily use our custom queries
@@ -17,6 +17,16 @@ impl<'a> SeiQuerier<'a> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Oracle,
             query_data: SeiQuery::ExchangeRates {},
+        }
+        .into();
+
+        self.querier.query(&request)
+    }
+
+    pub fn query_oracle_twaps(&self, lookback_seconds: i64) -> StdResult<OracleTwapsResponse> {
+        let request = SeiQueryWrapper {
+            route: SeiRoute::Oracle,
+            query_data: SeiQuery::OracleTwaps {lookback_seconds: lookback_seconds},
         }
         .into();
 
