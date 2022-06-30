@@ -20,9 +20,7 @@ impl CustomQuery for SeiQueryWrapper {}
 #[serde(rename_all = "snake_case")]
 pub enum SeiQuery {
     ExchangeRates {},
-    OracleTwaps{
-        lookback_seconds: i64,
-    }
+    OracleTwaps { lookback_seconds: i64 },
 }
 
 /// ExchangeRateItem is data format returned from OracleRequest::ExchangeRates query
