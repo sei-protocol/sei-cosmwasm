@@ -21,7 +21,7 @@ Make sure to note the code ID for the contract from the tx response. You can als
 `seid q wasm list-code`
 
 ### Instantiate Contract
-`seid tx wasm instantiate <code-id> '{}' -y --no-admin --from <account> --chain-id <name> --gas=1500000 --fees=1000sei --b block --label sei-tester`
+`seid tx wasm instantiate <code-id> '{}' -y --no-admin --from <account> --chain-id <name> --gas=1500000 --fees=1000sei -b block --label sei-tester`
 
 Make sure to note the contract address for the contract from the tx response. You can also find it with this query:
 

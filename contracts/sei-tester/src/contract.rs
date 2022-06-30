@@ -4,7 +4,9 @@ use cosmwasm_std::{
 };
 
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
-use sei_cosmwasm::{ExchangeRatesResponse, SeiMsgWrapper, SeiQuerier, SeiQueryWrapper};
+use sei_cosmwasm::{
+    ExchangeRatesResponse, OracleTwapsResponse, SeiMsgWrapper, SeiQuerier, SeiQueryWrapper,
+};
 
 #[entry_point]
 pub fn instantiate(
@@ -30,12 +32,25 @@ pub fn execute(
 pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult<QueryResponse> {
     match msg {
         QueryMsg::ExchangeRates {} => to_binary(&query_exchange_rates(deps)?),
+        QueryMsg::OracleTwaps { lookback_seconds } => {
+            to_binary(&query_oracle_twaps(deps, lookback_seconds)?)
+        }
     }
 }
 
 pub fn query_exchange_rates(deps: Deps<SeiQueryWrapper>) -> StdResult<ExchangeRatesResponse> {
     let querier = SeiQuerier::new(&deps.querier);
     let res: ExchangeRatesResponse = querier.query_exchange_rates()?;
+
+    Ok(res)
+}
+
+pub fn query_oracle_twaps(
+    deps: Deps<SeiQueryWrapper>,
+    lookback_seconds: i64,
+) -> StdResult<OracleTwapsResponse> {
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: OracleTwapsResponse = querier.query_oracle_twaps(lookback_seconds)?;
 
     Ok(res)
 }
