@@ -27,7 +27,7 @@ impl<'a> SeiQuerier<'a> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Oracle,
             query_data: SeiQuery::OracleTwaps {
-                lookback_seconds: lookback_seconds,
+                lookback_seconds,
             },
         }
         .into();
