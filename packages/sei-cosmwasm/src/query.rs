@@ -20,7 +20,13 @@ impl CustomQuery for SeiQueryWrapper {}
 #[serde(rename_all = "snake_case")]
 pub enum SeiQuery {
     ExchangeRates {},
-    OracleTwaps { lookback_seconds: i64 },
+    OracleTwaps {
+        lookback_seconds: i64,
+    },
+    DexTwaps {
+        contract_address: String,
+        lookback_seconds: u64,
+    },
 }
 
 /// ExchangeRateItem is data format returned from OracleRequest::ExchangeRates query
@@ -50,8 +56,27 @@ pub struct OracleTwap {
     lookback_seconds: i64,
 }
 
-/// OracleTwapsResponse is data format returned from OracleRequest::ExchangeRates query
+/// OracleTwapsResponse is data format returned from OracleRequest::OracleTwaps query
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct OracleTwapsResponse {
     pub oracle_twaps: Vec<OracleTwap>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct DexPair {
+    price_denom: i32, // TODO: change to string after sei changes denom representation
+    asset_denom: i32, // TODO: change to string after sei changes denom representation
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct DexTwap {
+    pair: DexPair,
+    twap: Decimal,
+    look_back_seconds: u64,
+}
+
+/// DexTwapsResponse is data format returned from DexTwaps query
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct DexTwapsResponse {
+    pub twaps: Vec<DexTwap>,
 }

@@ -3,7 +3,8 @@ use std::fs::create_dir_all;
 
 use cosmwasm_schema::{export_schema, remove_schemas, schema_for};
 use sei_cosmwasm::{
-    ExchangeRatesResponse, SeiMsg, SeiMsgWrapper, SeiQuery, SeiQueryWrapper, SeiRoute,
+    DexTwapsResponse, ExchangeRatesResponse, OracleTwapsResponse, SeiMsg, SeiMsgWrapper, SeiQuery,
+    SeiQueryWrapper, SeiRoute,
 };
 
 fn main() {
@@ -18,4 +19,6 @@ fn main() {
     export_schema(&schema_for!(SeiQuery), &out_dir);
     export_schema(&schema_for!(SeiRoute), &out_dir);
     export_schema(&schema_for!(ExchangeRatesResponse), &out_dir);
+    export_schema(&schema_for!(OracleTwapsResponse), &out_dir);
+    export_schema(&schema_for!(DexTwapsResponse), &out_dir);
 }
