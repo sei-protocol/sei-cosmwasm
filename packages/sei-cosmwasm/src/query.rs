@@ -51,9 +51,9 @@ pub struct ExchangeRatesResponse {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct OracleTwap {
-    denom: String,
-    twap: Decimal,
-    lookback_seconds: i64,
+    pub denom: String,
+    pub twap: Decimal,
+    pub lookback_seconds: i64,
 }
 
 /// OracleTwapsResponse is data format returned from OracleRequest::OracleTwaps query
@@ -64,15 +64,15 @@ pub struct OracleTwapsResponse {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct DexPair {
-    price_denom: i32, // TODO: change to string after sei changes denom representation
-    asset_denom: i32, // TODO: change to string after sei changes denom representation
+    pub price_denom: i32, // TODO: change to string after sei changes denom representation
+    pub asset_denom: i32, // TODO: change to string after sei changes denom representation
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct DexTwap {
-    pair: DexPair,
-    twap: Decimal,
-    look_back_seconds: u64,
+    pub pair: DexPair,
+    pub twap: Decimal,
+    pub look_back_seconds: u64,
 }
 
 /// DexTwapsResponse is data format returned from DexTwaps query
