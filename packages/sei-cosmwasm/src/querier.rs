@@ -1,8 +1,7 @@
-use cosmwasm_std::{Addr, QuerierWrapper, StdResult, Uint64};
+use cosmwasm_std::{QuerierWrapper, StdResult, Addr, Uint64};
 
 use crate::query::{
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, OracleTwapsResponse, SeiQuery,
-    SeiQueryWrapper,
+    DexTwapsResponse, ExchangeRatesResponse, OracleTwapsResponse, SeiQuery, SeiQueryWrapper, EpochResponse,
 };
 use crate::route::SeiRoute;
 
@@ -53,12 +52,13 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
-    pub fn query_epoch(&self) -> StdResult<EpochResponse> {
+    pub fn query_epoch(
+        &self,
+    ) -> StdResult<EpochResponse> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Epoch,
             query_data: SeiQuery::Epoch {},
-        }
-        .into();
+        }.into();
         self.querier.query(&request)
     }
 }

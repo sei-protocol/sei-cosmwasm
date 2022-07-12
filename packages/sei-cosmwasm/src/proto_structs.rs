@@ -37,25 +37,12 @@ pub struct DexTwap {
     pub look_back_seconds: u64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct Timestamp {
-    pub seconds: i64,
-    pub nanos: i32,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct Duration {
-    pub seconds: i64,
-    pub nanos: i32,
-}
-// TODO: make impl for Timestamp and Duration as needed
-
 // Epoch is the struct that matches the data format of Epoch in Epoch Response
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct Epoch {
-    pub genesis_time: Timestamp,
-    pub epoch_duration: Duration,
-    pub current_epoch: Uint64,
-    pub current_epoch_start_time: Timestamp,
+    pub genesis_time: String, // represented as ISO8601 UTC
+    pub duration: u64, // Represented as nanos
+    pub current_epoch: u64,
+    pub current_epoch_start_time: String, // represented as ISO8601 UTC
     pub current_epoch_height: i64,
 }
