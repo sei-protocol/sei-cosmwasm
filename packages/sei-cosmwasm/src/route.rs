@@ -7,4 +7,5 @@ use serde::{Deserialize, Serialize};
 pub enum SeiRoute {
     Oracle,
     Dex,
+    Epoch,
 }

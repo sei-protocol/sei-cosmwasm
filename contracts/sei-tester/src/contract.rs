@@ -1,11 +1,12 @@
 use cosmwasm_std::{
     entry_point, to_binary, Deps, DepsMut, Env, MessageInfo, QueryResponse, Response, StdError,
-    StdResult,
+    StdResult, Uint64,
 };
 
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 use sei_cosmwasm::{
-    ExchangeRatesResponse, OracleTwapsResponse, SeiMsgWrapper, SeiQuerier, SeiQueryWrapper,
+    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, OracleTwapsResponse, SeiMsgWrapper,
+    SeiQuerier, SeiQueryWrapper,
 };
 
 #[entry_point]
@@ -35,6 +36,11 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
         QueryMsg::OracleTwaps { lookback_seconds } => {
             to_binary(&query_oracle_twaps(deps, lookback_seconds)?)
         }
+        QueryMsg::DexTwaps {
+            contract_address,
+            lookback_seconds,
+        } => to_binary(&query_dex_twaps(deps, contract_address, lookback_seconds)?),
+        QueryMsg::Epoch {} => to_binary(&query_epoch(deps)?),
     }
 }
 
@@ -51,6 +57,25 @@ pub fn query_oracle_twaps(
 ) -> StdResult<OracleTwapsResponse> {
     let querier = SeiQuerier::new(&deps.querier);
     let res: OracleTwapsResponse = querier.query_oracle_twaps(lookback_seconds)?;
+
+    Ok(res)
+}
+
+pub fn query_dex_twaps(
+    deps: Deps<SeiQueryWrapper>,
+    contract_address: String,
+    lookback_seconds: Uint64,
+) -> StdResult<DexTwapsResponse> {
+    let valid_addr = deps.api.addr_validate(&contract_address)?;
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: DexTwapsResponse = querier.query_dex_twaps(lookback_seconds, valid_addr)?;
+
+    Ok(res)
+}
+
+pub fn query_epoch(deps: Deps<SeiQueryWrapper>) -> StdResult<EpochResponse> {
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: EpochResponse = querier.query_epoch()?;
 
     Ok(res)
 }

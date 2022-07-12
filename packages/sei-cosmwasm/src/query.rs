@@ -1,8 +1,9 @@
+use cosmwasm_std::{Addr, CustomQuery, Uint64};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
+use crate::proto_structs::{DenomOracleExchangeRatePair, DexTwap, Epoch, OracleTwap};
 use crate::route::SeiRoute;
-use cosmwasm_std::{CustomQuery, Decimal, Uint64};
 
 /// SeiQueryWrapper is an override of QueryRequest::Custom to access Sei-specific modules
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -24,23 +25,10 @@ pub enum SeiQuery {
         lookback_seconds: i64,
     },
     DexTwaps {
-        contract_address: String,
-        lookback_seconds: u64,
+        contract_address: Addr,
+        lookback_seconds: Uint64,
     },
-}
-
-/// ExchangeRateItem is data format returned from OracleRequest::ExchangeRates query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct OracleExchangeRate {
-    pub exchange_rate: Decimal,
-    pub last_update: Uint64,
-}
-
-/// ExchangeRateItem is data format returned from OracleRequest::ExchangeRates query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct DenomOracleExchangeRatePair {
-    pub denom: String,
-    pub oracle_exchange_rate: OracleExchangeRate,
+    Epoch {},
 }
 
 /// ExchangeRatesResponse is data format returned from OracleRequest::ExchangeRates query
@@ -49,34 +37,20 @@ pub struct ExchangeRatesResponse {
     pub denom_oracle_exchange_rate_pairs: Vec<DenomOracleExchangeRatePair>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct OracleTwap {
-    pub denom: String,
-    pub twap: Decimal,
-    pub lookback_seconds: i64,
-}
-
 /// OracleTwapsResponse is data format returned from OracleRequest::OracleTwaps query
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct OracleTwapsResponse {
     pub oracle_twaps: Vec<OracleTwap>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct DexPair {
-    pub price_denom: i32, // TODO: change to string after sei changes denom representation
-    pub asset_denom: i32, // TODO: change to string after sei changes denom representation
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct DexTwap {
-    pub pair: DexPair,
-    pub twap: Decimal,
-    pub look_back_seconds: u64,
-}
-
 /// DexTwapsResponse is data format returned from DexTwaps query
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct DexTwapsResponse {
     pub twaps: Vec<DexTwap>,
+}
+
+/// EpochResponse is data format returned from Epoch query
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct EpochResponse {
+    pub epoch: Epoch,
 }
