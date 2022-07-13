@@ -12,5 +12,12 @@ pub enum ExecuteMsg {}
 #[serde(rename_all = "snake_case")]
 pub enum QueryMsg {
     ExchangeRates {},
-    OracleTwaps { lookback_seconds: i64 },
+    OracleTwaps {
+        lookback_seconds: i64,
+    },
+    DexTwaps {
+        contract_address: String,
+        lookback_seconds: u64,
+    },
+    Epoch {},
 }

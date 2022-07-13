@@ -1,13 +1,17 @@
 mod msg;
+mod proto_structs;
 mod querier;
 mod query;
 mod route;
 
 pub use msg::{SeiMsg, SeiMsgWrapper};
+pub use proto_structs::{
+    DenomOracleExchangeRatePair, DexPair, DexTwap, Epoch, OracleExchangeRate, OracleTwap,
+};
 pub use querier::SeiQuerier;
 pub use query::{
-    DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, ExchangeRatesResponse,
-    OracleExchangeRate, OracleTwap, OracleTwapsResponse, SeiQuery, SeiQueryWrapper,
+    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, OracleTwapsResponse, SeiQuery,
+    SeiQueryWrapper,
 };
 pub use route::SeiRoute;
 
