@@ -41,7 +41,7 @@ pub struct DexTwap {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct Epoch {
     pub genesis_time: String, // represented as ISO8601 UTC
-    pub duration: u64, // Represented as nanos
+    pub duration: u64,        // Represented as nanos
     pub current_epoch: u64,
     pub current_epoch_start_time: String, // represented as ISO8601 UTC
     pub current_epoch_height: i64,
