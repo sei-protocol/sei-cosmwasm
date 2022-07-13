@@ -1,6 +1,6 @@
 use cosmwasm_std::{
     entry_point, to_binary, Deps, DepsMut, Env, MessageInfo, QueryResponse, Response, StdError,
-    StdResult, Uint64,
+    StdResult,
 };
 
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
@@ -64,7 +64,7 @@ pub fn query_oracle_twaps(
 pub fn query_dex_twaps(
     deps: Deps<SeiQueryWrapper>,
     contract_address: String,
-    lookback_seconds: Uint64,
+    lookback_seconds: u64,
 ) -> StdResult<DexTwapsResponse> {
     let valid_addr = deps.api.addr_validate(&contract_address)?;
     let querier = SeiQuerier::new(&deps.querier);

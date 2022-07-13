@@ -1,4 +1,3 @@
-use cosmwasm_std::Uint64;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -18,7 +17,7 @@ pub enum QueryMsg {
     },
     DexTwaps {
         contract_address: String,
-        lookback_seconds: Uint64,
+        lookback_seconds: u64,
     },
     Epoch {},
 }

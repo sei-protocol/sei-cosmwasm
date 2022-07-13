@@ -1,4 +1,4 @@
-use cosmwasm_std::{Addr, CustomQuery, Uint64};
+use cosmwasm_std::{Addr, CustomQuery};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -26,7 +26,7 @@ pub enum SeiQuery {
     },
     DexTwaps {
         contract_address: Addr,
-        lookback_seconds: Uint64,
+        lookback_seconds: u64,
     },
     Epoch {},
 }
