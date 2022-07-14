@@ -8,7 +8,7 @@ pub struct InstantiateMsg {}
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
     PlaceOrders {},
-    CancelOrders {order_ids: Vec<u64>},
+    CancelOrders { order_ids: Vec<u64> },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

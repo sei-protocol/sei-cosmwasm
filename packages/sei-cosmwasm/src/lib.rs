@@ -15,7 +15,7 @@ pub use query::{
     SeiQueryWrapper,
 };
 pub use route::SeiRoute;
-pub use sei_types::{OrderType, PositionDirection, Order};
+pub use sei_types::{Order, OrderType, PositionDirection};
 
 // TODO: properly support this requirement behavior in sei-chain
 // // This export is added to all contracts that import this package, signifying that they require

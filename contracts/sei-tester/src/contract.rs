@@ -5,8 +5,8 @@ use cosmwasm_std::{
 
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 use sei_cosmwasm::{
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, OracleTwapsResponse, Order,
-    OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
+    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, OracleTwapsResponse, Order, OrderType,
+    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
 };
 
 #[entry_point]
@@ -28,7 +28,7 @@ pub fn execute(
 ) -> Result<Response<SeiMsg>, StdError> {
     match msg {
         ExecuteMsg::PlaceOrders {} => place_orders(deps, env, info),
-        ExecuteMsg::CancelOrders {order_ids} => cancel_orders(deps, env, info, order_ids),
+        ExecuteMsg::CancelOrders { order_ids } => cancel_orders(deps, env, info, order_ids),
     }
 }
 
@@ -64,7 +64,7 @@ pub fn cancel_orders(
     let test_cancel = sei_cosmwasm::SeiMsg::CancelOrders {
         creator: env.contract.address.clone(),
         contract_address: env.contract.address,
-        order_ids: order_ids,
+        order_ids,
     };
     Ok(Response::new().add_message(test_cancel))
 }
