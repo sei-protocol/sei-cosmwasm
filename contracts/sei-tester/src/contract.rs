@@ -28,7 +28,7 @@ pub fn execute(
 ) -> Result<Response<SeiMsg>, StdError> {
     match msg {
         ExecuteMsg::PlaceOrders {} => place_orders(deps, env, info),
-        ExecuteMsg::CancelOrders {} => cancel_orders(deps, env, info),
+        ExecuteMsg::CancelOrders {order_ids} => cancel_orders(deps, env, info, order_ids),
     }
 }
 
@@ -59,11 +59,12 @@ pub fn cancel_orders(
     _deps: DepsMut,
     env: Env,
     _info: MessageInfo,
+    order_ids: Vec<u64>,
 ) -> Result<Response<SeiMsg>, StdError> {
     let test_cancel = sei_cosmwasm::SeiMsg::CancelOrders {
         creator: env.contract.address.clone(),
         contract_address: env.contract.address,
-        order_ids: vec![],
+        order_ids: order_ids,
     };
     Ok(Response::new().add_message(test_cancel))
 }
