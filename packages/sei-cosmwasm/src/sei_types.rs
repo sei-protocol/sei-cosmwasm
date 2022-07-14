@@ -1,5 +1,6 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use cosmwasm_std::Decimal;
 
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq, Hash, JsonSchema)]
 pub enum PositionDirection {
@@ -8,14 +9,20 @@ pub enum PositionDirection {
 }
 
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq, Hash, JsonSchema)]
-pub enum PositionEffect {
-    Open = 0,
-    Close = 1,
-}
-
-#[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq, Hash, JsonSchema)]
 pub enum OrderType {
     Limit = 0,
     Market = 1,
     Liquidation = 2, // TODO: check with @codchen if this is correct
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct Order {
+    pub price: Decimal,
+    pub quantity: Decimal,
+    pub price_denom: String,
+    pub asset_denom: String,
+    pub order_type: i32,
+    pub position_direction: i32,
+    pub data: String,
 }

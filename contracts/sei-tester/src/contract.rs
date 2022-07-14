@@ -5,8 +5,8 @@ use cosmwasm_std::{
 
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 use sei_cosmwasm::{
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, OracleTwapsResponse, OrderPlacement,
-    OrderType, PositionDirection, PositionEffect, SeiMsg, SeiQuerier, SeiQueryWrapper,
+    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, OracleTwapsResponse, Order,
+    OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
 };
 
 #[entry_point]
@@ -37,17 +37,15 @@ pub fn place_orders(
     env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
-    let order_placement = OrderPlacement {
-        position_direction: PositionDirection::Long,
+    let order_placement = Order {
         price: Decimal::from_atomics(120u128, 0).unwrap(),
         quantity: Decimal::one(),
-        price_denom: "usei".to_string(),
-        asset_denom: "uatom".to_string(),
-        position_effect: PositionEffect::Open,
-        order_type: OrderType::Limit,
-        leverage: Decimal::one(),
+        price_denom: "sei".to_string(),
+        asset_denom: "atom".to_string(),
+        position_direction: PositionDirection::Long as i32,
+        order_type: OrderType::Limit as i32,
+        data: "".to_string(),
     };
-
     let test_order = sei_cosmwasm::SeiMsg::PlaceOrders {
         creator: env.contract.address.clone(),
         contract_address: env.contract.address,
