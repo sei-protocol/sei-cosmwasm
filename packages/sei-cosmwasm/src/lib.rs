@@ -5,7 +5,7 @@ mod query;
 mod route;
 mod sei_types;
 
-pub use msg::{SeiMsg, OrderPlacement};
+pub use msg::{OrderPlacement, SeiMsg};
 pub use proto_structs::{
     DenomOracleExchangeRatePair, DexPair, DexTwap, Epoch, OracleExchangeRate, OracleTwap,
 };

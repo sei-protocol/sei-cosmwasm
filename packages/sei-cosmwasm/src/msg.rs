@@ -1,7 +1,7 @@
+use crate::sei_types::{OrderType, PositionDirection, PositionEffect};
+use cosmwasm_std::{Addr, Coin, CosmosMsg, CustomMsg, Decimal};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use cosmwasm_std::{CosmosMsg, CustomMsg, Decimal, Coin, Addr};
-use crate::sei_types::{OrderType, PositionDirection, PositionEffect};
 
 // implement custom query
 impl CustomMsg for SeiMsg {}

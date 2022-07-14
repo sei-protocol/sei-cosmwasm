@@ -1,12 +1,12 @@
 use cosmwasm_std::{
-    entry_point, to_binary, Deps, DepsMut, Env, MessageInfo, QueryResponse, Response, StdError,
-    StdResult, Decimal,
+    entry_point, to_binary, Decimal, Deps, DepsMut, Env, MessageInfo, QueryResponse, Response,
+    StdError, StdResult,
 };
 
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 use sei_cosmwasm::{
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, OracleTwapsResponse,
-    SeiQuerier, SeiQueryWrapper, SeiMsg, OrderPlacement, OrderType, PositionDirection, PositionEffect,
+    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, OracleTwapsResponse, OrderPlacement,
+    OrderType, PositionDirection, PositionEffect, SeiMsg, SeiQuerier, SeiQueryWrapper,
 };
 
 #[entry_point]
@@ -32,8 +32,12 @@ pub fn execute(
     }
 }
 
-pub fn place_orders(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<SeiMsg>, StdError> {
-    let order_placement = OrderPlacement{
+pub fn place_orders(
+    _deps: DepsMut,
+    env: Env,
+    _info: MessageInfo,
+) -> Result<Response<SeiMsg>, StdError> {
+    let order_placement = OrderPlacement {
         position_direction: PositionDirection::Long,
         price: Decimal::from_atomics(120u128, 0).unwrap(),
         quantity: Decimal::one(),
@@ -44,7 +48,7 @@ pub fn place_orders(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Resp
         leverage: Decimal::one(),
     };
 
-    let test_order = sei_cosmwasm::SeiMsg::PlaceOrders{
+    let test_order = sei_cosmwasm::SeiMsg::PlaceOrders {
         creator: env.contract.address.clone(),
         contract_address: env.contract.address.clone(),
         funds: vec![],
@@ -53,8 +57,12 @@ pub fn place_orders(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Resp
     Ok(Response::new().add_message(test_order))
 }
 
-pub fn cancel_orders(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<SeiMsg>, StdError> {
-    let test_cancel = sei_cosmwasm::SeiMsg::CancelOrders{
+pub fn cancel_orders(
+    _deps: DepsMut,
+    env: Env,
+    _info: MessageInfo,
+) -> Result<Response<SeiMsg>, StdError> {
+    let test_cancel = sei_cosmwasm::SeiMsg::CancelOrders {
         creator: env.contract.address.clone(),
         contract_address: env.contract.address.clone(),
         order_ids: vec![],
