@@ -12,7 +12,7 @@ pub enum PositionDirection {
 pub enum OrderType {
     Limit = 0,
     Market = 1,
-    Liquidation = 2, // TODO: check with @codchen if this is correct
+    Liquidation = 2,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
