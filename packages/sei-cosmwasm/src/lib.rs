@@ -3,8 +3,9 @@ mod proto_structs;
 mod querier;
 mod query;
 mod route;
+mod sei_types;
 
-pub use msg::{SeiMsg, SeiMsgWrapper};
+pub use msg::{SeiMsg, OrderPlacement};
 pub use proto_structs::{
     DenomOracleExchangeRatePair, DexPair, DexTwap, Epoch, OracleExchangeRate, OracleTwap,
 };
@@ -14,6 +15,7 @@ pub use query::{
     SeiQueryWrapper,
 };
 pub use route::SeiRoute;
+pub use sei_types::{OrderType, PositionDirection, PositionEffect};
 
 // TODO: properly support this requirement behavior in sei-chain
 // // This export is added to all contracts that import this package, signifying that they require
