@@ -17,8 +17,7 @@ pub use query::{
 pub use route::SeiRoute;
 pub use sei_types::{Order, OrderType, PositionDirection};
 
-// TODO: properly support this requirement behavior in sei-chain
-// // This export is added to all contracts that import this package, signifying that they require
-// // "sei" support on the chain they run on.
-// #[no_mangle]
-// extern "C" fn requires_sei() {}
+// This export is added to all contracts that import this package, signifying that they require
+// "sei" support on the chain they run on.
+#[no_mangle]
+extern "C" fn requires_sei() {}
