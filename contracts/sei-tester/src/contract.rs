@@ -50,7 +50,7 @@ pub fn place_orders(
 
     let test_order = sei_cosmwasm::SeiMsg::PlaceOrders {
         creator: env.contract.address.clone(),
-        contract_address: env.contract.address.clone(),
+        contract_address: env.contract.address,
         funds: vec![],
         orders: vec![order_placement],
     };
@@ -64,7 +64,7 @@ pub fn cancel_orders(
 ) -> Result<Response<SeiMsg>, StdError> {
     let test_cancel = sei_cosmwasm::SeiMsg::CancelOrders {
         creator: env.contract.address.clone(),
-        contract_address: env.contract.address.clone(),
+        contract_address: env.contract.address,
         order_ids: vec![],
     };
     Ok(Response::new().add_message(test_cancel))
