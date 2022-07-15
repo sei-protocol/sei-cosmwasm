@@ -12,10 +12,10 @@ pub use proto_structs::{
 pub use querier::SeiQuerier;
 pub use query::{
     DexTwapsResponse, EpochResponse, ExchangeRatesResponse, OracleTwapsResponse, SeiQuery,
-    SeiQueryWrapper,
+    SeiQueryWrapper, GetOrdersResponse, GetOrderByIdResponse,
 };
 pub use route::SeiRoute;
-pub use sei_types::{Order, OrderType, PositionDirection};
+pub use sei_types::{Order, OrderResponse, OrderType, PositionDirection};
 
 // This export is added to all contracts that import this package, signifying that they require
 // "sei" support on the chain they run on.
