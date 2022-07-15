@@ -1,7 +1,7 @@
+use cosmwasm_std::Decimal;
 use schemars::JsonSchema;
+use sei_cosmwasm::{Order, OrderType, PositionDirection};
 use serde::{Deserialize, Serialize};
-use cosmwasm_std::{Decimal};
-use sei_cosmwasm::{OrderType, PositionDirection, Order};
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct InstantiateMsg {}
@@ -49,7 +49,6 @@ pub struct DepositInfo {
 pub struct BulkOrderPlacementsResponse {
     pub unsuccessful_order_ids: Vec<u64>,
 }
-
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]

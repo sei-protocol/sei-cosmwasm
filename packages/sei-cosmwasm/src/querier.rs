@@ -1,8 +1,8 @@
 use cosmwasm_std::{Addr, QuerierWrapper, StdResult};
 
 use crate::query::{
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, OracleTwapsResponse, SeiQuery,
-    SeiQueryWrapper, GetOrderByIdResponse, GetOrdersResponse,
+    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
+    GetOrdersResponse, OracleTwapsResponse, SeiQuery, SeiQueryWrapper,
 };
 use crate::route::SeiRoute;
 
