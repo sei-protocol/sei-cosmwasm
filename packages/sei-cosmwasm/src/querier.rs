@@ -1,8 +1,8 @@
 use cosmwasm_std::{Addr, QuerierWrapper, StdResult};
 
 use crate::query::{
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, OracleTwapsResponse, SeiQuery,
-    SeiQueryWrapper,
+    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
+    GetOrdersResponse, OracleTwapsResponse, SeiQuery, SeiQueryWrapper,
 };
 use crate::route::SeiRoute;
 
@@ -57,6 +57,42 @@ impl<'a> SeiQuerier<'a> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Epoch,
             query_data: SeiQuery::Epoch {},
+        }
+        .into();
+        self.querier.query(&request)
+    }
+
+    pub fn query_get_orders(
+        &self,
+        contract_address: Addr,
+        account: Addr,
+    ) -> StdResult<GetOrdersResponse> {
+        let request = SeiQueryWrapper {
+            route: SeiRoute::Dex,
+            query_data: SeiQuery::GetOrders {
+                contract_address,
+                account,
+            },
+        }
+        .into();
+        self.querier.query(&request)
+    }
+
+    pub fn query_get_order_by_id(
+        &self,
+        contract_address: Addr,
+        price_denom: String,
+        asset_denom: String,
+        order_id: u64,
+    ) -> StdResult<GetOrderByIdResponse> {
+        let request = SeiQueryWrapper {
+            route: SeiRoute::Dex,
+            query_data: SeiQuery::GetOrderById {
+                contract_address,
+                price_denom,
+                asset_denom,
+                id: order_id,
+            },
         }
         .into();
         self.querier.query(&request)
