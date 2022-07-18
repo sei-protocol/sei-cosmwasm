@@ -26,8 +26,8 @@ pub struct OracleTwap {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct DexPair {
-    pub price_denom: i32, // TODO: change to string after sei changes denom representation
-    pub asset_denom: i32, // TODO: change to string after sei changes denom representation
+    pub price_denom: String,
+    pub asset_denom: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
