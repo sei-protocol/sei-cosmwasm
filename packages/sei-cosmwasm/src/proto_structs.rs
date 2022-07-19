@@ -28,13 +28,14 @@ pub struct OracleTwap {
 pub struct DexPair {
     pub price_denom: String,
     pub asset_denom: String,
+    pub tick_size: Decimal,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct DexTwap {
     pub pair: DexPair,
     pub twap: Decimal,
-    pub look_back_seconds: u64,
+    pub lookback_seconds: u64,
 }
 
 // Epoch is the struct that matches the data format of Epoch in Epoch Response
