@@ -1,7 +1,9 @@
 [package]
 name = "sei-cosmwasm"
 version = "0.2.0"
-edition = "2018"
+edition = "2021"
+description = "Bindings and helpers for cosmwasm contracts to interact with sei blockchain"
+license = "Apache-2.0"
 readme = "README.md"
 
 [features]
