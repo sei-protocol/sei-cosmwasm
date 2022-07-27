@@ -49,6 +49,7 @@ pub fn place_orders(
         position_direction: PositionDirection::Long,
         order_type: OrderType::Limit,
         data: "".to_string(),
+        status_description: "".to_string(),
     };
     let test_order = sei_cosmwasm::SeiMsg::PlaceOrders {
         creator: env.contract.address.clone(),
@@ -108,7 +109,7 @@ pub fn process_bulk_order_placements(
     _deposits: Vec<DepositInfo>,
 ) -> Result<Response, StdError> {
     let response = BulkOrderPlacementsResponse {
-        unsuccessful_order_ids: vec![],
+        unsuccessful_orders: vec![],
     };
     let serialized_json = match serde_json::to_string(&response) {
         Ok(val) => val,

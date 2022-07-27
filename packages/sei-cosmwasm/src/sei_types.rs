@@ -37,6 +37,7 @@ pub struct Order {
     pub order_type: OrderType,
     pub position_direction: PositionDirection,
     pub data: String,
+    pub status_description: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
