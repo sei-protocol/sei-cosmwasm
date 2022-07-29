@@ -47,7 +47,13 @@ pub struct DepositInfo {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema)]
 pub struct BulkOrderPlacementsResponse {
-    pub unsuccessful_order_ids: Vec<u64>,
+    pub unsuccessful_orders: Vec<UnsuccessfulOrder>,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema)]
+pub struct UnsuccessfulOrder {
+    pub id: u64,
+    pub reason: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
