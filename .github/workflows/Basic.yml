@@ -72,7 +72,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: schema
-          args: -p sei-tester
+          args: -p sei-cosmwasm
 
       - name: Schema Changes
         # fails if any changes not committed
