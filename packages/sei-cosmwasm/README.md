@@ -13,7 +13,7 @@ sei-cosmwasm = { version = "0.2.0" }
 
 ## Functionality
 
-Currently, Sei Bindings support query and message support for the sei custom modules Oracle, Dex, and Epoch. The supported functionality includes the following:
+Currently, Sei Bindings support query and message support for the sei custom modules Oracle, Dex, Epoch and TokenFactory. The supported functionality includes the following:
 
 - Oracle
     - Query
@@ -38,6 +38,16 @@ Currently, Sei Bindings support query and message support for the sei custom mod
     - Query
         - Epoch
             - Get current epoch information
+- TokenFactory
+    - Message
+        - CreateDenom
+            - Creates a denom of `factory/{creator address}/{subdenom}` given the denom creator address and the subdenom. Subdenoms can contain `[a-zA-Z0-9./]`.
+        - MintTokens
+            - Mint an amount of denom. Minting of a specific denom is only allowed for the creator of the denom registered during `CreateDenom`.
+        - BurnTokens
+            - Burn an amount of a denom. Burning of a specific denom is only allowed for the creator of the denom registered during `CreateDenom`.
+        - ChangeAdmin
+            - Burning of a specific denom is only allowed for the creator of the denom registered during `CreateDenom`.
 
 ## Usage
 
