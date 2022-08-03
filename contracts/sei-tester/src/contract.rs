@@ -89,29 +89,19 @@ pub fn create_denom(
     Ok(Response::new().add_message(test_create_denom))
 }
 
-pub fn mint(
-    _deps: DepsMut,
-    env: Env,
-    _info: MessageInfo,
-) -> Result<Response<SeiMsg>, StdError> {
-    let tokenfactory_denom = "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
+pub fn mint(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<SeiMsg>, StdError> {
+    let tokenfactory_denom =
+        "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
     let amount = coin(100, tokenfactory_denom);
-    let test_mint = sei_cosmwasm::SeiMsg::MintTokens {
-        amount,
-    };
+    let test_mint = sei_cosmwasm::SeiMsg::MintTokens { amount };
     Ok(Response::new().add_message(test_mint))
 }
 
-pub fn burn(
-    _deps: DepsMut,
-    env: Env,
-    _info: MessageInfo,
-) -> Result<Response<SeiMsg>, StdError> {
-    let tokenfactory_denom = "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
+pub fn burn(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<SeiMsg>, StdError> {
+    let tokenfactory_denom =
+        "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
     let amount = coin(10, tokenfactory_denom);
-    let test_burn = sei_cosmwasm::SeiMsg::BurnTokens {
-        amount,
-    };
+    let test_burn = sei_cosmwasm::SeiMsg::BurnTokens { amount };
     Ok(Response::new().add_message(test_burn))
 }
 
@@ -120,7 +110,8 @@ pub fn change_admin(
     env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
-    let tokenfactory_denom = "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
+    let tokenfactory_denom =
+        "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
     let new_admin_address = "sei1hjfwcza3e3uzeznf3qthhakdr9juetl7g6esl4".to_string();
     let test_change_admin = sei_cosmwasm::SeiMsg::ChangeAdmin {
         denom: tokenfactory_denom,
