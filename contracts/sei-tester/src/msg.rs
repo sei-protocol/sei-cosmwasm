@@ -11,6 +11,10 @@ pub struct InstantiateMsg {}
 pub enum ExecuteMsg {
     PlaceOrders {},
     CancelOrders { order_ids: Vec<u64> },
+    CreateDenom {},
+    Mint {},
+    Burn {},
+    ChangeAdmin {},
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

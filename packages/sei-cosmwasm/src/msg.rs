@@ -27,4 +27,17 @@ pub enum SeiMsg {
         order_ids: Vec<u64>,
         contract_address: Addr,
     },
+    CreateDenom {
+        subdenom: String,
+    },
+    MintTokens {
+        amount: Coin,
+    },
+    BurnTokens {
+        amount: Coin,
+    },
+    ChangeAdmin {
+        denom: String,
+        new_admin_address: String,
+    },
 }

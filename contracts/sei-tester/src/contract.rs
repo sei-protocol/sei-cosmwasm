@@ -1,5 +1,5 @@
 use cosmwasm_std::{
-    entry_point, to_binary, Binary, Decimal, Deps, DepsMut, Env, MessageInfo, QueryResponse,
+    coin, entry_point, to_binary, Binary, Decimal, Deps, DepsMut, Env, MessageInfo, QueryResponse,
     Response, StdError, StdResult,
 };
 
@@ -33,6 +33,10 @@ pub fn execute(
     match msg {
         ExecuteMsg::PlaceOrders {} => place_orders(deps, env, info),
         ExecuteMsg::CancelOrders { order_ids } => cancel_orders(deps, env, info, order_ids),
+        ExecuteMsg::CreateDenom {} => create_denom(deps, env, info),
+        ExecuteMsg::Mint {} => mint(deps, env, info),
+        ExecuteMsg::Burn {} => burn(deps, env, info),
+        ExecuteMsg::ChangeAdmin {} => change_admin(deps, env, info),
     }
 }
 
@@ -72,6 +76,48 @@ pub fn cancel_orders(
         order_ids,
     };
     Ok(Response::new().add_message(test_cancel))
+}
+
+pub fn create_denom(
+    _deps: DepsMut,
+    _env: Env,
+    _info: MessageInfo,
+) -> Result<Response<SeiMsg>, StdError> {
+    let test_create_denom = sei_cosmwasm::SeiMsg::CreateDenom {
+        subdenom: "subdenom".to_string(),
+    };
+    Ok(Response::new().add_message(test_create_denom))
+}
+
+pub fn mint(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<SeiMsg>, StdError> {
+    let tokenfactory_denom =
+        "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
+    let amount = coin(100, tokenfactory_denom);
+    let test_mint = sei_cosmwasm::SeiMsg::MintTokens { amount };
+    Ok(Response::new().add_message(test_mint))
+}
+
+pub fn burn(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<SeiMsg>, StdError> {
+    let tokenfactory_denom =
+        "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
+    let amount = coin(10, tokenfactory_denom);
+    let test_burn = sei_cosmwasm::SeiMsg::BurnTokens { amount };
+    Ok(Response::new().add_message(test_burn))
+}
+
+pub fn change_admin(
+    _deps: DepsMut,
+    env: Env,
+    _info: MessageInfo,
+) -> Result<Response<SeiMsg>, StdError> {
+    let tokenfactory_denom =
+        "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
+    let new_admin_address = "sei1hjfwcza3e3uzeznf3qthhakdr9juetl7g6esl4".to_string();
+    let test_change_admin = sei_cosmwasm::SeiMsg::ChangeAdmin {
+        denom: tokenfactory_denom,
+        new_admin_address,
+    };
+    Ok(Response::new().add_message(test_change_admin))
 }
 
 #[entry_point]
