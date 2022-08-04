@@ -41,13 +41,13 @@ Currently, Sei Bindings support query and message support for the sei custom mod
 - TokenFactory
     - Message
         - CreateDenom
-            - Creates a denom of `factory/{creator address}/{subdenom}` given the denom creator address and the subdenom. Subdenoms can contain `[a-zA-Z0-9./]`.
+            - Creates a denom of type `factory/{creator address}/{subdenom}` given a `subdenom`.
         - MintTokens
-            - Mint an amount of denom. Minting of a specific denom is only allowed for the creator of the denom registered during `CreateDenom`.
+            - Mint an amount of a factory denom. Only the creator of the denom (admin) can mint.
         - BurnTokens
-            - Burn an amount of a denom. Burning of a specific denom is only allowed for the creator of the denom registered during `CreateDenom`.
+            - Burns an amount of a factory denom. Only the creater of the denom (admin) can mint.
         - ChangeAdmin
-            - Burning of a specific denom is only allowed for the creator of the denom registered during `CreateDenom`.
+            - Change the Admin of the Denom. Only the current admin can change the admin.
 
 ## Usage
 
