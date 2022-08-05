@@ -68,9 +68,7 @@ pub fn cancel_orders(
     _info: MessageInfo,
     order_ids: Vec<u64>,
 ) -> Result<Response<SeiMsg>, StdError> {
-    let test_cancel = sei_cosmwasm::SeiMsg::CancelOrders {
-        order_ids,
-    };
+    let test_cancel = sei_cosmwasm::SeiMsg::CancelOrders { order_ids };
     Ok(Response::new().add_message(test_cancel))
 }
 
