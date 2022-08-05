@@ -1,5 +1,5 @@
 use crate::sei_types::Order;
-use cosmwasm_std::{Coin, CosmosMsg, CustomMsg};
+use cosmwasm_std::{Addr, Coin, CosmosMsg, CustomMsg};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -19,9 +19,11 @@ pub enum SeiMsg {
     PlaceOrders {
         orders: Vec<Order>,
         funds: Vec<Coin>,
+        contract_address: Addr,
     },
     CancelOrders {
         order_ids: Vec<u64>,
+        contract_address: Addr,
     },
     CreateDenom {
         subdenom: String,

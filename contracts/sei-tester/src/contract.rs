@@ -42,7 +42,7 @@ pub fn execute(
 
 pub fn place_orders(
     _deps: DepsMut,
-    _env: Env,
+    env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
     let order_placement = Order {
@@ -58,17 +58,21 @@ pub fn place_orders(
     let test_order = sei_cosmwasm::SeiMsg::PlaceOrders {
         funds: vec![],
         orders: vec![order_placement],
+        contract_address: env.contract.address,
     };
     Ok(Response::new().add_message(test_order))
 }
 
 pub fn cancel_orders(
     _deps: DepsMut,
-    _env: Env,
+    env: Env,
     _info: MessageInfo,
     order_ids: Vec<u64>,
 ) -> Result<Response<SeiMsg>, StdError> {
-    let test_cancel = sei_cosmwasm::SeiMsg::CancelOrders { order_ids };
+    let test_cancel = sei_cosmwasm::SeiMsg::CancelOrders {
+        order_ids,
+        contract_address: env.contract.address,
+    };
     Ok(Response::new().add_message(test_cancel))
 }
 
