@@ -17,13 +17,11 @@ impl From<SeiMsg> for CosmosMsg<SeiMsg> {
 #[serde(rename_all = "snake_case")]
 pub enum SeiMsg {
     PlaceOrders {
-        creator: Addr,
         orders: Vec<Order>,
-        contract_address: Addr,
         funds: Vec<Coin>,
+        contract_address: Addr,
     },
     CancelOrders {
-        creator: Addr,
         order_ids: Vec<u64>,
         contract_address: Addr,
     },
