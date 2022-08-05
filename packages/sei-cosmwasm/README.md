@@ -66,6 +66,7 @@ To use the custom messages, the messages need to be returned in the contract res
 
 ```rust
 let test_order = sei_cosmwasm::SeiMsg::PlaceOrders {
+    contract_address: env.contract.address,
     funds: vec![some_funds],
     orders: vec![some_order],
 };
