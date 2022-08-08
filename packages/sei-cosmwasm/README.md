@@ -8,7 +8,7 @@ Add the sei-cosmwasm dependency to your smart contract's `Cargo.toml` file:
 
 ```toml
 [dependencies]
-sei-cosmwasm = { version = "0.2.0" }
+sei-cosmwasm = { version = "0.3.0" }
 ```
 
 ## Functionality
