@@ -9,8 +9,8 @@ use crate::msg::{
 };
 use sei_cosmwasm::{
     DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, OracleTwapsResponse, Order, OrderType, PositionDirection, SeiMsg,
-    SeiQuerier, SeiQueryWrapper,
+    GetOrdersResponse, OracleTwapsResponse, Order, OrderType, OrderSimulationResponse, PositionDirection, 
+    SeiMsg, SeiQuerier, SeiQueryWrapper,
 };
 
 #[entry_point]
@@ -212,6 +212,9 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
             contract_address,
             lookback_seconds,
         } => to_binary(&query_dex_twaps(deps, contract_address, lookback_seconds)?),
+        QueryMsg::OrderSimulation {
+            order
+        } => to_binary(&query_order_simulation(deps, order)?),
         QueryMsg::Epoch {} => to_binary(&query_epoch(deps)?),
         QueryMsg::GetOrders {
             contract_address,
@@ -257,6 +260,16 @@ pub fn query_dex_twaps(
     let valid_addr = deps.api.addr_validate(&contract_address)?;
     let querier = SeiQuerier::new(&deps.querier);
     let res: DexTwapsResponse = querier.query_dex_twaps(lookback_seconds, valid_addr)?;
+
+    Ok(res)
+}
+
+pub fn query_order_simulation(
+    deps: Deps<SeiQueryWrapper>,
+    order: Order
+) -> StdResult<OrderSimulationResponse> {
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: OrderSimulationResponse = querier.query_order_simulation(order)?;
 
     Ok(res)
 }

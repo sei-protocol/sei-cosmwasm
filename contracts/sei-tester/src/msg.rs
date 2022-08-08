@@ -97,6 +97,9 @@ pub enum QueryMsg {
         contract_address: String,
         lookback_seconds: u64,
     },
+    OrderSimulation {
+        order: Order,
+    },
     Epoch {},
     GetOrders {
         contract_address: String,

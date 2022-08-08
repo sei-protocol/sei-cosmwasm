@@ -2,6 +2,7 @@ use cosmwasm_std::{Addr, CustomQuery};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
+use crate::Order;
 use crate::proto_structs::{DenomOracleExchangeRatePair, DexTwap, Epoch, OracleTwap};
 use crate::route::SeiRoute;
 use crate::sei_types::OrderResponse;
@@ -40,6 +41,9 @@ pub enum SeiQuery {
         asset_denom: String,
         id: u64,
     },
+    OrderSimulation {
+        order: Order,
+    },
 }
 
 /// ExchangeRatesResponse is data format returned from OracleRequest::ExchangeRates query
@@ -76,4 +80,10 @@ pub struct GetOrdersResponse {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct GetOrderByIdResponse {
     pub order: OrderResponse,
+}
+
+/// OrderSimulationResponse is data format returned from OrderSimulation query
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct OrderSimulationResponse {
+    pub executed_quantity: String
 }
