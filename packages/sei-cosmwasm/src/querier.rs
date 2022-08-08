@@ -1,11 +1,11 @@
 use cosmwasm_std::{Addr, QuerierWrapper, StdResult};
 
-use crate::Order;
 use crate::query::{
     DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, OracleTwapsResponse, SeiQuery, SeiQueryWrapper, OrderSimulationResponse,
+    GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
 };
 use crate::route::SeiRoute;
+use crate::Order;
 
 /// This is a helper wrapper to easily use our custom queries
 pub struct SeiQuerier<'a> {
@@ -17,7 +17,7 @@ impl<'a> SeiQuerier<'a> {
         SeiQuerier { querier }
     }
 
-    /* 
+    /*
     query oracle module
     */
     pub fn query_exchange_rates(&self) -> StdResult<ExchangeRatesResponse> {
@@ -40,7 +40,7 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
-    /* 
+    /*
     query dex module
     */
     pub fn query_dex_twaps(
@@ -60,15 +60,10 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
-    pub fn query_order_simulation(
-        &self,
-        order: Order
-    ) -> StdResult<OrderSimulationResponse> {
+    pub fn query_order_simulation(&self, order: Order) -> StdResult<OrderSimulationResponse> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Dex,
-            query_data: SeiQuery::OrderSimulation {
-                order,
-            },
+            query_data: SeiQuery::OrderSimulation { order },
         }
         .into();
 
@@ -111,9 +106,9 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
-    /* 
+    /*
     query epoch module
-    */    
+    */
     pub fn query_epoch(&self) -> StdResult<EpochResponse> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Epoch,
