@@ -12,7 +12,7 @@ pub use proto_structs::{
 pub use querier::SeiQuerier;
 pub use query::{
     DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, OracleTwapsResponse, SeiQuery, SeiQueryWrapper,
+    GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
 };
 pub use route::SeiRoute;
 pub use sei_types::{Order, OrderResponse, OrderType, PositionDirection};

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::proto_structs::{DenomOracleExchangeRatePair, DexTwap, Epoch, OracleTwap};
 use crate::route::SeiRoute;
 use crate::sei_types::OrderResponse;
+use crate::Order;
 
 /// SeiQueryWrapper is an override of QueryRequest::Custom to access Sei-specific modules
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -39,6 +40,9 @@ pub enum SeiQuery {
         price_denom: String,
         asset_denom: String,
         id: u64,
+    },
+    OrderSimulation {
+        order: Order,
     },
 }
 
@@ -76,4 +80,10 @@ pub struct GetOrdersResponse {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct GetOrderByIdResponse {
     pub order: OrderResponse,
+}
+
+/// OrderSimulationResponse is data format returned from OrderSimulation query
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct OrderSimulationResponse {
+    pub executed_quantity: String,
 }
