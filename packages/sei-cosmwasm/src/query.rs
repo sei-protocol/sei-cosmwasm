@@ -42,6 +42,7 @@ pub enum SeiQuery {
         id: u64,
     },
     OrderSimulation {
+        contract_address: Addr,
         order: Order,
     },
 }
