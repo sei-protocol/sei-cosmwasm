@@ -1,4 +1,4 @@
-use cosmwasm_std::{Addr, CustomQuery};
+use cosmwasm_std::{Addr, CustomQuery, Decimal};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -42,6 +42,7 @@ pub enum SeiQuery {
         id: u64,
     },
     OrderSimulation {
+        contract_address: Addr,
         order: Order,
     },
 }
@@ -85,5 +86,5 @@ pub struct GetOrderByIdResponse {
 /// OrderSimulationResponse is data format returned from OrderSimulation query
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct OrderSimulationResponse {
-    pub executed_quantity: String,
+    pub executed_quantity: Decimal,
 }

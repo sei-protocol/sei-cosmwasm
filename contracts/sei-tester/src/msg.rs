@@ -99,6 +99,7 @@ pub enum QueryMsg {
     },
     OrderSimulation {
         order: Order,
+        contract_address: String,
     },
     Epoch {},
     GetOrders {

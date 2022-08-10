@@ -212,7 +212,10 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
             contract_address,
             lookback_seconds,
         } => to_binary(&query_dex_twaps(deps, contract_address, lookback_seconds)?),
-        QueryMsg::OrderSimulation { order } => to_binary(&query_order_simulation(deps, order)?),
+        QueryMsg::OrderSimulation {
+            order,
+            contract_address,
+        } => to_binary(&query_order_simulation(deps, order, contract_address)?),
         QueryMsg::Epoch {} => to_binary(&query_epoch(deps)?),
         QueryMsg::GetOrders {
             contract_address,
@@ -265,9 +268,11 @@ pub fn query_dex_twaps(
 pub fn query_order_simulation(
     deps: Deps<SeiQueryWrapper>,
     order: Order,
+    contract_address: String,
 ) -> StdResult<OrderSimulationResponse> {
+    let contract_addr = deps.api.addr_validate(&contract_address)?;
     let querier = SeiQuerier::new(&deps.querier);
-    let res: OrderSimulationResponse = querier.query_order_simulation(order)?;
+    let res: OrderSimulationResponse = querier.query_order_simulation(order, contract_addr)?;
 
     Ok(res)
 }
