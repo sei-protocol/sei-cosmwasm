@@ -16,6 +16,7 @@ pub enum OrderType {
     Limit = 0,
     Market = 1,
     Liquidation = 2,
+    FokMarket = 3,
 }
 
 #[derive(Serialize_repr, Deserialize_repr, Copy, Clone, Debug, PartialEq, Eq, Hash, JsonSchema)]
