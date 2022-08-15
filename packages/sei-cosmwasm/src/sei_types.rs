@@ -36,7 +36,7 @@ pub struct Order {
     pub asset_denom: String,
     pub order_type: OrderType,
     pub position_direction: PositionDirection,
-    pub data: String,
+    pub data: String, // serialized order data, defined by the specific target contract
     pub status_description: String,
 }
 

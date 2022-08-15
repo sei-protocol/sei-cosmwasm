@@ -3,9 +3,12 @@ use cosmwasm_std::{
     Response, StdError, StdResult,
 };
 
-use crate::msg::{
-    BulkOrderPlacementsResponse, DepositInfo, ExecuteMsg, InstantiateMsg, LiquidationRequest,
-    LiquidationResponse, QueryMsg, SettlementEntry, SudoMsg,
+use crate::{
+    msg::{
+        BulkOrderPlacementsResponse, DepositInfo, ExecuteMsg, InstantiateMsg, LiquidationRequest,
+        LiquidationResponse, QueryMsg, SettlementEntry, SudoMsg,
+    },
+    types::{OrderData, PositionEffect},
 };
 use sei_cosmwasm::{
     DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
@@ -45,6 +48,11 @@ pub fn place_orders(
     env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
+    let order_data = OrderData {
+        leverage: Decimal::one(),
+        position_effect: PositionEffect::Open,
+    };
+
     let order_placement = Order {
         price: Decimal::from_atomics(120u128, 0).unwrap(),
         quantity: Decimal::one(),
@@ -52,7 +60,7 @@ pub fn place_orders(
         asset_denom: "atom".to_string(),
         position_direction: PositionDirection::Long,
         order_type: OrderType::Limit,
-        data: "".to_string(),
+        data: serde_json::to_string(&order_data).unwrap(),
         status_description: "".to_string(),
     };
     let test_order = sei_cosmwasm::SeiMsg::PlaceOrders {
