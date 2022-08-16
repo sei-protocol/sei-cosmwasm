@@ -28,7 +28,7 @@ pub enum SeiMsg {
     CreateDenom {
         subdenom: String,
     },
-    MintTokens {
+    Mint {
         amount: Coin,
     },
     BurnTokens {

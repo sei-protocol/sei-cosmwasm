@@ -99,7 +99,7 @@ pub fn mint(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<Sei
     let tokenfactory_denom =
         "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
     let amount = coin(100, tokenfactory_denom);
-    let test_mint = sei_cosmwasm::SeiMsg::MintTokens { amount };
+    let test_mint = sei_cosmwasm::SeiMsg::Mint { amount };
     Ok(Response::new().add_message(test_mint))
 }
 

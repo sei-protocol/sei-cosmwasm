@@ -42,7 +42,7 @@ Currently, Sei Bindings support query and message support for the sei custom mod
     - Message
         - CreateDenom
             - Creates a denom of type `factory/{creator address}/{subdenom}` given a `subdenom`.
-        - MintTokens
+        - Mint
             - Mint an amount of a factory denom. Only the creator of the denom (admin) can mint.
         - BurnTokens
             - Burns an amount of a factory denom. Only the creater of the denom (admin) can mint.
