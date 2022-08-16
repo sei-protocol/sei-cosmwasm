@@ -107,7 +107,7 @@ pub fn burn(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<Sei
     let tokenfactory_denom =
         "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
     let amount = coin(10, tokenfactory_denom);
-    let test_burn = sei_cosmwasm::SeiMsg::BurnTokens { amount };
+    let test_burn = sei_cosmwasm::SeiMsg::Burn { amount };
     Ok(Response::new().add_message(test_burn))
 }
 

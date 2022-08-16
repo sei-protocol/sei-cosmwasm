@@ -31,7 +31,7 @@ pub enum SeiMsg {
     Mint {
         amount: Coin,
     },
-    BurnTokens {
+    Burn {
         amount: Coin,
     },
     ChangeAdmin {
