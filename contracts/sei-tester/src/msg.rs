@@ -3,6 +3,8 @@ use schemars::JsonSchema;
 use sei_cosmwasm::{Order, OrderType, PositionDirection};
 use serde::{Deserialize, Serialize};
 
+use crate::types::ContractOrderResult;
+
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct InstantiateMsg {}
 
@@ -83,6 +85,10 @@ pub enum SudoMsg {
 
     Liquidation {
         requests: Vec<LiquidationRequest>,
+    },
+
+    FinalizeBlock {
+        contract_order_results: Vec<ContractOrderResult>,
     },
 }
 

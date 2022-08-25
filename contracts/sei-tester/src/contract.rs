@@ -8,7 +8,7 @@ use crate::{
         BulkOrderPlacementsResponse, DepositInfo, ExecuteMsg, InstantiateMsg, LiquidationRequest,
         LiquidationResponse, QueryMsg, SettlementEntry, SudoMsg,
     },
-    types::{OrderData, PositionEffect},
+    types::{ContractOrderResult, OrderData, PositionEffect},
 };
 use sei_cosmwasm::{
     DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
@@ -136,6 +136,9 @@ pub fn sudo(deps: DepsMut<SeiQueryWrapper>, env: Env, msg: SudoMsg) -> Result<Re
         }
         SudoMsg::BulkOrderCancellations { ids } => process_bulk_order_cancellations(deps, ids),
         SudoMsg::Liquidation { requests } => process_bulk_liquidation(deps, env, requests),
+        SudoMsg::FinalizeBlock {
+            contract_order_results,
+        } => process_finalize_block(deps, env, contract_order_results),
     }
 }
 
@@ -206,6 +209,38 @@ pub fn process_bulk_liquidation(
 
     let mut response: Response = Response::new();
     response = response.set_data(binary);
+    Ok(response)
+}
+
+pub fn process_finalize_block(
+    deps: DepsMut<SeiQueryWrapper>,
+    _env: Env,
+    contract_order_results: Vec<ContractOrderResult>,
+) -> Result<Response, StdError> {
+    deps.api.debug("Processing finalize block...");
+
+    // print order placement results
+    for order_results in contract_order_results {
+        deps.api.debug(&format!(
+            "Order results from contract {}",
+            order_results.contract_address
+        ));
+
+        for order_placement in order_results.order_placement_results {
+            deps.api.debug(&format!(
+                "Order id {}, status {}",
+                order_placement.order_id, order_placement.status_code
+            ));
+        }
+        for order_execution in order_results.order_execution_results {
+            deps.api.debug(&format!(
+                "Order id {}, executed_quantity {}",
+                order_execution.order_id, order_execution.executed_quantity
+            ));
+        }
+    }
+
+    let response = Response::new();
     Ok(response)
 }
 
