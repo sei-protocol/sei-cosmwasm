@@ -11,9 +11,9 @@ use crate::{
     types::{OrderData, PositionEffect},
 };
 use sei_cosmwasm::{
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse,
-    OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, ContractOrderResult
+    ContractOrderResult, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
+    GetOrderByIdResponse, GetOrdersResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse,
+    OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;

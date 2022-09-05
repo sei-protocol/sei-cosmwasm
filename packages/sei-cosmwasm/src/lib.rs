@@ -15,7 +15,10 @@ pub use query::{
     GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
 };
 pub use route::SeiRoute;
-pub use sei_types::{MsgPlaceOrdersResponse, Order, OrderResponse, OrderType, PositionDirection, ContractOrderResult, OrderPlacementResult, OrderExecutionResult};
+pub use sei_types::{
+    MsgPlaceOrdersResponse, ContractOrderResult, Order, OrderExecutionResult, OrderPlacementResult,
+    OrderResponse, OrderType, PositionDirection,
+};
 
 // This export is added to all contracts that import this package, signifying that they require
 // "sei" support on the chain they run on.
