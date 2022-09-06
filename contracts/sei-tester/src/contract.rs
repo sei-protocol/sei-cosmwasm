@@ -1,6 +1,6 @@
 use cosmwasm_std::{
-    coin, entry_point, from_binary, to_binary, Binary, Decimal, Deps, DepsMut, Env, MessageInfo, QueryResponse,
-    Response, Reply, StdError, StdResult, SubMsgResponse, SubMsg,
+    coin, entry_point, from_binary, to_binary, Binary, Decimal, Deps, DepsMut, Env, MessageInfo,
+    QueryResponse, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse,
 };
 
 use crate::{
@@ -12,8 +12,8 @@ use crate::{
 };
 use sei_cosmwasm::{
     DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
-    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
+    GetOrdersResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse,
+    OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
@@ -248,23 +248,14 @@ pub fn process_finalize_block(
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
-pub fn reply(
-    _deps: DepsMut<SeiQueryWrapper>,
-    _env: Env,
-    msg: Reply,
-) -> Result<Response, StdError> {
+pub fn reply(_deps: DepsMut<SeiQueryWrapper>, _env: Env, msg: Reply) -> Result<Response, StdError> {
     match msg.id {
         PLACE_ORDER_REPLY_ID => handle_place_order_reply(msg),
-        id => Err(StdError::generic_err(format!(
-            "Unknown reply id: {}",
-            id
-        ))),
+        id => Err(StdError::generic_err(format!("Unknown reply id: {}", id))),
     }
 }
 
-pub fn handle_place_order_reply(
-    msg: Reply,
-) -> Result<Response, StdError> {
+pub fn handle_place_order_reply(msg: Reply) -> Result<Response, StdError> {
     let submsg_response: SubMsgResponse =
         msg.result.into_result().map_err(StdError::generic_err)?;
 
@@ -273,12 +264,13 @@ pub fn handle_place_order_reply(
             let parsed_order_response: MsgPlaceOrdersResponse = from_binary(&response_data)?;
             Ok(Response::new()
                 .add_attribute("method", "handle_place_order_reply")
-                .add_attribute("order_ids", format!("{:?}", parsed_order_response.order_ids))
-            )
+                .add_attribute(
+                    "order_ids",
+                    format!("{:?}", parsed_order_response.order_ids),
+                ))
         }
-        None => Ok(Response::new().add_attribute("method", "handle_place_order_reply"))
+        None => Ok(Response::new().add_attribute("method", "handle_place_order_reply")),
     }
-
 }
 
 #[entry_point]
