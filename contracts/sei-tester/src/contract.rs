@@ -1,6 +1,6 @@
 use cosmwasm_std::{
-    coin, entry_point, to_binary, Binary, Decimal, Deps, DepsMut, Env, MessageInfo, QueryResponse,
-    Response, StdError, StdResult,
+    coin, entry_point, from_binary, to_binary, Binary, Decimal, Deps, DepsMut, Env, MessageInfo, QueryResponse,
+    Response, Reply, StdError, StdResult, SubMsgResponse, SubMsg,
 };
 
 use crate::{
@@ -12,9 +12,11 @@ use crate::{
 };
 use sei_cosmwasm::{
     DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
+    GetOrdersResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
     PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
 };
+
+const PLACE_ORDER_REPLY_ID: u64 = 1;
 
 #[entry_point]
 pub fn instantiate(
@@ -68,7 +70,8 @@ pub fn place_orders(
         orders: vec![order_placement],
         contract_address: env.contract.address,
     };
-    Ok(Response::new().add_message(test_order))
+    let test_order_sub_msg = SubMsg::reply_on_success(test_order, PLACE_ORDER_REPLY_ID);
+    Ok(Response::new().add_submessage(test_order_sub_msg))
 }
 
 pub fn cancel_orders(
@@ -242,6 +245,40 @@ pub fn process_finalize_block(
 
     let response = Response::new();
     Ok(response)
+}
+
+#[cfg_attr(not(feature = "library"), entry_point)]
+pub fn reply(
+    _deps: DepsMut<SeiQueryWrapper>,
+    _env: Env,
+    msg: Reply,
+) -> Result<Response, StdError> {
+    match msg.id {
+        PLACE_ORDER_REPLY_ID => handle_place_order_reply(msg),
+        id => Err(StdError::generic_err(format!(
+            "Unknown reply id: {}",
+            id
+        ))),
+    }
+}
+
+pub fn handle_place_order_reply(
+    msg: Reply,
+) -> Result<Response, StdError> {
+    let submsg_response: SubMsgResponse =
+        msg.result.into_result().map_err(StdError::generic_err)?;
+
+    match submsg_response.data {
+        Some(response_data) => {
+            let parsed_order_response: MsgPlaceOrdersResponse = from_binary(&response_data)?;
+            Ok(Response::new()
+                .add_attribute("method", "handle_place_order_reply")
+                .add_attribute("order_ids", format!("{:?}", parsed_order_response.order_ids))
+            )
+        }
+        None => Ok(Response::new().add_attribute("method", "handle_place_order_reply"))
+    }
+
 }
 
 #[entry_point]

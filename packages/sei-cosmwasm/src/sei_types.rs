@@ -54,3 +54,9 @@ pub struct OrderResponse {
     pub position_direction: PositionDirection,
     pub data: String,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct MsgPlaceOrdersResponse {
+    pub order_ids: Vec<u64>,
+}
