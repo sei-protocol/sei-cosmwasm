@@ -4,16 +4,14 @@ use cosmwasm_std::{
 };
 
 use crate::{
-    msg::{
-        BulkOrderPlacementsResponse, DepositInfo, ExecuteMsg, InstantiateMsg, LiquidationRequest,
-        LiquidationResponse, QueryMsg, SettlementEntry, SudoMsg,
-    },
-    types::{ContractOrderResult, OrderData, PositionEffect},
+    msg::{ExecuteMsg, InstantiateMsg, QueryMsg},
+    types::{OrderData, PositionEffect},
 };
 use sei_cosmwasm::{
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
-    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
+    BulkOrderPlacementsResponse, ContractOrderResult, DepositInfo, DexTwapsResponse, EpochResponse,
+    ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, LiquidationRequest,
+    LiquidationResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
+    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
 };
 
 #[entry_point]
