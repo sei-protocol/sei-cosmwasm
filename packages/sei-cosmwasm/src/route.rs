@@ -8,4 +8,5 @@ pub enum SeiRoute {
     Oracle,
     Dex,
     Epoch,
+    Tokenfactory,
 }

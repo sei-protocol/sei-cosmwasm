@@ -118,4 +118,8 @@ pub enum QueryMsg {
         asset_denom: String,
         id: u64,
     },
+    GetDenomFeeWhitelist {},
+    CreatorInDenomFeeWhitelist {
+        creator: String,
+    },
 }
