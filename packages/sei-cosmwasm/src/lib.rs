@@ -16,7 +16,7 @@ pub use query::{
 };
 pub use route::SeiRoute;
 pub use sei_types::{
-    MsgPlaceOrdersResponse, ContractOrderResult, Order, OrderExecutionResult, OrderPlacementResult,
+    ContractOrderResult, MsgPlaceOrdersResponse, Order, OrderExecutionResult, OrderPlacementResult,
     OrderResponse, OrderType, PositionDirection,
 };
 

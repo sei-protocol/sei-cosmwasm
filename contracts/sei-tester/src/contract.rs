@@ -12,8 +12,8 @@ use crate::{
 };
 use sei_cosmwasm::{
     ContractOrderResult, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
-    GetOrderByIdResponse, GetOrdersResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse,
-    OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
+    GetOrderByIdResponse, GetOrdersResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
+    OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
