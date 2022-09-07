@@ -11,8 +11,9 @@ pub use proto_structs::{
 };
 pub use querier::SeiQuerier;
 pub use query::{
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
+    CreatorInDenomFeeWhitelistResponse, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
+    GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwapsResponse,
+    OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
 };
 pub use route::SeiRoute;
 pub use sei_types::{

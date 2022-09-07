@@ -11,9 +11,10 @@ use crate::{
     types::{OrderData, PositionEffect},
 };
 use sei_cosmwasm::{
-    ContractOrderResult, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
-    GetOrderByIdResponse, GetOrdersResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
-    OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
+    ContractOrderResult, CreatorInDenomFeeWhitelistResponse, DexTwapsResponse, EpochResponse,
+    ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
+    MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
+    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
@@ -305,6 +306,10 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
             asset_denom,
             id,
         )?),
+        QueryMsg::GetDenomFeeWhitelist {} => to_binary(&query_get_denom_fee_whitelist(deps)?),
+        QueryMsg::CreatorInDenomFeeWhitelist { creator } => {
+            to_binary(&query_creator_in_denom_fee_whitelist(deps, creator)?)
+        }
     }
 }
 
@@ -380,6 +385,27 @@ pub fn query_get_order_by_id(
     let querier = SeiQuerier::new(&deps.querier);
     let res: GetOrderByIdResponse =
         querier.query_get_order_by_id(valid_addr, price_denom, asset_denom, order_id)?;
+
+    Ok(res)
+}
+
+pub fn query_get_denom_fee_whitelist(
+    deps: Deps<SeiQueryWrapper>,
+) -> StdResult<GetDenomFeeWhitelistResponse> {
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: GetDenomFeeWhitelistResponse = querier.query_get_denom_fee_whitelist()?;
+
+    Ok(res)
+}
+
+pub fn query_creator_in_denom_fee_whitelist(
+    deps: Deps<SeiQueryWrapper>,
+    creator: String,
+) -> StdResult<CreatorInDenomFeeWhitelistResponse> {
+    let valid_addr = deps.api.addr_validate(&creator)?;
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: CreatorInDenomFeeWhitelistResponse =
+        querier.query_creator_in_denom_fee_whitelist(valid_addr)?;
 
     Ok(res)
 }
