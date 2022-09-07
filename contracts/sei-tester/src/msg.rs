@@ -1,9 +1,7 @@
 use cosmwasm_std::Decimal;
 use schemars::JsonSchema;
-use sei_cosmwasm::{Order, OrderType, PositionDirection};
+use sei_cosmwasm::{ContractOrderResult, Order, OrderType, PositionDirection};
 use serde::{Deserialize, Serialize};
-
-use crate::types::ContractOrderResult;
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct InstantiateMsg {}
