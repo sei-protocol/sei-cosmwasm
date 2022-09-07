@@ -8,13 +8,13 @@ use crate::{
         BulkOrderPlacementsResponse, DepositInfo, ExecuteMsg, InstantiateMsg, LiquidationRequest,
         LiquidationResponse, QueryMsg, SettlementEntry, SudoMsg,
     },
-    types::{ContractOrderResult, OrderData, PositionEffect},
+    types::{OrderData, PositionEffect},
 };
 use sei_cosmwasm::{
-    CreatorInDenomFeeWhitelistResponse, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
-    GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse, MsgPlaceOrdersResponse,
-    OracleTwapsResponse, Order, OrderSimulationResponse, OrderType, PositionDirection, SeiMsg,
-    SeiQuerier, SeiQueryWrapper,
+    ContractOrderResult, CreatorInDenomFeeWhitelistResponse, DexTwapsResponse, EpochResponse,
+    ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
+    MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
+    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
