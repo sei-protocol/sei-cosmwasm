@@ -5,7 +5,7 @@ mod query;
 mod route;
 mod sei_types;
 
-pub use msg::SeiMsg;
+pub use msg::{SeiMsg, SudoMsg};
 pub use proto_structs::{
     DenomOracleExchangeRatePair, DexPair, DexTwap, Epoch, OracleExchangeRate, OracleTwap,
 };
@@ -17,8 +17,9 @@ pub use query::{
 };
 pub use route::SeiRoute;
 pub use sei_types::{
-    ContractOrderResult, MsgPlaceOrdersResponse, Order, OrderExecutionResult, OrderPlacementResult,
-    OrderResponse, OrderType, PositionDirection,
+    BulkOrderPlacementsResponse, ContractOrderResult, DepositInfo, LiquidationRequest,
+    LiquidationResponse, MsgPlaceOrdersResponse, Order, OrderExecutionResult, OrderPlacementResult,
+    OrderResponse, OrderType, PositionDirection, SettlementEntry,
 };
 
 // This export is added to all contracts that import this package, signifying that they require
