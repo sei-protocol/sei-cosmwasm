@@ -11,13 +11,15 @@ pub use proto_structs::{
 };
 pub use querier::SeiQuerier;
 pub use query::{
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
+    CreatorInDenomFeeWhitelistResponse, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
+    GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwapsResponse,
+    OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
 };
 pub use route::SeiRoute;
 pub use sei_types::{
     BulkOrderPlacementsResponse, ContractOrderResult, DepositInfo, LiquidationRequest,
-    LiquidationResponse, Order, OrderResponse, OrderType, PositionDirection, SettlementEntry,
+    LiquidationResponse, MsgPlaceOrdersResponse, Order, OrderExecutionResult, OrderPlacementResult,
+    OrderResponse, OrderType, PositionDirection, SettlementEntry,
 };
 
 // This export is added to all contracts that import this package, signifying that they require

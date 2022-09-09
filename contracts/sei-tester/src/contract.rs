@@ -1,6 +1,6 @@
 use cosmwasm_std::{
-    coin, entry_point, to_binary, Binary, Decimal, Deps, DepsMut, Env, MessageInfo, QueryResponse,
-    Response, StdError, StdResult,
+    coin, entry_point, from_binary, to_binary, Binary, Decimal, Deps, DepsMut, Env, MessageInfo,
+    QueryResponse, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse,
 };
 
 use crate::{
@@ -8,11 +8,15 @@ use crate::{
     types::{OrderData, PositionEffect},
 };
 use sei_cosmwasm::{
-    BulkOrderPlacementsResponse, ContractOrderResult, DepositInfo, DexTwapsResponse, EpochResponse,
-    ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, LiquidationRequest,
-    LiquidationResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
-    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
+    BulkOrderPlacementsResponse, ContractOrderResult, CreatorInDenomFeeWhitelistResponse,
+    DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
+    GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse, LiquidationRequest,
+    LiquidationResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
+    OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
+    SettlementEntry, SudoMsg,
 };
+
+const PLACE_ORDER_REPLY_ID: u64 = 1;
 
 #[entry_point]
 pub fn instantiate(
@@ -66,7 +70,8 @@ pub fn place_orders(
         orders: vec![order_placement],
         contract_address: env.contract.address,
     };
-    Ok(Response::new().add_message(test_order))
+    let test_order_sub_msg = SubMsg::reply_on_success(test_order, PLACE_ORDER_REPLY_ID);
+    Ok(Response::new().add_submessage(test_order_sub_msg))
 }
 
 pub fn cancel_orders(
@@ -242,6 +247,32 @@ pub fn process_finalize_block(
     Ok(response)
 }
 
+#[cfg_attr(not(feature = "library"), entry_point)]
+pub fn reply(_deps: DepsMut<SeiQueryWrapper>, _env: Env, msg: Reply) -> Result<Response, StdError> {
+    match msg.id {
+        PLACE_ORDER_REPLY_ID => handle_place_order_reply(msg),
+        id => Err(StdError::generic_err(format!("Unknown reply id: {}", id))),
+    }
+}
+
+pub fn handle_place_order_reply(msg: Reply) -> Result<Response, StdError> {
+    let submsg_response: SubMsgResponse =
+        msg.result.into_result().map_err(StdError::generic_err)?;
+
+    match submsg_response.data {
+        Some(response_data) => {
+            let parsed_order_response: MsgPlaceOrdersResponse = from_binary(&response_data)?;
+            Ok(Response::new()
+                .add_attribute("method", "handle_place_order_reply")
+                .add_attribute(
+                    "order_ids",
+                    format!("{:?}", parsed_order_response.order_ids),
+                ))
+        }
+        None => Ok(Response::new().add_attribute("method", "handle_place_order_reply")),
+    }
+}
+
 #[entry_point]
 pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult<QueryResponse> {
     match msg {
@@ -274,6 +305,10 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
             asset_denom,
             id,
         )?),
+        QueryMsg::GetDenomFeeWhitelist {} => to_binary(&query_get_denom_fee_whitelist(deps)?),
+        QueryMsg::CreatorInDenomFeeWhitelist { creator } => {
+            to_binary(&query_creator_in_denom_fee_whitelist(deps, creator)?)
+        }
     }
 }
 
@@ -349,6 +384,27 @@ pub fn query_get_order_by_id(
     let querier = SeiQuerier::new(&deps.querier);
     let res: GetOrderByIdResponse =
         querier.query_get_order_by_id(valid_addr, price_denom, asset_denom, order_id)?;
+
+    Ok(res)
+}
+
+pub fn query_get_denom_fee_whitelist(
+    deps: Deps<SeiQueryWrapper>,
+) -> StdResult<GetDenomFeeWhitelistResponse> {
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: GetDenomFeeWhitelistResponse = querier.query_get_denom_fee_whitelist()?;
+
+    Ok(res)
+}
+
+pub fn query_creator_in_denom_fee_whitelist(
+    deps: Deps<SeiQueryWrapper>,
+    creator: String,
+) -> StdResult<CreatorInDenomFeeWhitelistResponse> {
+    let valid_addr = deps.api.addr_validate(&creator)?;
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: CreatorInDenomFeeWhitelistResponse =
+        querier.query_creator_in_denom_fee_whitelist(valid_addr)?;
 
     Ok(res)
 }
