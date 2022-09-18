@@ -79,12 +79,6 @@ pub struct OrderExecutionResult {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub struct MsgPlaceOrdersResponse {
-    pub order_ids: Vec<u64>,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct SettlementEntry {
     pub account: String,
     pub price_denom: String,
