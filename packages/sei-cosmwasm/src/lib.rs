@@ -4,6 +4,7 @@ mod querier;
 mod query;
 mod route;
 mod sei_types;
+mod tx;
 
 pub use msg::{SeiMsg, SudoMsg};
 pub use proto_structs::{
@@ -18,9 +19,10 @@ pub use query::{
 pub use route::SeiRoute;
 pub use sei_types::{
     BulkOrderPlacementsResponse, ContractOrderResult, DepositInfo, LiquidationRequest,
-    LiquidationResponse, MsgPlaceOrdersResponse, Order, OrderExecutionResult, OrderPlacementResult,
-    OrderResponse, OrderType, PositionDirection, SettlementEntry,
+    LiquidationResponse, Order, OrderExecutionResult, OrderPlacementResult, OrderResponse,
+    OrderType, PositionDirection, SettlementEntry,
 };
+pub use tx::MsgPlaceOrdersResponse;
 
 // This export is added to all contracts that import this package, signifying that they require
 // "sei" support on the chain they run on.

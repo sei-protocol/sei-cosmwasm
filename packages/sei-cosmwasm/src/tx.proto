@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message MsgPlaceOrdersResponse {
+  repeated uint64 order_ids = 1;
+}

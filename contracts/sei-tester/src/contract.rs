@@ -1,12 +1,13 @@
 use cosmwasm_std::{
-    coin, entry_point, from_binary, to_binary, Binary, Decimal, Deps, DepsMut, Env, MessageInfo,
-    QueryResponse, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse,
+    coin, entry_point, to_binary, Binary, Decimal, Deps, DepsMut, Env, MessageInfo, QueryResponse,
+    Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse,
 };
 
 use crate::{
     msg::{ExecuteMsg, InstantiateMsg, QueryMsg},
     types::{OrderData, PositionEffect},
 };
+use protobuf::Message;
 use sei_cosmwasm::{
     BulkOrderPlacementsResponse, ContractOrderResult, CreatorInDenomFeeWhitelistResponse,
     DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
@@ -248,20 +249,31 @@ pub fn process_finalize_block(
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
-pub fn reply(_deps: DepsMut<SeiQueryWrapper>, _env: Env, msg: Reply) -> Result<Response, StdError> {
+pub fn reply(deps: DepsMut<SeiQueryWrapper>, _env: Env, msg: Reply) -> Result<Response, StdError> {
     match msg.id {
-        PLACE_ORDER_REPLY_ID => handle_place_order_reply(msg),
+        PLACE_ORDER_REPLY_ID => handle_place_order_reply(deps, msg),
         id => Err(StdError::generic_err(format!("Unknown reply id: {}", id))),
     }
 }
 
-pub fn handle_place_order_reply(msg: Reply) -> Result<Response, StdError> {
+pub fn handle_place_order_reply(
+    deps: DepsMut<SeiQueryWrapper>,
+    msg: Reply,
+) -> Result<Response, StdError> {
     let submsg_response: SubMsgResponse =
         msg.result.into_result().map_err(StdError::generic_err)?;
 
     match submsg_response.data {
         Some(response_data) => {
-            let parsed_order_response: MsgPlaceOrdersResponse = from_binary(&response_data)?;
+            let parsed_order_response: MsgPlaceOrdersResponse =
+                Message::parse_from_bytes(response_data.as_slice()).map_err(|_| {
+                    StdError::parse_err("MsgPlaceOrdersResponse", "failed to parse data")
+                })?;
+            deps.api.debug(&format!(
+                "Order results from contract {:?}",
+                parsed_order_response
+            ));
+
             Ok(Response::new()
                 .add_attribute("method", "handle_place_order_reply")
                 .add_attribute(
