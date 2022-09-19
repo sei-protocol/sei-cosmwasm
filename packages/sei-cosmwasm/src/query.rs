@@ -19,7 +19,7 @@ pub struct SeiQueryWrapper {
 impl CustomQuery for SeiQueryWrapper {}
 
 /// SeiQuery is defines available query datas
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum SeiQuery {
     ExchangeRates {},
@@ -58,7 +58,7 @@ pub struct ExchangeRatesResponse {
 }
 
 /// OracleTwapsResponse is data format returned from OracleRequest::OracleTwaps query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct OracleTwapsResponse {
     pub oracle_twaps: Vec<OracleTwap>,
 }
@@ -70,37 +70,37 @@ pub struct DexTwapsResponse {
 }
 
 /// EpochResponse is data format returned from Epoch query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct EpochResponse {
     pub epoch: Epoch,
 }
 
 /// GetOrdersResponse is data format returned from GetOrders query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct GetOrdersResponse {
     pub orders: Vec<OrderResponse>,
 }
 
 /// GetOrderdByIdResponse is data format returned from GetOrderById query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct GetOrderByIdResponse {
     pub order: OrderResponse,
 }
 
 /// OrderSimulationResponse is data format returned from OrderSimulation query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct OrderSimulationResponse {
     pub executed_quantity: Decimal,
 }
 
 /// GetDenomFeeWhitelistResponse is data format returned from GetDenomFeeWhitelist query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct GetDenomFeeWhitelistResponse {
     pub creators: Vec<String>,
 }
 
 /// CreatorInDenomFeeWhitelistResponse is data format returned from CreatorInDenomFeeWhitelist query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct CreatorInDenomFeeWhitelistResponse {
     pub whitelisted: bool,
 }
