@@ -8,7 +8,7 @@ use crate::sei_types::OrderResponse;
 use crate::Order;
 
 /// SeiQueryWrapper is an override of QueryRequest::Custom to access Sei-specific modules
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub struct SeiQueryWrapper {
     pub route: SeiRoute,
@@ -52,7 +52,7 @@ pub enum SeiQuery {
 }
 
 /// ExchangeRatesResponse is data format returned from OracleRequest::ExchangeRates query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct ExchangeRatesResponse {
     pub denom_oracle_exchange_rate_pairs: Vec<DenomOracleExchangeRatePair>,
 }
@@ -64,7 +64,7 @@ pub struct OracleTwapsResponse {
 }
 
 /// DexTwapsResponse is data format returned from DexTwaps query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct DexTwapsResponse {
     pub twaps: Vec<DexTwap>,
 }
