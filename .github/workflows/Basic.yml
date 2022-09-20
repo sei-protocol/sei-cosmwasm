@@ -60,7 +60,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: -- -D warnings
+          args: -- -W warnings
 
       - name: Generate Schema For sei-tester
         uses: actions-rs/cargo@v1
