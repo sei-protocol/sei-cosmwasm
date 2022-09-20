@@ -28,7 +28,7 @@ pub enum OrderStatus {
     Fulfilled = 3,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub struct Order {
     pub price: Decimal,
@@ -41,7 +41,7 @@ pub struct Order {
     pub status_description: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub struct OrderResponse {
     pub id: u64,
@@ -56,20 +56,20 @@ pub struct OrderResponse {
 }
 
 // The following are the types used in the sudo response for finalize block
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct ContractOrderResult {
     pub contract_address: String,
     pub order_placement_results: Vec<OrderPlacementResult>,
     pub order_execution_results: Vec<OrderExecutionResult>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct OrderPlacementResult {
     pub order_id: u64,
     pub status_code: i32,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct OrderExecutionResult {
     pub order_id: u64,
     pub execution_price: Decimal,
@@ -78,7 +78,7 @@ pub struct OrderExecutionResult {
     pub position_direction: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct SettlementEntry {
     pub account: String,
     pub price_denom: String,
@@ -91,31 +91,31 @@ pub struct SettlementEntry {
     pub order_id: u64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct DepositInfo {
     pub account: String,
     pub denom: String,
     pub amount: Decimal,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct LiquidationRequest {
     pub requestor: String,
     pub account: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema)]
 pub struct LiquidationResponse {
     pub successful_accounts: Vec<String>,
     pub liquidation_orders: Vec<Order>,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema)]
 pub struct BulkOrderPlacementsResponse {
     pub unsuccessful_orders: Vec<UnsuccessfulOrder>,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema)]
 pub struct UnsuccessfulOrder {
     pub id: u64,
     pub reason: String,
