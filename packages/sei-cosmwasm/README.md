@@ -8,7 +8,7 @@ Add the sei-cosmwasm dependency to your smart contract's `Cargo.toml` file:
 
 ```toml
 [dependencies]
-sei-cosmwasm = { version = "0.4.5" }
+sei-cosmwasm = { version = "0.4.4" }
 ```
 
 ## Functionality
@@ -71,55 +71,4 @@ let test_order = sei_cosmwasm::SeiMsg::PlaceOrders {
     orders: vec![some_order],
 };
 Ok(Response::new().add_message(test_order))
-```
-
-### Tokenfactory
-
-The tokenfactory supports any Sei user to create, mint, burn and change owner of custom tokens. 
-
-
-```rust
-// create a new coin denom through the tokenfactory module.
-// This will create a denom with fullname "factory/{creator address}/{subdenom}"
-let test_create_denom = sei_cosmwasm::SeiMsg::CreateDenom {
-    subdenom: "subdenom".to_string(),
-};
-Ok(Response::new().add_message(test_create_denom))
-
-
-// mint a token and send to a designated receiver
-// note here the denom name provided must be the fullname in format of "factory/{creator address}/{subdenom}"
-let tokenfactory_denom =
-    "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
-let amount = coin(100, tokenfactory_denom);
-
-let test_mint = sei_cosmwasm::SeiMsg::MintTokens {
-    amount: amount.to_owned(),
-};
-let send_msg = SubMsg::new(BankMsg::Send {
-    to_address: info.sender.to_string(),
-    amount: vec![amount],
-});
-
-Ok(Response::new()
-    .add_message(test_mint)
-    .add_submessage(send_msg))
-
-
-// burn a token, the denom name provided must be the fullname in format of "factory/{creator address}/{subdenom}"
-let tokenfactory_denom =
-    "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
-let amount = coin(10, tokenfactory_denom);
-let test_burn = sei_cosmwasm::SeiMsg::BurnTokens { amount };
-Ok(Response::new().add_message(test_burn))
-
-// change the owner of a token 
-let tokenfactory_denom =
-    "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
-let new_admin_address = "${NEW_ADMIN_ADDRESS}".to_string();
-let test_change_admin = sei_cosmwasm::SeiMsg::ChangeAdmin {
-    denom: tokenfactory_denom,
-    new_admin_address,
-};
-Ok(Response::new().add_message(test_change_admin))
 ```

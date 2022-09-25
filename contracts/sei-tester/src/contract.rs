@@ -1,6 +1,6 @@
 use cosmwasm_std::{
-    coin, entry_point, to_binary, BankMsg, Binary, Decimal, Deps, DepsMut, Env, MessageInfo,
-    QueryResponse, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse,
+    coin, entry_point, to_binary, Binary, Decimal, Deps, DepsMut, Env, MessageInfo, QueryResponse,
+    Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse,
 };
 
 use crate::{
@@ -47,8 +47,8 @@ pub fn execute(
 }
 
 pub fn place_orders(
-    deps: DepsMut,
-    _env: Env,
+    _deps: DepsMut,
+    env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
     let order_data = OrderData {
@@ -59,8 +59,8 @@ pub fn place_orders(
     let order_placement = Order {
         price: Decimal::from_atomics(120u128, 0).unwrap(),
         quantity: Decimal::one(),
-        price_denom: "USDC".to_string(),
-        asset_denom: "ATOM".to_string(),
+        price_denom: "sei".to_string(),
+        asset_denom: "atom".to_string(),
         position_direction: PositionDirection::Long,
         order_type: OrderType::Limit,
         data: serde_json::to_string(&order_data).unwrap(),
@@ -69,9 +69,7 @@ pub fn place_orders(
     let test_order = sei_cosmwasm::SeiMsg::PlaceOrders {
         funds: vec![],
         orders: vec![order_placement],
-        contract_address: deps
-            .api
-            .addr_validate("sei14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9sh9m79m")?,
+        contract_address: env.contract.address,
     };
     let test_order_sub_msg = SubMsg::reply_on_success(test_order, PLACE_ORDER_REPLY_ID);
     Ok(Response::new().add_submessage(test_order_sub_msg))
@@ -90,8 +88,6 @@ pub fn cancel_orders(
     Ok(Response::new().add_message(test_cancel))
 }
 
-// create a new coin denom through the tokenfactory module.
-// This will create a denom with fullname "factory/{creator address}/{subdenom}"
 pub fn create_denom(
     _deps: DepsMut,
     _env: Env,
@@ -103,24 +99,12 @@ pub fn create_denom(
     Ok(Response::new().add_message(test_create_denom))
 }
 
-// mint a token and send to a designated receiver
-// note here the denom name provided must be the fullname in format of "factory/{creator address}/{subdenom}"
-pub fn mint(_deps: DepsMut, env: Env, info: MessageInfo) -> Result<Response<SeiMsg>, StdError> {
+pub fn mint(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<SeiMsg>, StdError> {
     let tokenfactory_denom =
         "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
     let amount = coin(100, tokenfactory_denom);
-
-    let test_mint = sei_cosmwasm::SeiMsg::MintTokens {
-        amount: amount.to_owned(),
-    };
-    let send_msg = SubMsg::new(BankMsg::Send {
-        to_address: info.sender.to_string(),
-        amount: vec![amount],
-    });
-
-    Ok(Response::new()
-        .add_message(test_mint)
-        .add_submessage(send_msg))
+    let test_mint = sei_cosmwasm::SeiMsg::MintTokens { amount };
+    Ok(Response::new().add_message(test_mint))
 }
 
 pub fn burn(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<SeiMsg>, StdError> {
@@ -238,17 +222,6 @@ pub fn process_finalize_block(
     contract_order_results: Vec<ContractOrderResult>,
 ) -> Result<Response, StdError> {
     deps.api.debug("Processing finalize block...");
-
-    let valid_addr = deps
-        .api
-        .addr_validate("sei14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9sh9m79m")?;
-    let querier = SeiQuerier::new(&deps.querier);
-    let res: GetOrderByIdResponse =
-        querier.query_get_order_by_id(valid_addr, "USDC".to_string(), "ATOM".to_string(), 1)?;
-
-    deps.api.debug("Processing GetOrderByIdResponse...");
-    deps.api
-        .debug(&format!("GetOrderByIdResponse... {:?}", res));
 
     // print order placement results
     for order_results in contract_order_results {

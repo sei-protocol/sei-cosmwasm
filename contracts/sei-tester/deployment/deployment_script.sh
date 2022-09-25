@@ -26,6 +26,6 @@ admin_addr=$(printf $password |$seid keys show $keyname | grep -A 1 "address" | 
 
 addr=$(printf $password |$seid tx wasm instantiate $code "{}" --from $keyname --broadcast-mode=block --label "vortex" --no-admin --chain-id sei-chain --gas=30000000 --fees=300000usei -y | grep -A 1 -m 1 "key: _contract_address" | sed -n 's/.*value: //p' | xargs)
 
-printf $password |$seid tx dex register-contract $addr $code false true sei14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9sh9m79m -y --from=$keyname --chain-id=sei-chain --fees=10000000usei --gas=10000000 --broadcast-mode=block
+printf $password |$seid tx dex register-contract $addr $code true true -y --from=$keyname --chain-id=sei-chain --fees=10000000usei --gas=10000000 --broadcast-mode=block
 
 printf "\n\nDeployed sei tester contract address is %s\n" $addr
