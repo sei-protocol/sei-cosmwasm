@@ -1,3 +1,4 @@
+#[cfg(not(feature = "library"))]
 use cosmwasm_std::{
     coin, entry_point, to_binary, Binary, Decimal, Deps, DepsMut, Env, MessageInfo, QueryResponse,
     Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse,
@@ -18,20 +19,40 @@ use sei_cosmwasm::{
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
+// version info for migration info
+const CONTRACT_NAME: &str = "crates.io:sei-tester";
+const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
+// use semver::Version;
 
-#[entry_point]
+pub fn validate_migration(
+    deps: Deps<SeiQueryWrapper>,
+    contract_name: &str,
+    contract_version: &str,
+) -> Result<(), StdError> {
+    let ver = cw2::get_contract_version(deps.storage)?;
+    // ensure we are migrating from an allowed contract
+    if ver.contract != contract_name {
+        return Err(StdError::generic_err("Can only upgrade from same type").into());
+    }
+    Ok(())
+}
+
+#[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
-    _deps: DepsMut,
+    _deps: DepsMut<SeiQueryWrapper>,
     _env: Env,
     _info: MessageInfo,
     _msg: InstantiateMsg,
 ) -> StdResult<Response<SeiMsg>> {
+    //validate_migration(_deps.as_ref(), CONTRACT_NAME, CONTRACT_VERSION)?;
+    // set the new version
+    cw2::set_contract_version(_deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     Ok(Response::new())
 }
 
-#[entry_point]
+#[cfg_attr(not(feature = "library"), entry_point)]
 pub fn execute(
-    deps: DepsMut,
+    deps: DepsMut<SeiQueryWrapper>,
     env: Env,
     info: MessageInfo,
     msg: ExecuteMsg,
@@ -47,7 +68,7 @@ pub fn execute(
 }
 
 pub fn place_orders(
-    _deps: DepsMut,
+    _deps: DepsMut<SeiQueryWrapper>,
     env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
@@ -76,7 +97,7 @@ pub fn place_orders(
 }
 
 pub fn cancel_orders(
-    _deps: DepsMut,
+    _deps: DepsMut<SeiQueryWrapper>,
     env: Env,
     _info: MessageInfo,
     order_ids: Vec<u64>,
@@ -89,7 +110,7 @@ pub fn cancel_orders(
 }
 
 pub fn create_denom(
-    _deps: DepsMut,
+    _deps: DepsMut<SeiQueryWrapper>,
     _env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
@@ -99,7 +120,11 @@ pub fn create_denom(
     Ok(Response::new().add_message(test_create_denom))
 }
 
-pub fn mint(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<SeiMsg>, StdError> {
+pub fn mint(
+    _deps: DepsMut<SeiQueryWrapper>,
+    env: Env,
+    _info: MessageInfo,
+) -> Result<Response<SeiMsg>, StdError> {
     let tokenfactory_denom =
         "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
     let amount = coin(100, tokenfactory_denom);
@@ -107,7 +132,11 @@ pub fn mint(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<Sei
     Ok(Response::new().add_message(test_mint))
 }
 
-pub fn burn(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<SeiMsg>, StdError> {
+pub fn burn(
+    _deps: DepsMut<SeiQueryWrapper>,
+    env: Env,
+    _info: MessageInfo,
+) -> Result<Response<SeiMsg>, StdError> {
     let tokenfactory_denom =
         "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
     let amount = coin(10, tokenfactory_denom);
@@ -116,7 +145,7 @@ pub fn burn(_deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response<Sei
 }
 
 pub fn change_admin(
-    _deps: DepsMut,
+    _deps: DepsMut<SeiQueryWrapper>,
     env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
@@ -249,7 +278,11 @@ pub fn process_finalize_block(
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
-pub fn reply(deps: DepsMut<SeiQueryWrapper>, _env: Env, msg: Reply) -> Result<Response, StdError> {
+pub fn reply(
+    deps: DepsMut<SeiQueryWrapper>,
+    _env: Env,
+    msg: Reply,
+) -> Result<Response<SeiMsg>, StdError> {
     match msg.id {
         PLACE_ORDER_REPLY_ID => handle_place_order_reply(deps, msg),
         id => Err(StdError::generic_err(format!("Unknown reply id: {}", id))),
@@ -259,7 +292,7 @@ pub fn reply(deps: DepsMut<SeiQueryWrapper>, _env: Env, msg: Reply) -> Result<Re
 pub fn handle_place_order_reply(
     deps: DepsMut<SeiQueryWrapper>,
     msg: Reply,
-) -> Result<Response, StdError> {
+) -> Result<Response<SeiMsg>, StdError> {
     let submsg_response: SubMsgResponse =
         msg.result.into_result().map_err(StdError::generic_err)?;
 
@@ -285,8 +318,8 @@ pub fn handle_place_order_reply(
     }
 }
 
-#[entry_point]
-pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult<QueryResponse> {
+#[cfg_attr(not(feature = "library"), entry_point)]
+pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
         QueryMsg::ExchangeRates {} => to_binary(&query_exchange_rates(deps)?),
         QueryMsg::OracleTwaps { lookback_seconds } => {
