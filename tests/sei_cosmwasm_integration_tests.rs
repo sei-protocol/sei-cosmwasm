@@ -217,7 +217,7 @@ fn test_epoch_query() {
         res.epoch.genesis_time,
         "2022-09-15T15:53:04.303018Z".to_string()
     );
-    assert_eq!(res.epoch.duration, 61);
+    assert_eq!(res.epoch.duration, 60);
     assert_eq!(res.epoch.current_epoch, 1);
     assert_eq!(
         res.epoch.current_epoch_start_time,
