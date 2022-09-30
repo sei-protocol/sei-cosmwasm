@@ -9,9 +9,12 @@ use cw_multi_test::{
     FailingStaking, Module, Router, SudoMsg, WasmKeeper,
 };
 use schemars::JsonSchema;
-use sei_cosmwasm::{SeiMsg, SeiQuery, SeiQueryWrapper};
+use sei_cosmwasm::{Epoch, EpochResponse, SeiMsg, SeiQuery, SeiQueryWrapper};
+use sei_tester::{
+    contract::{execute, instantiate, query},
+    msg::{ExecuteMsg, InstantiateMsg, QueryMsg},
+};
 use serde::de::DeserializeOwned;
-
 use std::{fmt::Debug, marker::PhantomData};
 
 use anyhow::Result as AnyResult;
@@ -69,7 +72,6 @@ impl Module for SeiModule {
                         "Must be owner of coin factory denom to mint"
                     ));
                 }
-
                 router.sudo(
                     api,
                     storage,
@@ -87,7 +89,6 @@ impl Module for SeiModule {
                         "Must be owner of coin factory denom to burn"
                     ));
                 }
-
                 Ok(router
                     .execute(
                         api,
@@ -110,9 +111,41 @@ impl Module for SeiModule {
         _storage: &dyn Storage,
         _querier: &dyn Querier,
         _block: &BlockInfo,
-        _request: Self::QueryT,
+        request: Self::QueryT,
     ) -> AnyResult<Binary> {
-        todo!()
+        match request.query_data {
+            SeiQuery::ExchangeRates {} => Ok(Binary::default()),
+            SeiQuery::OracleTwaps { lookback_seconds } => Ok(Binary::default()),
+            SeiQuery::DexTwaps {
+                contract_address,
+                lookback_seconds,
+            } => Ok(Binary::default()),
+            SeiQuery::OrderSimulation {
+                order,
+                contract_address,
+            } => Ok(Binary::default()),
+            SeiQuery::Epoch {} => Ok(to_binary(&EpochResponse {
+                epoch: Epoch {
+                    genesis_time: "2022-09-15T15:53:04.303018Z".to_string(),
+                    duration: 60,
+                    current_epoch: 1,
+                    current_epoch_start_time: "2022-09-15T15:53:04.303018Z".to_string(),
+                    current_epoch_height: 1,
+                },
+            })?),
+            SeiQuery::GetOrders {
+                contract_address,
+                account,
+            } => Ok(Binary::default()),
+            SeiQuery::GetOrderById {
+                contract_address,
+                price_denom,
+                asset_denom,
+                id,
+            } => Ok(Binary::default()),
+            SeiQuery::GetDenomFeeWhitelist {} => Ok(Binary::default()),
+            SeiQuery::CreatorInDenomFeeWhitelist { creator } => Ok(Binary::default()),
+        }
     }
 
     fn sudo<ExecC, QueryC>(
@@ -168,4 +201,28 @@ where
         .with_wasm::<SeiModule, WasmKeeper<SeiMsg, SeiQueryWrapper>>(WasmKeeper::new());
 
     appbuilder.build(init_fn)
+}
+
+pub fn get_balance(
+    app: &App<BankKeeper, MockApi, MemoryStorage, SeiModule, WasmKeeper<SeiMsg, SeiQueryWrapper>>,
+    addr: String,
+    denom: String,
+) -> BalanceResponse {
+    let arr = app.read_module(|router, api, storage| {
+        router.bank.query(
+            api,
+            storage,
+            &MockQuerier::default(),
+            &BlockInfo {
+                height: 0,
+                time: Timestamp::from_seconds(0u64),
+                chain_id: "test".to_string(),
+            },
+            BankQuery::Balance {
+                address: addr,
+                denom: denom,
+            },
+        )
+    });
+    from_binary(&arr.unwrap()).unwrap()
 }
