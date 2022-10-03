@@ -3,13 +3,16 @@ use common::{get_balance, mock_app};
 use cosmwasm_std::{
     coin, from_binary,
     testing::{MockApi, MockStorage},
-    Addr, Api, BalanceResponse, Coin, CosmosMsg, Storage, Uint128,
+    Addr, Api, BalanceResponse, Coin, CosmosMsg, Decimal, StdError, Storage, Uint128,
 };
 use cw_multi_test::{
     App, BankKeeper, ContractWrapper, Executor, FailingDistribution, FailingStaking, Router,
     WasmKeeper,
 };
-use sei_cosmwasm::{EpochResponse, SeiMsg, SeiQueryWrapper};
+use sei_cosmwasm::{
+    EpochResponse, GetOrderByIdResponse, GetOrdersResponse, Order, OrderStatus, OrderType,
+    PositionDirection, SeiMsg, SeiQueryWrapper,
+};
 use sei_tester::{
     contract::{execute, instantiate, query},
     msg::{InstantiateMsg, QueryMsg},
@@ -224,4 +227,248 @@ fn test_epoch_query() {
         "2022-09-15T15:53:04.303018Z".to_string()
     );
     assert_eq!(res.epoch.current_epoch_height, 1);
+}
+
+/// Dex Module - place and get orders
+#[test]
+fn test_dex_module_integration_orders() {
+    let mut app = mock_app(init_default_balances);
+    let sei_tester_addr = setup_test(&mut app);
+
+    // input params: orders, funds, contract_addr
+    let mut orders: Vec<Order> = Vec::new();
+    let mut funds = Vec::<Coin>::new();
+    let contract_addr = "example_contract".to_string();
+
+    // Make order1
+    let price = Decimal::raw(100);
+    let quantity = Decimal::raw(1000);
+    let price_denom = "USDC".to_string();
+    let asset_denom = "ATOM".to_string();
+    let order_type = OrderType::Market;
+    let position_direction = PositionDirection::Long;
+    let data = "".to_string();
+    let status_description = "order1".to_string();
+
+    let order1: Order = Order {
+        price: price,
+        quantity: quantity,
+        price_denom: price_denom.clone(),
+        asset_denom: asset_denom.clone(),
+        order_type: order_type,
+        position_direction: position_direction,
+        data: data, // serialized order data, defined by the specific target contract
+        status_description: status_description,
+    };
+    orders.push(order1);
+
+    // Make order2
+    let price2 = Decimal::raw(500);
+    let quantity2 = Decimal::raw(5000);
+    let price_denom2 = "DAI".to_string();
+    let asset_denom2 = "ATOM".to_string();
+    let order_type2 = OrderType::Limit;
+    let position_direction2 = PositionDirection::Short;
+    let data2 = "".to_string();
+    let status_description2 = "order2".to_string();
+
+    let order2: Order = Order {
+        price: price2,
+        quantity: quantity2,
+        price_denom: price_denom2.clone(),
+        asset_denom: asset_denom2.clone(),
+        order_type: order_type2,
+        position_direction: position_direction2,
+        data: data2, // serialized order data, defined by the specific target contract
+        status_description: status_description2,
+    };
+    orders.push(order2);
+
+    funds.push(Coin {
+        denom: "usei".to_string(),
+        amount: Uint128::new(10),
+    });
+
+    // Msg PlaceOrders() with orders 1 and 2
+    let arr = app
+        .execute_multi(
+            Addr::unchecked(ADMIN),
+            vec![CosmosMsg::Custom(SeiMsg::PlaceOrders {
+                orders: orders,
+                funds: funds,
+                contract_address: Addr::unchecked(&contract_addr),
+            })],
+        )
+        .unwrap();
+    let res = arr.first().unwrap().clone().data;
+    let data = res.unwrap();
+    let out: String = from_binary(&data).unwrap();
+    assert_eq!(out.to_string(), contract_addr.to_string());
+
+    // Query GetOrders() after order 1
+    let res: GetOrdersResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::GetOrders {
+                contract_address: contract_addr.to_string(),
+                account: sei_tester_addr.to_string(),
+            },
+        )
+        .unwrap();
+
+    assert_eq!(res.orders.len(), 2);
+    assert_eq!(res.orders[0].id, 0);
+    assert_eq!(res.orders[0].status, OrderStatus::Placed);
+    assert_eq!(res.orders[0].price, Decimal::raw(100));
+    assert_eq!(res.orders[0].quantity, Decimal::raw(1000));
+    assert_eq!(res.orders[0].price_denom.clone(), "USDC");
+    assert_eq!(res.orders[0].asset_denom.clone(), "ATOM");
+    assert_eq!(res.orders[0].order_type, order_type);
+    assert_eq!(res.orders[0].position_direction, position_direction);
+
+    assert_eq!(res.orders[1].id, 1);
+    assert_eq!(res.orders[1].status, OrderStatus::Placed);
+    assert_eq!(res.orders[1].price, Decimal::raw(500));
+    assert_eq!(res.orders[1].quantity, Decimal::raw(5000));
+    assert_eq!(res.orders[1].price_denom.clone(), "DAI");
+    assert_eq!(res.orders[1].asset_denom.clone(), "ATOM");
+    assert_eq!(res.orders[1].order_type, order_type2);
+    assert_eq!(res.orders[1].position_direction, position_direction2);
+
+    //Query GetOrders for non-existent contract address
+    let res: Result<GetOrderByIdResponse, StdError> = app.wrap().query_wasm_smart(
+        sei_tester_addr.clone(),
+        &QueryMsg::GetOrders {
+            contract_address: "fake_contract_addr".to_string(),
+            account: sei_tester_addr.to_string(),
+        },
+    );
+
+    let error = res.err();
+    assert!(error.is_some());
+
+    // Query GetOrderById() for order id 0
+    let res: GetOrderByIdResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::GetOrderById {
+                contract_address: contract_addr.to_string(),
+                price_denom: price_denom.clone(),
+                asset_denom: asset_denom.clone(),
+                id: 0,
+            },
+        )
+        .unwrap();
+
+    assert_eq!(res.order.id, 0);
+    assert_eq!(res.order.status, OrderStatus::Placed);
+    assert_eq!(res.order.price, Decimal::raw(100));
+    assert_eq!(res.order.quantity, Decimal::raw(1000));
+    assert_eq!(res.order.price_denom.clone(), "USDC");
+    assert_eq!(res.order.asset_denom.clone(), "ATOM");
+    assert_eq!(res.order.order_type, order_type);
+    assert_eq!(res.order.position_direction, position_direction);
+
+    // Query GetOrderById for order id 1
+    let res: GetOrderByIdResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::GetOrderById {
+                contract_address: contract_addr.to_string(),
+                price_denom: price_denom2.clone(),
+                asset_denom: asset_denom2.clone(),
+                id: 1,
+            },
+        )
+        .unwrap();
+
+    assert_eq!(res.order.id, 1);
+    assert_eq!(res.order.status, OrderStatus::Placed);
+    assert_eq!(res.order.price, Decimal::raw(500));
+    assert_eq!(res.order.quantity, Decimal::raw(5000));
+    assert_eq!(res.order.price_denom.clone(), "DAI");
+    assert_eq!(res.order.asset_denom.clone(), "ATOM");
+    assert_eq!(res.order.order_type, order_type2);
+    assert_eq!(res.order.position_direction, position_direction2);
+
+    // Query GetOrderById for order id 2 (doesn't exist)
+    let res: Result<GetOrderByIdResponse, StdError> = app.wrap().query_wasm_smart(
+        sei_tester_addr.clone(),
+        &QueryMsg::GetOrderById {
+            contract_address: contract_addr.to_string(),
+            price_denom: price_denom2.clone(),
+            asset_denom: asset_denom2.clone(),
+            id: 2,
+        },
+    );
+    let error = res.err();
+    assert!(error.is_some());
+
+    // CancelOrders for a contract address that doesn't exist
+    let mut nonexistent_order_ids: Vec<u64> = Vec::new();
+    nonexistent_order_ids.push(3);
+    let res = app.execute_multi(
+        Addr::unchecked(ADMIN),
+        vec![CosmosMsg::Custom(SeiMsg::CancelOrders {
+            order_ids: nonexistent_order_ids,
+            contract_address: Addr::unchecked("fake_contract_addr".to_string()),
+        })],
+    );
+    let error = res.err();
+    assert!(error.is_some());
+
+    // CancelOrders for order id 1
+    let mut cancel_order_ids: Vec<u64> = Vec::new();
+    cancel_order_ids.push(0);
+    let arr = app
+        .execute_multi(
+            Addr::unchecked(ADMIN),
+            vec![CosmosMsg::Custom(SeiMsg::CancelOrders {
+                order_ids: cancel_order_ids,
+                contract_address: Addr::unchecked(&contract_addr),
+            })],
+        )
+        .unwrap();
+    let res = arr.first().unwrap().clone().data;
+    let data = res.unwrap();
+    let out: String = from_binary(&data).unwrap();
+    assert_eq!(out.to_string(), contract_addr.to_string());
+
+    // Query GetOrders() after order 0 cancelled
+    let res: GetOrdersResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::GetOrders {
+                contract_address: contract_addr.to_string(),
+                account: sei_tester_addr.to_string(),
+            },
+        )
+        .unwrap();
+
+    assert_eq!(res.orders.len(), 1);
+    assert_eq!(res.orders[0].id, 1);
+    assert_eq!(res.orders[0].status, OrderStatus::Placed);
+    assert_eq!(res.orders[0].price, Decimal::raw(500));
+    assert_eq!(res.orders[0].quantity, Decimal::raw(5000));
+    assert_eq!(res.orders[0].price_denom.clone(), "DAI");
+    assert_eq!(res.orders[0].asset_denom.clone(), "ATOM");
+    assert_eq!(res.orders[0].order_type, order_type2);
+    assert_eq!(res.orders[0].position_direction, position_direction2);
+
+    // Query GetOrderById for order id 0 (doesn't exist)
+    let res: Result<GetOrderByIdResponse, StdError> = app.wrap().query_wasm_smart(
+        sei_tester_addr.clone(),
+        &QueryMsg::GetOrderById {
+            contract_address: contract_addr.to_string(),
+            price_denom: price_denom.clone(),
+            asset_denom: asset_denom.clone(),
+            id: 0,
+        },
+    );
+    let error = res.err();
+    assert!(error.is_some());
 }
