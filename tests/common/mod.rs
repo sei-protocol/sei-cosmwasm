@@ -2,7 +2,7 @@ use cosmwasm_std::{
     from_binary,
     testing::{MockApi, MockQuerier, MockStorage},
     to_binary, Addr, Api, BalanceResponse, BankMsg, BankQuery, Binary, BlockInfo, Coin, CosmosMsg,
-    CustomQuery, Empty, MemoryStorage, Querier, StdError, Storage, Timestamp,
+    CustomQuery, Decimal, Empty, MemoryStorage, Querier, Storage, Timestamp, Uint128, Uint64,
 };
 use cw_multi_test::{
     App, AppBuilder, AppResponse, BankKeeper, BankSudo, CosmosRouter, FailingDistribution,
@@ -10,23 +10,51 @@ use cw_multi_test::{
 };
 use schemars::JsonSchema;
 use sei_cosmwasm::{
-    Epoch, EpochResponse, GetOrderByIdResponse, GetOrdersResponse, Order, OrderResponse,
-    OrderStatus, SeiMsg, SeiQuery, SeiQueryWrapper,
-};
-use sei_tester::{
-    contract::{execute, instantiate, query},
-    msg::{ExecuteMsg, InstantiateMsg, QueryMsg},
+    DenomOracleExchangeRatePair, Epoch, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
+    GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderStatus, SeiMsg,
+    SeiQuery, SeiQueryWrapper,
 };
 use serde::de::DeserializeOwned;
-use std::{fmt::Debug, marker::PhantomData};
+use std::{
+    collections::HashMap,
+    fmt::Debug,
+    ops::{Div, Mul, Sub},
+};
 
 use anyhow::Result as AnyResult;
 
-pub struct SeiModule(PhantomData<(SeiMsg, SeiQuery)>);
+pub struct SeiModule {
+    exchange_rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
+}
 
 impl SeiModule {
     pub fn new() -> Self {
-        SeiModule(PhantomData)
+        SeiModule {
+            exchange_rates: HashMap::new(),
+        }
+    }
+
+    pub fn new_with_oracle_exchange_rates(rates: Vec<DenomOracleExchangeRatePair>) -> Self {
+        let mut exchange_rates: HashMap<String, Vec<DenomOracleExchangeRatePair>> = HashMap::new();
+
+        for rate in rates {
+            let arr = exchange_rates
+                .entry(rate.denom.clone())
+                .or_insert_with(Vec::new);
+
+            match arr.binary_search_by(|x| {
+                rate.oracle_exchange_rate
+                    .last_update
+                    .cmp(&x.oracle_exchange_rate.last_update)
+            }) {
+                Ok(_) => {}
+                Err(pos) => arr.insert(pos, rate.clone()),
+            };
+        }
+
+        SeiModule {
+            exchange_rates: exchange_rates,
+        }
     }
 }
 
@@ -90,15 +118,20 @@ impl Module for SeiModule {
         request: Self::QueryT,
     ) -> AnyResult<Binary> {
         match request.query_data {
-            SeiQuery::ExchangeRates {} => Ok(Binary::default()),
-            SeiQuery::OracleTwaps { lookback_seconds } => Ok(Binary::default()),
-            SeiQuery::DexTwaps {
-                contract_address,
+            SeiQuery::ExchangeRates {} => {
+                Ok(to_binary(&get_exchange_rates(self.exchange_rates.clone()))?)
+            }
+            SeiQuery::OracleTwaps { lookback_seconds } => Ok(to_binary(&get_oracle_twaps(
+                self.exchange_rates.clone(),
                 lookback_seconds,
+            ))?),
+            SeiQuery::DexTwaps {
+                contract_address: _,
+                lookback_seconds: _,
             } => Ok(Binary::default()),
             SeiQuery::OrderSimulation {
-                order,
-                contract_address,
+                order: _,
+                contract_address: _,
             } => Ok(Binary::default()),
             // TODO: replace with app stored data
             SeiQuery::Epoch {} => Ok(to_binary(&EpochResponse {
@@ -131,7 +164,7 @@ impl Module for SeiModule {
                 );
             }
             SeiQuery::GetDenomFeeWhitelist {} => Ok(Binary::default()),
-            SeiQuery::CreatorInDenomFeeWhitelist { creator } => Ok(Binary::default()),
+            SeiQuery::CreatorInDenomFeeWhitelist { creator: _ } => Ok(Binary::default()),
         }
     }
 
@@ -159,7 +192,7 @@ impl Module for SeiModule {
 fn execute_place_orders_helper(
     storage: &mut dyn Storage,
     orders: Vec<Order>,
-    funds: Vec<Coin>,
+    _funds: Vec<Coin>,
     contract_address: Addr,
 ) -> AnyResult<AppResponse> {
     // Storage:
@@ -250,7 +283,6 @@ fn execute_cancel_orders_helper(
     // get existing orders
     let order_responses_key = contract_address.to_string() + "-" + "OrderResponses";
 
-    let mut order_responses: Vec<OrderResponse> = Vec::new();
     let existing_order_responses = storage.get(order_responses_key.as_bytes());
     if !existing_order_responses.is_some() {
         return Err(anyhow::anyhow!(
@@ -260,7 +292,7 @@ fn execute_cancel_orders_helper(
 
     let responses_json: String =
         serde_json::from_slice(&existing_order_responses.clone().unwrap()).unwrap();
-    order_responses = serde_json::from_str(&responses_json).unwrap();
+    let mut order_responses: Vec<OrderResponse> = serde_json::from_str(&responses_json).unwrap();
 
     for order_id in &order_ids.clone() {
         let order_response: Vec<OrderResponse> = order_responses
@@ -300,11 +332,87 @@ fn execute_cancel_orders_helper(
     })
 }
 
+fn get_exchange_rates(
+    rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
+) -> ExchangeRatesResponse {
+    let mut exchange_rates: Vec<DenomOracleExchangeRatePair> = Vec::new();
+
+    for key in rates.keys() {
+        let rate = rates.get(key).unwrap();
+        exchange_rates.push(rate[0].clone());
+    }
+
+    ExchangeRatesResponse {
+        denom_oracle_exchange_rate_pairs: exchange_rates,
+    }
+}
+
+fn get_oracle_twaps(
+    rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
+    lookback_seconds: i64,
+) -> OracleTwapsResponse {
+    let mut oracle_twaps: Vec<OracleTwap> = Vec::new();
+    let lbs = lookback_seconds as u64;
+
+    for key in rates.keys() {
+        let pair_rates = rates.get(key).unwrap();
+        let mut sum = Decimal::zero();
+        let start: u64 = 1_571_797_419;
+        let mut time: u64 = 1_571_797_419;
+        let mut last_rate = Decimal::zero();
+
+        if pair_rates[0].oracle_exchange_rate.last_update < Uint64::new(start - lbs) {
+            oracle_twaps.push(OracleTwap {
+                denom: key.clone(),
+                twap: pair_rates[0].oracle_exchange_rate.exchange_rate,
+                lookback_seconds: lookback_seconds,
+            });
+            continue;
+        }
+
+        // Average prices of rates for the past lookback_seconds
+        for rate in pair_rates {
+            last_rate = rate.oracle_exchange_rate.exchange_rate;
+            if Uint64::new(start) - rate.oracle_exchange_rate.last_update < Uint64::new(lbs) {
+                sum += last_rate.mul(Decimal::from_ratio(
+                    Uint128::new((time - rate.oracle_exchange_rate.last_update.u64()).into()),
+                    Uint128::one(),
+                ));
+                time = rate.oracle_exchange_rate.last_update.u64();
+            } else {
+                break;
+            }
+        }
+
+        if Uint64::new(start - time) < Uint64::new(lbs) {
+            let sec: u64 = lbs;
+            let diff = sec.sub(start - time);
+            sum += last_rate.mul(Decimal::from_ratio(
+                Uint128::new(diff.into()),
+                Uint128::one(),
+            ));
+        }
+
+        oracle_twaps.push(OracleTwap {
+            denom: key.clone(),
+            twap: sum.div(Decimal::from_ratio(
+                Uint128::new(lbs.into()),
+                Uint128::one(),
+            )),
+            lookback_seconds: lookback_seconds,
+        });
+    }
+
+    OracleTwapsResponse {
+        oracle_twaps: oracle_twaps,
+    }
+}
+
 // Query: GetOrders()
 fn query_get_orders_helper(
     storage: &dyn Storage,
     contract_address: Addr,
-    account: Addr,
+    _account: Addr,
 ) -> AnyResult<Binary> {
     let order_responses_key = contract_address.to_string() + "-" + "OrderResponses";
     let existing_order_responses = storage.get(order_responses_key.as_bytes());
@@ -465,6 +573,7 @@ pub fn get_balance(
 // Mock app
 pub fn mock_app<F>(
     init_fn: F,
+    rates: Vec<DenomOracleExchangeRatePair>,
 ) -> App<
     BankKeeper,
     MockApi,
@@ -496,7 +605,7 @@ where
         FailingStaking,
         FailingDistribution,
     > = AppBuilder::new()
-        .with_custom(SeiModule::new())
+        .with_custom(SeiModule::new_with_oracle_exchange_rates(rates))
         .with_wasm::<SeiModule, WasmKeeper<SeiMsg, SeiQueryWrapper>>(WasmKeeper::new());
 
     appbuilder.build(init_fn)
