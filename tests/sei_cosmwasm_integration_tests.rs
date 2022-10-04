@@ -204,7 +204,7 @@ fn test_tokenfactory_integration_foundation() {
 
 /// Basic querying examples
 
-/// Epoch
+/// Epoch: TODO -> replace with app stored data
 #[test]
 fn test_epoch_query() {
     let mut app = mock_app(init_default_balances);

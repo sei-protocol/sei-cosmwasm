@@ -1,7 +1,7 @@
 use cosmwasm_std::{
     from_binary,
     testing::{MockApi, MockQuerier, MockStorage},
-    to_binary, Addr, Api, BalanceResponse, BankMsg, BankQuery, Binary, BlockInfo, CosmosMsg,
+    to_binary, Addr, Api, BalanceResponse, BankMsg, BankQuery, Binary, BlockInfo, Coin, CosmosMsg,
     CustomQuery, Empty, MemoryStorage, Querier, StdError, Storage, Timestamp,
 };
 use cw_multi_test::{
@@ -10,8 +10,8 @@ use cw_multi_test::{
 };
 use schemars::JsonSchema;
 use sei_cosmwasm::{
-    Epoch, EpochResponse, GetOrderByIdResponse, GetOrdersResponse, OrderResponse, OrderStatus,
-    SeiMsg, SeiQuery, SeiQueryWrapper,
+    Epoch, EpochResponse, GetOrderByIdResponse, GetOrdersResponse, Order, OrderResponse,
+    OrderStatus, SeiMsg, SeiQuery, SeiQueryWrapper,
 };
 use sei_tester::{
     contract::{execute, instantiate, query},
@@ -60,188 +60,22 @@ impl Module for SeiModule {
                 funds,
                 contract_address,
             } => {
-                // Storage:
-                // OrderIdCounter -> OrderId
-                // contract_address + "-" + OrderResponses -> OrderResponse[]
-                // contract_address + "-" + OrdeResponseById + "-" + Price Denom + "-" + Asset Denom + "-" + OrderId -> OrderResponse
-
-                // Get latest order id
-                let mut latest_order_id: u64 = 0;
-                let curr = storage.get("OrderIdCounter".as_bytes());
-                if storage.get("OrderIdCounter".as_bytes()).is_some() {
-                    latest_order_id = String::from_utf8(curr.unwrap_or_default())
-                        .unwrap_or_default()
-                        .parse::<u64>()
-                        .unwrap();
-                }
-
-                // get existing orders
-                let order_responses_key = contract_address.to_string() + "-" + "OrderResponses";
-
-                let mut order_responses: Vec<OrderResponse> = Vec::new();
-                let existing_order_responses = storage.get(order_responses_key.as_bytes());
-                if existing_order_responses.is_some() {
-                    //let order_responses_key = contract_address.to_string() + "-" + "OrderResponses";
-                    let responses_json: String =
-                        serde_json::from_slice(&existing_order_responses.clone().unwrap()).unwrap();
-                    order_responses = serde_json::from_str(&responses_json).unwrap();
-                }
-                // Iterate through orders, make OrderResponse
-                for order in orders.iter() {
-                    let order_response = OrderResponse {
-                        id: latest_order_id,
-                        status: OrderStatus::Placed,
-                        price: order.price,
-                        quantity: order.quantity,
-                        price_denom: order.price_denom.clone(),
-                        asset_denom: order.asset_denom.clone(),
-                        order_type: order.order_type,
-                        position_direction: order.position_direction,
-                        data: order.data.clone(),
-                    };
-                    order_responses.push(order_response.clone());
-
-                    // update GetOrderById() -> OrderResponse storage
-                    let response_json = serde_json::to_string(&order_response);
-                    let order_id_key = contract_address.to_string()
-                        + "-"
-                        + "OrderResponseById"
-                        + "-"
-                        + &order.price_denom.clone()
-                        + "-"
-                        + &order.asset_denom.clone()
-                        + "-"
-                        + &latest_order_id.to_string();
-                    storage.set(
-                        order_id_key.as_bytes(),
-                        &serde_json::to_vec(&response_json.unwrap_or_default()).unwrap(),
-                    );
-
-                    latest_order_id += 1;
-                }
-
-                let responses_json = serde_json::to_string(&order_responses);
-
-                // update GetOrders() -> OrderResponse[] storage
-                storage.set(
-                    order_responses_key.as_bytes(),
-                    &serde_json::to_vec(&responses_json.unwrap_or_default()).unwrap(),
-                );
-                // update OrderIdCounter -> latest_order_id storage
-                storage.set(
-                    "OrderIdCounter".as_bytes(),
-                    latest_order_id.to_string().as_bytes(),
-                );
-
-                Ok(AppResponse {
-                    events: vec![],
-                    data: Some(to_binary(&contract_address).unwrap()),
-                })
+                return execute_place_orders_helper(storage, orders, funds, contract_address);
             }
             SeiMsg::CancelOrders {
                 order_ids,
                 contract_address,
             } => {
-                // get existing orders
-                let order_responses_key = contract_address.to_string() + "-" + "OrderResponses";
-
-                let mut order_responses: Vec<OrderResponse> = Vec::new();
-                let existing_order_responses = storage.get(order_responses_key.as_bytes());
-                if !existing_order_responses.is_some() {
-                    return Err(anyhow::anyhow!(
-                        "CancelOrders: orders for contract_address do not exist"
-                    ));
-                }
-
-                let responses_json: String =
-                    serde_json::from_slice(&existing_order_responses.clone().unwrap()).unwrap();
-                order_responses = serde_json::from_str(&responses_json).unwrap();
-
-                for order_id in &order_ids.clone() {
-                    let order_response: Vec<OrderResponse> = order_responses
-                        .clone()
-                        .into_iter()
-                        .filter(|o| order_id.clone() == o.id)
-                        .collect();
-                    let order_id_key = contract_address.to_string()
-                        + "-"
-                        + "OrderResponseById"
-                        + "-"
-                        + &order_response[0].price_denom.clone()
-                        + "-"
-                        + &order_response[0].asset_denom.clone()
-                        + "-"
-                        + &order_id.to_string();
-                    // Remove individual for GetOrderById()
-                    storage.remove(order_id_key.as_bytes());
-                }
-
-                order_responses = order_responses
-                    .into_iter()
-                    .filter(|o| !order_ids.contains(&o.id))
-                    .collect();
-
-                let responses_json = serde_json::to_string(&order_responses);
-
-                // update GetOrders() -> OrderResponse[] storage
-                storage.set(
-                    order_responses_key.as_bytes(),
-                    &serde_json::to_vec(&responses_json.unwrap_or_default()).unwrap(),
-                );
-
-                Ok(AppResponse {
-                    events: vec![],
-                    data: Some(to_binary(&contract_address).unwrap()),
-                })
+                return execute_cancel_orders_helper(storage, order_ids, contract_address);
             }
             SeiMsg::CreateDenom { subdenom } => {
-                let denom = format!("factory/{}/{}", sender, subdenom);
-                if storage.get(denom.as_bytes()).is_some() {
-                    return Err(anyhow::anyhow!("denom already exists"));
-                }
-
-                storage.set(denom.as_bytes(), sender.to_string().as_bytes());
-
-                Ok(AppResponse {
-                    events: vec![],
-                    data: Some(to_binary(&denom).unwrap()),
-                })
+                return execute_create_denom_helper(storage, sender, subdenom);
             }
             SeiMsg::MintTokens { amount } => {
-                let owner = storage.get(amount.denom.as_bytes());
-                if owner.is_none() || owner.unwrap() != sender.to_string().as_bytes() {
-                    return Err(anyhow::anyhow!(
-                        "Must be owner of coin factory denom to mint"
-                    ));
-                }
-                router.sudo(
-                    api,
-                    storage,
-                    block,
-                    SudoMsg::Bank(BankSudo::Mint {
-                        to_address: sender.to_string(),
-                        amount: vec![amount],
-                    }),
-                )
+                return execute_mint_tokens_helper(api, storage, router, block, sender, amount);
             }
             SeiMsg::BurnTokens { amount } => {
-                let owner = storage.get(amount.denom.as_bytes());
-                if owner.is_none() || owner.unwrap() != sender.to_string().as_bytes() {
-                    return Err(anyhow::anyhow!(
-                        "Must be owner of coin factory denom to burn"
-                    ));
-                }
-                Ok(router
-                    .execute(
-                        api,
-                        storage,
-                        block,
-                        sender,
-                        CosmosMsg::Bank(BankMsg::Burn {
-                            amount: vec![amount],
-                        }),
-                    )
-                    .unwrap())
+                return execute_burn_tokens_helper(api, storage, router, block, sender, amount);
             }
             _ => panic!("Unexpected custom exec msg"),
         }
@@ -266,6 +100,7 @@ impl Module for SeiModule {
                 order,
                 contract_address,
             } => Ok(Binary::default()),
+            // TODO: replace with app stored data
             SeiQuery::Epoch {} => Ok(to_binary(&EpochResponse {
                 epoch: Epoch {
                     genesis_time: "2022-09-15T15:53:04.303018Z".to_string(),
@@ -279,22 +114,7 @@ impl Module for SeiModule {
                 contract_address,
                 account,
             } => {
-                let order_responses_key = contract_address.to_string() + "-" + "OrderResponses";
-                let existing_order_responses = storage.get(order_responses_key.as_bytes());
-                if !existing_order_responses.is_some() {
-                    return Err(anyhow::anyhow!(
-                        "GetOrders: orders for contract_address do not exist"
-                    ));
-                }
-                let responses_json: String =
-                    serde_json::from_slice(&existing_order_responses.clone().unwrap()).unwrap();
-
-                let order_responses: Vec<OrderResponse> =
-                    serde_json::from_str(&responses_json).unwrap();
-
-                return Ok(to_binary(&GetOrdersResponse {
-                    orders: order_responses,
-                })?);
+                return query_get_orders_helper(storage, contract_address, account);
             }
             SeiQuery::GetOrderById {
                 contract_address,
@@ -302,29 +122,13 @@ impl Module for SeiModule {
                 asset_denom,
                 id,
             } => {
-                let order_id_key = contract_address.to_string()
-                    + "-"
-                    + "OrderResponseById"
-                    + "-"
-                    + &price_denom
-                    + "-"
-                    + &asset_denom
-                    + "-"
-                    + &id.to_string();
-                let existing_order_response = storage.get(order_id_key.as_bytes());
-
-                if !existing_order_response.is_some() {
-                    return Err(anyhow::anyhow!("GetOrderById: order for id does not exist"));
-                }
-
-                let response_json: String =
-                    serde_json::from_slice(&existing_order_response.clone().unwrap()).unwrap();
-
-                let order_response: OrderResponse = serde_json::from_str(&response_json).unwrap();
-
-                return Ok(to_binary(&GetOrderByIdResponse {
-                    order: order_response,
-                })?);
+                return query_get_order_by_id_helper(
+                    storage,
+                    contract_address,
+                    price_denom,
+                    asset_denom,
+                    id,
+                );
             }
             SeiQuery::GetDenomFeeWhitelist {} => Ok(Binary::default()),
             SeiQuery::CreatorInDenomFeeWhitelist { creator } => Ok(Binary::default()),
@@ -347,6 +151,318 @@ impl Module for SeiModule {
     }
 }
 
+// Helper functions
+
+// Dex Module
+
+// Execute: PlaceOrders()
+fn execute_place_orders_helper(
+    storage: &mut dyn Storage,
+    orders: Vec<Order>,
+    funds: Vec<Coin>,
+    contract_address: Addr,
+) -> AnyResult<AppResponse> {
+    // Storage:
+    // OrderIdCounter -> OrderId
+    // contract_address + "-" + OrderResponses -> OrderResponse[]
+    // contract_address + "-" + OrdeResponseById + "-" + Price Denom + "-" + Asset Denom + "-" + OrderId -> OrderResponse
+
+    // Get latest order id
+    let mut latest_order_id: u64 = 0;
+    let curr = storage.get("OrderIdCounter".as_bytes());
+    if storage.get("OrderIdCounter".as_bytes()).is_some() {
+        latest_order_id = String::from_utf8(curr.unwrap_or_default())
+            .unwrap_or_default()
+            .parse::<u64>()
+            .unwrap();
+    }
+
+    // get existing orders
+    let order_responses_key = contract_address.to_string() + "-" + "OrderResponses";
+
+    let mut order_responses: Vec<OrderResponse> = Vec::new();
+    let existing_order_responses = storage.get(order_responses_key.as_bytes());
+    if existing_order_responses.is_some() {
+        //let order_responses_key = contract_address.to_string() + "-" + "OrderResponses";
+        let responses_json: String =
+            serde_json::from_slice(&existing_order_responses.clone().unwrap()).unwrap();
+        order_responses = serde_json::from_str(&responses_json).unwrap();
+    }
+    // Iterate through orders, make OrderResponse
+    for order in orders.iter() {
+        let order_response = OrderResponse {
+            id: latest_order_id,
+            status: OrderStatus::Placed,
+            price: order.price,
+            quantity: order.quantity,
+            price_denom: order.price_denom.clone(),
+            asset_denom: order.asset_denom.clone(),
+            order_type: order.order_type,
+            position_direction: order.position_direction,
+            data: order.data.clone(),
+        };
+        order_responses.push(order_response.clone());
+
+        // update GetOrderById() -> OrderResponse storage
+        let response_json = serde_json::to_string(&order_response);
+        let order_id_key = contract_address.to_string()
+            + "-"
+            + "OrderResponseById"
+            + "-"
+            + &order.price_denom.clone()
+            + "-"
+            + &order.asset_denom.clone()
+            + "-"
+            + &latest_order_id.to_string();
+        storage.set(
+            order_id_key.as_bytes(),
+            &serde_json::to_vec(&response_json.unwrap_or_default()).unwrap(),
+        );
+
+        latest_order_id += 1;
+    }
+
+    let responses_json = serde_json::to_string(&order_responses);
+
+    // update GetOrders() -> OrderResponse[] storage
+    storage.set(
+        order_responses_key.as_bytes(),
+        &serde_json::to_vec(&responses_json.unwrap_or_default()).unwrap(),
+    );
+    // update OrderIdCounter -> latest_order_id storage
+    storage.set(
+        "OrderIdCounter".as_bytes(),
+        latest_order_id.to_string().as_bytes(),
+    );
+
+    Ok(AppResponse {
+        events: vec![],
+        data: Some(to_binary(&contract_address).unwrap()),
+    })
+}
+
+// Execute: CancelOrders()
+fn execute_cancel_orders_helper(
+    storage: &mut dyn Storage,
+    order_ids: Vec<u64>,
+    contract_address: Addr,
+) -> AnyResult<AppResponse> {
+    // get existing orders
+    let order_responses_key = contract_address.to_string() + "-" + "OrderResponses";
+
+    let mut order_responses: Vec<OrderResponse> = Vec::new();
+    let existing_order_responses = storage.get(order_responses_key.as_bytes());
+    if !existing_order_responses.is_some() {
+        return Err(anyhow::anyhow!(
+            "CancelOrders: orders for contract_address do not exist"
+        ));
+    }
+
+    let responses_json: String =
+        serde_json::from_slice(&existing_order_responses.clone().unwrap()).unwrap();
+    order_responses = serde_json::from_str(&responses_json).unwrap();
+
+    for order_id in &order_ids.clone() {
+        let order_response: Vec<OrderResponse> = order_responses
+            .clone()
+            .into_iter()
+            .filter(|o| order_id.clone() == o.id)
+            .collect();
+        let order_id_key = contract_address.to_string()
+            + "-"
+            + "OrderResponseById"
+            + "-"
+            + &order_response[0].price_denom.clone()
+            + "-"
+            + &order_response[0].asset_denom.clone()
+            + "-"
+            + &order_id.to_string();
+        // Remove individual for GetOrderById()
+        storage.remove(order_id_key.as_bytes());
+    }
+
+    order_responses = order_responses
+        .into_iter()
+        .filter(|o| !order_ids.contains(&o.id))
+        .collect();
+
+    let responses_json = serde_json::to_string(&order_responses);
+
+    // update GetOrders() -> OrderResponse[] storage
+    storage.set(
+        order_responses_key.as_bytes(),
+        &serde_json::to_vec(&responses_json.unwrap_or_default()).unwrap(),
+    );
+
+    Ok(AppResponse {
+        events: vec![],
+        data: Some(to_binary(&contract_address).unwrap()),
+    })
+}
+
+// Query: GetOrders()
+fn query_get_orders_helper(
+    storage: &dyn Storage,
+    contract_address: Addr,
+    account: Addr,
+) -> AnyResult<Binary> {
+    let order_responses_key = contract_address.to_string() + "-" + "OrderResponses";
+    let existing_order_responses = storage.get(order_responses_key.as_bytes());
+    if !existing_order_responses.is_some() {
+        return Err(anyhow::anyhow!(
+            "GetOrders: orders for contract_address do not exist"
+        ));
+    }
+    let responses_json: String =
+        serde_json::from_slice(&existing_order_responses.clone().unwrap()).unwrap();
+
+    let order_responses: Vec<OrderResponse> = serde_json::from_str(&responses_json).unwrap();
+
+    return Ok(to_binary(&GetOrdersResponse {
+        orders: order_responses,
+    })?);
+}
+
+// Query: GetOrderById()
+fn query_get_order_by_id_helper(
+    storage: &dyn Storage,
+    contract_address: Addr,
+    price_denom: String,
+    asset_denom: String,
+    id: u64,
+) -> AnyResult<Binary> {
+    let order_id_key = contract_address.to_string()
+        + "-"
+        + "OrderResponseById"
+        + "-"
+        + &price_denom
+        + "-"
+        + &asset_denom
+        + "-"
+        + &id.to_string();
+    let existing_order_response = storage.get(order_id_key.as_bytes());
+
+    if !existing_order_response.is_some() {
+        return Err(anyhow::anyhow!("GetOrderById: order for id does not exist"));
+    }
+
+    let response_json: String =
+        serde_json::from_slice(&existing_order_response.clone().unwrap()).unwrap();
+
+    let order_response: OrderResponse = serde_json::from_str(&response_json).unwrap();
+
+    return Ok(to_binary(&GetOrderByIdResponse {
+        order: order_response,
+    })?);
+}
+
+// TokenFactory
+
+// Execute: CreateDenom()
+fn execute_create_denom_helper(
+    storage: &mut dyn Storage,
+    sender: Addr,
+    subdenom: String,
+) -> AnyResult<AppResponse> {
+    let denom = format!("factory/{}/{}", sender, subdenom);
+    if storage.get(denom.as_bytes()).is_some() {
+        return Err(anyhow::anyhow!("denom already exists"));
+    }
+    storage.set(denom.as_bytes(), sender.to_string().as_bytes());
+    Ok(AppResponse {
+        events: vec![],
+        data: Some(to_binary(&denom).unwrap()),
+    })
+}
+
+// Execute: MintTokens()
+fn execute_mint_tokens_helper<ExecC, QueryC>(
+    api: &dyn Api,
+    storage: &mut dyn Storage,
+    router: &dyn CosmosRouter<ExecC = ExecC, QueryC = QueryC>,
+    block: &BlockInfo,
+    sender: Addr,
+    amount: Coin,
+) -> AnyResult<AppResponse>
+where
+    ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
+    QueryC: CustomQuery + DeserializeOwned + 'static,
+{
+    let owner = storage.get(amount.denom.as_bytes());
+    if owner.is_none() || owner.unwrap() != sender.to_string().as_bytes() {
+        return Err(anyhow::anyhow!(
+            "Must be owner of coin factory denom to mint"
+        ));
+    }
+    router.sudo(
+        api,
+        storage,
+        block,
+        SudoMsg::Bank(BankSudo::Mint {
+            to_address: sender.to_string(),
+            amount: vec![amount],
+        }),
+    )
+}
+
+// Execute: BurnTokens()
+fn execute_burn_tokens_helper<ExecC, QueryC>(
+    api: &dyn Api,
+    storage: &mut dyn Storage,
+    router: &dyn CosmosRouter<ExecC = ExecC, QueryC = QueryC>,
+    block: &BlockInfo,
+    sender: Addr,
+    amount: Coin,
+) -> AnyResult<AppResponse>
+where
+    ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
+    QueryC: CustomQuery + DeserializeOwned + 'static,
+{
+    let owner = storage.get(amount.denom.as_bytes());
+    if owner.is_none() || owner.unwrap() != sender.to_string().as_bytes() {
+        return Err(anyhow::anyhow!(
+            "Must be owner of coin factory denom to burn"
+        ));
+    }
+    Ok(router
+        .execute(
+            api,
+            storage,
+            block,
+            sender,
+            CosmosMsg::Bank(BankMsg::Burn {
+                amount: vec![amount],
+            }),
+        )
+        .unwrap())
+}
+
+// Get balance
+pub fn get_balance(
+    app: &App<BankKeeper, MockApi, MemoryStorage, SeiModule, WasmKeeper<SeiMsg, SeiQueryWrapper>>,
+    addr: String,
+    denom: String,
+) -> BalanceResponse {
+    let arr = app.read_module(|router, api, storage| {
+        router.bank.query(
+            api,
+            storage,
+            &MockQuerier::default(),
+            &BlockInfo {
+                height: 0,
+                time: Timestamp::from_seconds(0u64),
+                chain_id: "test".to_string(),
+            },
+            BankQuery::Balance {
+                address: addr,
+                denom: denom,
+            },
+        )
+    });
+    from_binary(&arr.unwrap()).unwrap()
+}
+
+// Mock app
 pub fn mock_app<F>(
     init_fn: F,
 ) -> App<
@@ -384,28 +500,4 @@ where
         .with_wasm::<SeiModule, WasmKeeper<SeiMsg, SeiQueryWrapper>>(WasmKeeper::new());
 
     appbuilder.build(init_fn)
-}
-
-pub fn get_balance(
-    app: &App<BankKeeper, MockApi, MemoryStorage, SeiModule, WasmKeeper<SeiMsg, SeiQueryWrapper>>,
-    addr: String,
-    denom: String,
-) -> BalanceResponse {
-    let arr = app.read_module(|router, api, storage| {
-        router.bank.query(
-            api,
-            storage,
-            &MockQuerier::default(),
-            &BlockInfo {
-                height: 0,
-                time: Timestamp::from_seconds(0u64),
-                chain_id: "test".to_string(),
-            },
-            BankQuery::Balance {
-                address: addr,
-                denom: denom,
-            },
-        )
-    });
-    from_binary(&arr.unwrap()).unwrap()
 }
