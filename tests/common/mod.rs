@@ -1,8 +1,10 @@
+use anyhow::Result as AnyResult;
 use cosmwasm_std::{
     from_binary,
     testing::{MockApi, MockQuerier, MockStorage},
     to_binary, Addr, Api, BalanceResponse, BankMsg, BankQuery, Binary, BlockInfo, Coin, CosmosMsg,
-    CustomQuery, Decimal, Empty, MemoryStorage, Querier, Storage, Timestamp, Uint128, Uint64,
+    CustomQuery, Decimal, Empty, MemoryStorage, Querier, StdResult, Storage, Timestamp, Uint128,
+    Uint64, WasmMsg,
 };
 use cw_multi_test::{
     App, AppBuilder, AppResponse, BankKeeper, BankSudo, CosmosRouter, FailingDistribution,
@@ -12,24 +14,37 @@ use schemars::JsonSchema;
 use sei_cosmwasm::{
     DenomOracleExchangeRatePair, Epoch, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
     GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderStatus, SeiMsg,
-    SeiQuery, SeiQueryWrapper,
+    SeiQuery, SeiQueryWrapper, SudoMsg as SeiSudoMsg,
 };
+use sei_tester::msg::{ExecuteMsg, QueryMsg};
 use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fmt::Debug,
     ops::{Div, Mul, Sub},
 };
 
-use anyhow::Result as AnyResult;
-
 pub struct SeiModule {
+    epoch: Epoch,
     exchange_rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
 }
+
+const genesis_time_str: &str = "2022-09-15T15:53:04.303018Z";
+// from("2022-09-15T15:53:04.303018Z")
+
+const genesis_epoch: Epoch = Epoch {
+    genesis_time: String::new(),
+    duration: 60,
+    current_epoch: 1,
+    current_epoch_start_time: String::new(),
+    current_epoch_height: 1,
+};
 
 impl SeiModule {
     pub fn new() -> Self {
         SeiModule {
+            epoch: genesis_epoch,
             exchange_rates: HashMap::new(),
         }
     }
@@ -53,7 +68,15 @@ impl SeiModule {
         }
 
         SeiModule {
+            epoch: genesis_epoch,
             exchange_rates: exchange_rates,
+        }
+    }
+
+    pub fn set_epoch(&self, new_epoch: Epoch) -> Self {
+        SeiModule {
+            epoch: new_epoch,
+            exchange_rates: (&self.exchange_rates).clone(),
         }
     }
 }
@@ -67,7 +90,7 @@ impl Default for SeiModule {
 impl Module for SeiModule {
     type ExecT = SeiMsg;
     type QueryT = SeiQueryWrapper;
-    type SudoT = Empty;
+    type SudoT = SeiSudoMsg;
 
     fn execute<ExecC, QueryC>(
         &self,
@@ -133,16 +156,7 @@ impl Module for SeiModule {
                 order: _,
                 contract_address: _,
             } => Ok(Binary::default()),
-            // TODO: replace with app stored data
-            SeiQuery::Epoch {} => Ok(to_binary(&EpochResponse {
-                epoch: Epoch {
-                    genesis_time: "2022-09-15T15:53:04.303018Z".to_string(),
-                    duration: 60,
-                    current_epoch: 1,
-                    current_epoch_start_time: "2022-09-15T15:53:04.303018Z".to_string(),
-                    current_epoch_height: 1,
-                },
-            })?),
+            SeiQuery::Epoch {} => return query_get_epoch_helper(self.epoch.clone()),
             SeiQuery::GetOrders {
                 contract_address,
                 account,
@@ -174,19 +188,57 @@ impl Module for SeiModule {
         _storage: &mut dyn Storage,
         _router: &dyn CosmosRouter<ExecC = ExecC, QueryC = QueryC>,
         _block: &BlockInfo,
-        _msg: Self::SudoT,
+        msg: Self::SudoT,
     ) -> AnyResult<AppResponse>
     where
         ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
         QueryC: CustomQuery + DeserializeOwned + 'static,
     {
-        todo!()
+        match msg {
+            SeiSudoMsg::Settlement { epoch, entries } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
+            SeiSudoMsg::NewBlock { epoch } => {
+                let new_epoch = Epoch {
+                    genesis_time: self.epoch.clone().genesis_time,
+                    duration: self.epoch.duration,
+                    current_epoch: epoch as u64,
+                    current_epoch_start_time: self.epoch.clone().current_epoch_start_time,
+                    current_epoch_height: self.epoch.current_epoch_height + 1,
+                };
+                self.set_epoch(new_epoch);
+                return Ok(AppResponse {
+                    events: vec![],
+                    data: None,
+                });
+            }
+            SeiSudoMsg::BulkOrderPlacements { orders, deposits } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
+            SeiSudoMsg::BulkOrderCancellations { ids } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
+            SeiSudoMsg::Liquidation { requests } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
+            SeiSudoMsg::FinalizeBlock {
+                contract_order_results,
+            } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
+            _ => panic!("Unexpected sudo exec msg"),
+        }
     }
 }
 
 // Helper functions
 
-// Dex Module
+// Dex Module Msg
 
 // Execute: PlaceOrders()
 fn execute_place_orders_helper(
@@ -332,6 +384,8 @@ fn execute_cancel_orders_helper(
     })
 }
 
+// Oracle Module
+
 fn get_exchange_rates(
     rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
 ) -> ExchangeRatesResponse {
@@ -408,6 +462,8 @@ fn get_oracle_twaps(
     }
 }
 
+// Dex Module Queries
+
 // Query: GetOrders()
 fn query_get_orders_helper(
     storage: &dyn Storage,
@@ -464,7 +520,18 @@ fn query_get_order_by_id_helper(
     })?);
 }
 
-// TokenFactory
+// Epoch Module Queries
+
+fn get_epoch(epoch: Epoch) -> EpochResponse {
+    EpochResponse { epoch: epoch }
+}
+
+// Query: GetEpoch()
+fn query_get_epoch_helper(epoch: Epoch) -> AnyResult<Binary> {
+    return Ok(to_binary(&get_epoch(epoch))?);
+}
+
+// TokenFactory Msg
 
 // Execute: CreateDenom()
 fn execute_create_denom_helper(
@@ -610,3 +677,30 @@ where
 
     appbuilder.build(init_fn)
 }
+
+// #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+// pub struct RateLimitingContract(pub Addr);
+
+// impl RateLimitingContract {
+//     pub fn addr(&self) -> Addr {
+//         self.0.clone()
+//     }
+
+//     pub fn call<T: Into<ExecuteMsg>>(&self, msg: T) -> StdResult<CosmosMsg> {
+//         let msg = to_binary(&msg.into())?;
+//         Ok(WasmMsg::Execute {
+//             contract_addr: self.addr().into(),
+//             msg,
+//             funds: vec![],
+//         }
+//         .into())
+//     }
+
+//     pub fn sudo<T: Into<SudoMsg>>(&self, msg: T) -> cw_multi_test::SudoMsg {
+//         let msg = to_binary(&msg.into()).unwrap();
+//         cw_multi_test::SudoMsg::Wasm(cw_multi_test::WasmSudo {
+//             contract_addr: self.addr().into(),
+//             msg,
+//         })
+//     }
+// }

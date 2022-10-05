@@ -175,8 +175,12 @@ pub fn change_admin(
     Ok(Response::new().add_message(test_change_admin))
 }
 
-#[entry_point]
-pub fn sudo(deps: DepsMut<SeiQueryWrapper>, env: Env, msg: SudoMsg) -> Result<Response, StdError> {
+#[cfg_attr(not(feature = "library"), entry_point)]
+pub fn sudo(
+    deps: DepsMut<SeiQueryWrapper>,
+    env: Env,
+    msg: SudoMsg,
+) -> Result<Response<SeiMsg>, StdError> {
     match msg {
         SudoMsg::Settlement { epoch, entries } => process_settlements(deps, entries, epoch),
         SudoMsg::NewBlock { epoch } => handle_new_block(deps, env, epoch),
@@ -195,7 +199,7 @@ pub fn process_settlements(
     _deps: DepsMut<SeiQueryWrapper>,
     _entries: Vec<SettlementEntry>,
     _epoch: i64,
-) -> Result<Response, StdError> {
+) -> Result<Response<SeiMsg>, StdError> {
     Ok(Response::new())
 }
 
@@ -203,7 +207,7 @@ pub fn handle_new_block(
     _deps: DepsMut<SeiQueryWrapper>,
     _env: Env,
     _epoch: i64,
-) -> Result<Response, StdError> {
+) -> Result<Response<SeiMsg>, StdError> {
     Ok(Response::new())
 }
 
@@ -211,7 +215,7 @@ pub fn process_bulk_order_placements(
     _deps: DepsMut<SeiQueryWrapper>,
     _orders: Vec<Order>,
     _deposits: Vec<DepositInfo>,
-) -> Result<Response, StdError> {
+) -> Result<Response<SeiMsg>, StdError> {
     let response = BulkOrderPlacementsResponse {
         unsuccessful_orders: vec![],
     };
@@ -227,13 +231,14 @@ pub fn process_bulk_order_placements(
 
     let mut response: Response = Response::new();
     response = response.set_data(binary);
-    Ok(response)
+    //return Ok(response.clone());
+    return Ok(Response::new());
 }
 
 pub fn process_bulk_order_cancellations(
     _deps: DepsMut<SeiQueryWrapper>,
     _ids: Vec<u64>,
-) -> Result<Response, StdError> {
+) -> Result<Response<SeiMsg>, StdError> {
     Ok(Response::new())
 }
 
@@ -241,7 +246,7 @@ pub fn process_bulk_liquidation(
     _deps: DepsMut<SeiQueryWrapper>,
     _env: Env,
     _requests: Vec<LiquidationRequest>,
-) -> Result<Response, StdError> {
+) -> Result<Response<SeiMsg>, StdError> {
     let response = LiquidationResponse {
         successful_accounts: vec![],
         liquidation_orders: vec![],
@@ -258,14 +263,15 @@ pub fn process_bulk_liquidation(
 
     let mut response: Response = Response::new();
     response = response.set_data(binary);
-    Ok(response)
+    //Ok(response)
+    return Ok(Response::new());
 }
 
 pub fn process_finalize_block(
     deps: DepsMut<SeiQueryWrapper>,
     _env: Env,
     contract_order_results: Vec<ContractOrderResult>,
-) -> Result<Response, StdError> {
+) -> Result<Response<SeiMsg>, StdError> {
     deps.api.debug("Processing finalize block...");
 
     let valid_addr = deps
