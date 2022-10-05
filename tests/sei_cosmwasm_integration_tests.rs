@@ -1,17 +1,19 @@
 use common::SeiModule;
 use common::{get_balance, mock_app};
+use cosmwasm_std::Uint64;
 use cosmwasm_std::{
     coin, from_binary,
     testing::{MockApi, MockStorage},
-    Addr, Api, BalanceResponse, Coin, CosmosMsg, Decimal, StdError, Storage, Uint128,
+    Addr, Api, BalanceResponse, Coin, CosmosMsg, Decimal, QueryRequest, StdError, Storage, Uint128,
 };
 use cw_multi_test::{
     App, BankKeeper, ContractWrapper, Executor, FailingDistribution, FailingStaking, Router,
     WasmKeeper,
 };
 use sei_cosmwasm::{
-    EpochResponse, GetOrderByIdResponse, GetOrdersResponse, Order, OrderStatus, OrderType,
-    PositionDirection, SeiMsg, SeiQueryWrapper,
+    DenomOracleExchangeRatePair, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
+    GetOrdersResponse, OracleExchangeRate, OracleTwapsResponse, Order, OrderStatus, OrderType,
+    PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute,
 };
 use sei_tester::{
     contract::{execute, instantiate, query},
@@ -118,7 +120,7 @@ fn setup_test(
 /// Token Factory
 #[test]
 fn test_tokenfactory_integration_foundation() {
-    let mut app = mock_app(init_default_balances);
+    let mut app = mock_app(init_default_balances, vec![]);
     setup_test(&mut app);
 
     let arr = app
@@ -207,7 +209,7 @@ fn test_tokenfactory_integration_foundation() {
 /// Epoch: TODO -> replace with app stored data
 #[test]
 fn test_epoch_query() {
-    let mut app = mock_app(init_default_balances);
+    let mut app = mock_app(init_default_balances, vec![]);
     let sei_tester_addr = setup_test(&mut app);
 
     // Query auction and assert values are what is expected
@@ -232,7 +234,7 @@ fn test_epoch_query() {
 /// Dex Module - place and get orders
 #[test]
 fn test_dex_module_integration_orders() {
-    let mut app = mock_app(init_default_balances);
+    let mut app = mock_app(init_default_balances, vec![]);
     let sei_tester_addr = setup_test(&mut app);
 
     // input params: orders, funds, contract_addr
@@ -471,4 +473,120 @@ fn test_dex_module_integration_orders() {
     );
     let error = res.err();
     assert!(error.is_some());
+}
+
+/// Oracle Module - set and query exchange rates
+#[test]
+fn test_oracle_module_query_exchange_rate() {
+    let app = mock_app(
+        init_default_balances,
+        vec![
+            DenomOracleExchangeRatePair {
+                denom: "uusdc".to_string(),
+                oracle_exchange_rate: OracleExchangeRate {
+                    exchange_rate: Decimal::percent(80),
+                    last_update: Uint64::zero(),
+                },
+            },
+            DenomOracleExchangeRatePair {
+                denom: "usei".to_string(),
+                oracle_exchange_rate: OracleExchangeRate {
+                    exchange_rate: Decimal::percent(70),
+                    last_update: Uint64::zero(),
+                },
+            },
+            DenomOracleExchangeRatePair {
+                denom: "uusdc".to_string(),
+                oracle_exchange_rate: OracleExchangeRate {
+                    exchange_rate: Decimal::percent(90),
+                    last_update: Uint64::new(1),
+                },
+            },
+        ],
+    );
+
+    let res: ExchangeRatesResponse = app
+        .wrap()
+        .query(&QueryRequest::Custom(SeiQueryWrapper {
+            route: SeiRoute::Oracle,
+            query_data: SeiQuery::ExchangeRates {},
+        }))
+        .unwrap();
+
+    for rate in res.denom_oracle_exchange_rate_pairs {
+        match rate.denom.as_str() {
+            "usei" => {
+                assert_eq!(
+                    rate.oracle_exchange_rate,
+                    OracleExchangeRate {
+                        exchange_rate: Decimal::percent(70),
+                        last_update: Uint64::zero(),
+                    }
+                );
+            }
+            "uusdc" => {
+                assert_eq!(
+                    rate.oracle_exchange_rate,
+                    OracleExchangeRate {
+                        exchange_rate: Decimal::percent(90),
+                        last_update: Uint64::new(1),
+                    }
+                );
+            }
+            _ => panic!("Unexpected denom"),
+        }
+    }
+}
+
+/// Oracle Module - query TWAP rates
+#[test]
+fn test_oracle_module_query_twaps() {
+    let app = mock_app(
+        init_default_balances,
+        vec![
+            DenomOracleExchangeRatePair {
+                denom: "uusdc".to_string(),
+                oracle_exchange_rate: OracleExchangeRate {
+                    exchange_rate: Decimal::percent(80),
+                    last_update: Uint64::new(1_571_797_411),
+                },
+            },
+            DenomOracleExchangeRatePair {
+                denom: "usei".to_string(),
+                oracle_exchange_rate: OracleExchangeRate {
+                    exchange_rate: Decimal::percent(70),
+                    last_update: Uint64::zero(),
+                },
+            },
+            DenomOracleExchangeRatePair {
+                denom: "uusdc".to_string(),
+                oracle_exchange_rate: OracleExchangeRate {
+                    exchange_rate: Decimal::percent(90),
+                    last_update: Uint64::new(1_571_797_415),
+                },
+            },
+        ],
+    );
+
+    let res: OracleTwapsResponse = app
+        .wrap()
+        .query(&QueryRequest::Custom(SeiQueryWrapper {
+            route: SeiRoute::Oracle,
+            query_data: SeiQuery::OracleTwaps {
+                lookback_seconds: 10,
+            },
+        }))
+        .unwrap();
+
+    for rate in res.oracle_twaps {
+        match rate.denom.as_str() {
+            "usei" => {
+                assert_eq!(rate.twap, Decimal::percent(70),);
+            }
+            "uusdc" => {
+                assert_eq!(rate.twap, Decimal::percent(84),);
+            }
+            _ => panic!("Unexpected denom"),
+        }
+    }
 }
