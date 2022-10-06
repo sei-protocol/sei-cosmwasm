@@ -102,7 +102,7 @@ fn setup_test(
         ContractWrapper::new(execute, instantiate, query)
             .with_reply(sei_tester::contract::reply)
             .with_sudo(sei_tester::contract::sudo),
-    ));
+    )); //::<SeiMsg, SeiQueryWrapper>
 
     let sei_tester_addr = app
         .instantiate_contract(
@@ -228,12 +228,12 @@ fn test_epoch_query() {
     assert_eq!(res.epoch.current_epoch_start_time, "".to_string());
     assert_eq!(res.epoch.current_epoch_height, 1);
 
-    // // Compiles but doesn't work
-    let sudo_msg = WasmSudo {
-        contract_addr: sei_tester_addr.clone(),
-        msg: to_binary(&SeiSudoMsg::NewBlock { epoch: 100 }).unwrap(),
-    };
-    app.sudo(sudo_msg.into()).unwrap();
+    // // // Compiles but doesn't work
+    // let sudo_msg = WasmSudo {
+    //     contract_addr: sei_tester_addr.clone(),
+    //     msg: to_binary(&SeiSudoMsg::NewBlock { epoch: 100 }).unwrap(),
+    // };
+    // app.sudo(sudo_msg.into()).unwrap();
 
     // // Also compiles but doesn't work
     // let msg: SeiSudoMsg = SeiSudoMsg::NewBlock { epoch: 100 };
@@ -241,6 +241,53 @@ fn test_epoch_query() {
     //     contract_addr: sei_tester_addr.clone(),
     //     msg: to_binary(&msg).unwrap(),
     // });
+
+    // let arr = app
+    //     .execute_multi(
+    //         Addr::unchecked(ADMIN),
+    //         vec![CosmosMsg::Custom(SeiSudoMsg::NewBlock { epoch: 100 })],
+    //     )
+    //     .unwrap();
+
+    // let arr = app
+    //     .execute_multi(
+    //         Addr::unchecked(ADMIN),
+    //         vec![SudoMsg::Wasm(WasmSudo {
+    //             contract_addr: sei_tester_addr.clone(),
+    //             msg: to_binary(&SeiSudoMsg::NewBlock { epoch: 100 }).unwrap(),
+    //         })],
+    //     )
+    //     .unwrap();
+
+    // // Also compiles but doesn't work
+    app.wasm_sudo(
+        sei_tester_addr.clone(),
+        &(SeiSudoMsg::NewBlock { epoch: 100 }),
+    )
+    .unwrap();
+
+    //app.sudo(SudoMsg::Custom(&(SeiSudoMsg::NewBlock { epoch: 100 })));
+    // app.sudo(SudoMsg::Wasm(WasmSudo {
+    //     contract_addr: sei_tester_addr.clone(),
+    //     msg: to_binary(&SeiSudoMsg::NewBlock { epoch: 100 }).unwrap(),
+    // }))
+    // .unwrap();
+
+    // // Also compiles but doesn't work
+    // let sudo_msg = WasmSudo {
+    //     contract_addr: sei_tester_addr.clone(),
+    //     msg: to_binary(&SeiSudoMsg::NewBlock { epoch: 100 }).unwrap(),
+    // };
+    // app.sudo(cw_multi_test::SudoMsg::Wasm(sudo_msg.into()))
+    //     .unwrap();
+
+    // // we can do the same with sudo call
+    // let msg = SeiSudoMsg::NewBlock { epoch: 100 };
+    // let sudo_msg = WasmSudo {
+    //     contract_addr: sei_tester_addr.clone(),
+    //     msg: to_binary(&msg).unwrap(),
+    // };
+    // app.sudo(sudo_msg.into()).unwrap();
 
     let res: EpochResponse = app
         .wrap()

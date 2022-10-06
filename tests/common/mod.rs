@@ -30,9 +30,6 @@ pub struct SeiModule {
     exchange_rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
 }
 
-const genesis_time_str: &str = "2022-09-15T15:53:04.303018Z";
-// from("2022-09-15T15:53:04.303018Z")
-
 const genesis_epoch: Epoch = Epoch {
     genesis_time: String::new(),
     duration: 60,
@@ -128,6 +125,20 @@ impl Module for SeiModule {
             SeiMsg::BurnTokens { amount } => {
                 return execute_burn_tokens_helper(api, storage, router, block, sender, amount);
             }
+            // SeiMsg::SeiSudoMsg::NewBlock { epoch } => {
+            //     let new_epoch = Epoch {
+            //         genesis_time: self.epoch.clone().genesis_time,
+            //         duration: self.epoch.duration,
+            //         current_epoch: epoch as u64,
+            //         current_epoch_start_time: self.epoch.clone().current_epoch_start_time,
+            //         current_epoch_height: self.epoch.current_epoch_height + 1,
+            //     };
+            //     self.set_epoch(new_epoch);
+            //     return Ok(AppResponse {
+            //         events: vec![],
+            //         data: None,
+            //     });
+            // }
             _ => panic!("Unexpected custom exec msg"),
         }
     }
@@ -194,6 +205,7 @@ impl Module for SeiModule {
         ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
         QueryC: CustomQuery + DeserializeOwned + 'static,
     {
+        println!("HELLO..");
         match msg {
             SeiSudoMsg::Settlement { epoch, entries } => Ok(AppResponse {
                 events: vec![],
