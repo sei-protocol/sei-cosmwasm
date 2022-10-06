@@ -17,6 +17,7 @@ pub enum OrderType {
     Market = 1,
     Liquidation = 2,
     Fokmarket = 3, // fill-or-kill market order
+    Fokmarketbyvalue = 4, // fill-or-kill market by value order
 }
 
 #[derive(Serialize_repr, Deserialize_repr, Copy, Clone, Debug, PartialEq, Eq, Hash, JsonSchema)]
