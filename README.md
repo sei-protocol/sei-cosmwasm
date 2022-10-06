@@ -82,18 +82,21 @@ Module functionality is mocked at the chain level, more details on each module c
 
 ### Dex Module
 
-The mocked functionality includes the following:
+You can interact with a mocked version of the dex module in the following ways:
 
 Messages:
---`PlaceOrders(orders, funds, contract_address)`: places the corresponding `orders` for the `contract_address`. Each order follows the `Order` struct and has an `order_id`.
---`CancelOrders(order_ids, contract_address)`: cancels the particular `order_ids` for the `contract_address`.
+
+- `PlaceOrders(orders, funds, contract_address)`: places the corresponding `orders` for the `contract_address`. Each order follows the `Order` struct and has an `order_id`.
+- `CancelOrders(order_ids, contract_address)`: cancels the particular `order_ids` for the `contract_address`.
 
 Queries:
---`GetOrders(contract_address, account)`: returns `orders` for a given
---`GetOrderById(contract_address, price_denom, asset_denom, id)`: returns particular `order` based on `id` and price and asset `denom`.
+
+- `GetOrders(contract_address, account)`: returns `orders` for a given
+- `GetOrderById(contract_address, price_denom, asset_denom, id)`: returns particular `order` based on `id` and price and asset `denom`.
 
 Examples:
---Below is an example where you make an order and call `PlaceOrders()` followed by `GetOrders()`:
+
+- Below is an example where you make an order and call `PlaceOrders()` followed by `GetOrders()`:
 
 First placing an order:
 
