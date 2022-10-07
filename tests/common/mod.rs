@@ -10,9 +10,10 @@ use cw_multi_test::{
 };
 use schemars::JsonSchema;
 use sei_cosmwasm::{
-    DenomOracleExchangeRatePair, Epoch, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderStatus, SeiMsg,
-    SeiQuery, SeiQueryWrapper,
+    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, Epoch, EpochResponse,
+    ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
+    OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderStatus, SeiMsg, SeiQuery,
+    SeiQueryWrapper,
 };
 use serde::de::DeserializeOwned;
 use std::{
@@ -25,12 +26,16 @@ use anyhow::Result as AnyResult;
 
 pub struct SeiModule {
     exchange_rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
+    denom_fee_whitelist: Vec<String>,
 }
 
 impl SeiModule {
     pub fn new() -> Self {
         SeiModule {
             exchange_rates: HashMap::new(),
+            denom_fee_whitelist: ["whitelist1", "whitelist2", "whitelist3"]
+                .map(String::from)
+                .to_vec(),
         }
     }
 
@@ -54,6 +59,9 @@ impl SeiModule {
 
         SeiModule {
             exchange_rates: exchange_rates,
+            denom_fee_whitelist: ["whitelist1", "whitelist2", "whitelist3"]
+                .map(String::from)
+                .to_vec(),
         }
     }
 }
@@ -163,8 +171,15 @@ impl Module for SeiModule {
                     id,
                 );
             }
-            SeiQuery::GetDenomFeeWhitelist {} => Ok(Binary::default()),
-            SeiQuery::CreatorInDenomFeeWhitelist { creator: _ } => Ok(Binary::default()),
+            SeiQuery::GetDenomFeeWhitelist {} => {
+                return query_get_denom_fee_whitelist_helper(self.denom_fee_whitelist.clone())
+            }
+            SeiQuery::CreatorInDenomFeeWhitelist { creator } => {
+                return query_get_creator_in_denom_fee_whitelist_helper(
+                    creator,
+                    self.denom_fee_whitelist.clone(),
+                )
+            }
         }
     }
 
@@ -462,6 +477,32 @@ fn query_get_order_by_id_helper(
     return Ok(to_binary(&GetOrderByIdResponse {
         order: order_response,
     })?);
+}
+
+fn get_denom_fee_whitelist(denom_fee_whitelist: Vec<String>) -> GetDenomFeeWhitelistResponse {
+    GetDenomFeeWhitelistResponse {
+        creators: denom_fee_whitelist,
+    }
+}
+
+// Query: GetDenomFeeWhitelist()
+fn query_get_denom_fee_whitelist_helper(denom_fee_whitelist: Vec<String>) -> AnyResult<Binary> {
+    return Ok(to_binary(&get_denom_fee_whitelist(denom_fee_whitelist))?);
+}
+
+fn get_creator_in_denom_fee_whitelist(whitelisted: bool) -> CreatorInDenomFeeWhitelistResponse {
+    CreatorInDenomFeeWhitelistResponse {
+        whitelisted: whitelisted,
+    }
+}
+
+// Query: CreatorInDenomFeeWhitelistResponse()
+fn query_get_creator_in_denom_fee_whitelist_helper(
+    creator: Addr,
+    denom_fee_whitelist: Vec<String>,
+) -> AnyResult<Binary> {
+    let whitelisted: bool = denom_fee_whitelist.contains(&creator.to_string());
+    return Ok(to_binary(&get_creator_in_denom_fee_whitelist(whitelisted))?);
 }
 
 // TokenFactory

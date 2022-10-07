@@ -11,9 +11,10 @@ use cw_multi_test::{
     WasmKeeper,
 };
 use sei_cosmwasm::{
-    DenomOracleExchangeRatePair, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, OracleExchangeRate, OracleTwapsResponse, Order, OrderStatus, OrderType,
-    PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute,
+    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, EpochResponse,
+    ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
+    OracleExchangeRate, OracleTwapsResponse, Order, OrderStatus, OrderType, PositionDirection,
+    SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute,
 };
 use sei_tester::{
     contract::{execute, instantiate, query},
@@ -536,6 +537,50 @@ fn test_oracle_module_query_exchange_rate() {
             _ => panic!("Unexpected denom"),
         }
     }
+}
+
+/// Denom fee whitelist
+#[test]
+fn test_denom_fee_whitelist_query() {
+    let mut app = mock_app(init_default_balances, vec![]);
+    let sei_tester_addr = setup_test(&mut app);
+
+    // Query denom fee whitelist
+    let res: GetDenomFeeWhitelistResponse = app
+        .wrap()
+        .query_wasm_smart(sei_tester_addr.clone(), &QueryMsg::GetDenomFeeWhitelist {})
+        .unwrap();
+
+    assert_eq!(
+        res.creators,
+        ["whitelist1", "whitelist2", "whitelist3"]
+            .map(String::from)
+            .to_vec()
+    );
+
+    // Query example creator within whitelist
+    let res: CreatorInDenomFeeWhitelistResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::CreatorInDenomFeeWhitelist {
+                creator: "whitelist1".to_string(),
+            },
+        )
+        .unwrap();
+    assert_eq!(res.whitelisted, true);
+
+    // Query example creator not within whitelist
+    let res: CreatorInDenomFeeWhitelistResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::CreatorInDenomFeeWhitelist {
+                creator: "non-whitelist1".to_string(),
+            },
+        )
+        .unwrap();
+    assert_eq!(res.whitelisted, false);
 }
 
 /// Oracle Module - query TWAP rates
