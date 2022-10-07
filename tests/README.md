@@ -16,27 +16,27 @@ followed by relevant any relevant `Msg` to execute or `Query` to run.
 To execute a `MsgToExecute` you can use `execute()` or `execute_multi()`:
 
 ```rust
-        app
-        .execute_multi(
-            addr_to_use,
-            vec![CosmosMsg::Custom(SeiMsg::MsgToExecute {
-                ...
-            })],
-        )
-        .unwrap();
+app
+.execute_multi(
+    addr_to_use,
+    vec![CosmosMsg::Custom(SeiMsg::MsgToExecute {
+        ...
+    })],
+)
+.unwrap();
 ```
 
 To query `MsgToQuery` you can use `query_wasm_smart()`:
 
 ```rust
-        app
-        .wrap()
-        .query_wasm_smart(
-            contract_addr,
-            &QueryMsg::MsgToQuery {
-                ...
-            },
-        )
+app
+.wrap()
+.query_wasm_smart(
+    contract_addr,
+    &QueryMsg::MsgToQuery {
+        ...
+    },
+)
 ```
 
 Module functionality is mocked at the chain level, more details on each module can be found below.
@@ -62,61 +62,61 @@ Examples:
 First placing an order:
 
 ```rust
-    let mut orders: Vec<Order> = Vec::new();
-    let mut funds = Vec::<Coin>::new();
-    let contract_addr = "example_contract".to_string();
+let mut orders: Vec<Order> = Vec::new();
+let mut funds = Vec::<Coin>::new();
+let contract_addr = "example_contract".to_string();
 
-    // Make order1
-    let price = Decimal::raw(100);
-    let quantity = Decimal::raw(1000);
-    let price_denom = "USDC".to_string();
-    let asset_denom = "ATOM".to_string();
-    let order_type = OrderType::Market;
-    let position_direction = PositionDirection::Long;
-    let data = "".to_string();
-    let status_description = "order1".to_string();
+// Make order1
+let price = Decimal::raw(100);
+let quantity = Decimal::raw(1000);
+let price_denom = "USDC".to_string();
+let asset_denom = "ATOM".to_string();
+let order_type = OrderType::Market;
+let position_direction = PositionDirection::Long;
+let data = "".to_string();
+let status_description = "order1".to_string();
 
-    let order1: Order = Order {
-        price: price,
-        quantity: quantity,
-        price_denom: price_denom.clone(),
-        asset_denom: asset_denom.clone(),
-        order_type: order_type,
-        position_direction: position_direction,
-        data: data,
-        status_description: status_description,
-    };
-    orders.push(order1);
+let order1: Order = Order {
+    price: price,
+    quantity: quantity,
+    price_denom: price_denom.clone(),
+    asset_denom: asset_denom.clone(),
+    order_type: order_type,
+    position_direction: position_direction,
+    data: data,
+    status_description: status_description,
+};
+orders.push(order1);
 
-    let res = app
-        .execute_multi(
-            Addr::unchecked(ADMIN),
-            vec![CosmosMsg::Custom(SeiMsg::PlaceOrders {
-                orders: orders,
-                funds: funds,
-                contract_address: Addr::unchecked(&contract_addr),
-            })],
-        )
-        .unwrap();
+let res = app
+    .execute_multi(
+        Addr::unchecked(ADMIN),
+        vec![CosmosMsg::Custom(SeiMsg::PlaceOrders {
+            orders: orders,
+            funds: funds,
+            contract_address: Addr::unchecked(&contract_addr),
+        })],
+    )
+    .unwrap();
 ```
 
 Then querying:
 
 ```rust
-    let res: GetOrdersResponse = app
-        .wrap()
-        .query_wasm_smart(
-            sei_tester_addr.clone(),
-            &QueryMsg::GetOrders {
-                contract_address: contract_addr.to_string(),
-                account: sei_tester_addr.to_string(),
-            },
-        )
-        .unwrap();
+let res: GetOrdersResponse = app
+    .wrap()
+    .query_wasm_smart(
+        sei_tester_addr.clone(),
+        &QueryMsg::GetOrders {
+            contract_address: contract_addr.to_string(),
+            account: sei_tester_addr.to_string(),
+        },
+    )
+    .unwrap();
 
-    assert_eq!(res.orders.len(), 1);
-    assert_eq!(res.orders[0].id, 0);
-    assert_eq!(res.orders[0].status, OrderStatus::Placed);
-    ...
+assert_eq!(res.orders.len(), 1);
+assert_eq!(res.orders[0].id, 0);
+assert_eq!(res.orders[0].status, OrderStatus::Placed);
+...
 
 ```
