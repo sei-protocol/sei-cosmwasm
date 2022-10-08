@@ -40,6 +40,7 @@ pub struct Order {
     pub position_direction: PositionDirection,
     pub data: String, // serialized order data, defined by the specific target contract
     pub status_description: String,
+    pub nominal: Decimal, // only needed for Fokmarketbyvalue order
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
