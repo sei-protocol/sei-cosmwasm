@@ -52,8 +52,8 @@ Messages:
 
 Queries:
 
-- `GetOrders(contract_address, account)`: returns `orders` for a given
-- `GetOrderById(contract_address, price_denom, asset_denom, id)`: returns particular `order` based on `id` and price and asset `denom`.
+- `GetOrders(contract_address, account)`: returns `orders` for a given account
+- `GetOrderById(contract_address, price_denom, asset_denom, id)`: returns particular `order` based on `id` and `price_denom`, and `asset_denom`.
 
 Examples:
 
@@ -119,4 +119,72 @@ assert_eq!(res.orders[0].id, 0);
 assert_eq!(res.orders[0].status, OrderStatus::Placed);
 ...
 
+```
+
+### Oracle Module
+
+The oracle module should only be interacted with after initializing the app with a price history of assets: 
+
+```rust
+let app = mock_app(
+    init_default_balances,
+    vec![
+        DenomOracleExchangeRatePair {
+            denom: "uusdc".to_string(),
+            oracle_exchange_rate: OracleExchangeRate {
+                exchange_rate: Decimal::percent(80),
+                last_update: Uint64::zero(),
+            },
+        },
+        DenomOracleExchangeRatePair {
+            denom: "usei".to_string(),
+            oracle_exchange_rate: OracleExchangeRate {
+                exchange_rate: Decimal::percent(70),
+                last_update: Uint64::zero(),
+            },
+        },
+        DenomOracleExchangeRatePair {
+            denom: "uusdc".to_string(),
+            oracle_exchange_rate: OracleExchangeRate {
+                exchange_rate: Decimal::percent(90),
+                last_update: Uint64::new(1),
+            },
+        },
+    ],
+);
+```
+
+Queries:
+
+- `ExchangeRates()`: returns the most recent exchange rates of all pairs
+- `OracleTwaps(lookback_seconds)`: returns the TWAP of all pairs for the provided `lookback_seconds`
+
+Examples: 
+
+- Below are two examples of querying the oracle module: 
+
+ExchangeRates: 
+
+```rust
+let res: ExchangeRatesResponse = app
+    .wrap()
+    .query(&QueryRequest::Custom(SeiQueryWrapper {
+        route: SeiRoute::Oracle,
+        query_data: SeiQuery::ExchangeRates {},
+    }))
+    .unwrap();
+```
+
+OracleTwaps: 
+
+```rust
+let res: OracleTwapsResponse = app
+    .wrap()
+    .query(&QueryRequest::Custom(SeiQueryWrapper {
+        route: SeiRoute::Oracle,
+        query_data: SeiQuery::OracleTwaps {
+            lookback_seconds: 10,
+        },
+    }))
+    .unwrap();
 ```
