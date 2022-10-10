@@ -16,7 +16,8 @@ pub enum OrderType {
     Limit = 0,
     Market = 1,
     Liquidation = 2,
-    Fokmarket = 3, // fill-or-kill market order
+    Fokmarket = 3,        // fill-or-kill market order
+    Fokmarketbyvalue = 4, // fill-or-kill market by value order
 }
 
 #[derive(Serialize_repr, Deserialize_repr, Copy, Clone, Debug, PartialEq, Eq, Hash, JsonSchema)]
@@ -39,6 +40,7 @@ pub struct Order {
     pub position_direction: PositionDirection,
     pub data: String, // serialized order data, defined by the specific target contract
     pub status_description: String,
+    pub nominal: Decimal, // only needed for Fokmarketbyvalue order
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

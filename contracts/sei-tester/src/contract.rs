@@ -1,7 +1,7 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
-    coin, entry_point, to_binary, BankMsg, Binary, Decimal, Deps, DepsMut, Env, MessageInfo,
-    QueryResponse, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse,
+    coin, entry_point, to_binary, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
+    QueryResponse, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128,
 };
 
 use crate::{
@@ -86,9 +86,14 @@ pub fn place_orders(
         order_type: OrderType::Limit,
         data: serde_json::to_string(&order_data).unwrap(),
         status_description: "".to_string(),
+        nominal: Decimal::zero(),
+    };
+    let fund = Coin {
+        denom: "uusdc".to_string(),
+        amount: Uint128::new(10000000000u128),
     };
     let test_order = sei_cosmwasm::SeiMsg::PlaceOrders {
-        funds: vec![],
+        funds: vec![fund],
         orders: vec![order_placement],
         contract_address: deps
             .api
@@ -267,17 +272,6 @@ pub fn process_finalize_block(
     contract_order_results: Vec<ContractOrderResult>,
 ) -> Result<Response, StdError> {
     deps.api.debug("Processing finalize block...");
-
-    let valid_addr = deps
-        .api
-        .addr_validate("sei14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9sh9m79m")?;
-    let querier = SeiQuerier::new(&deps.querier);
-    let res: GetOrderByIdResponse =
-        querier.query_get_order_by_id(valid_addr, "USDC".to_string(), "ATOM".to_string(), 1)?;
-
-    deps.api.debug("Processing GetOrderByIdResponse...");
-    deps.api
-        .debug(&format!("GetOrderByIdResponse... {:?}", res));
 
     // print order placement results
     for order_results in contract_order_results {
