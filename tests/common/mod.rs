@@ -12,9 +12,10 @@ use cw_multi_test::{
 };
 use schemars::JsonSchema;
 use sei_cosmwasm::{
-    DenomOracleExchangeRatePair, Epoch, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderStatus, SeiMsg,
-    SeiQuery, SeiQueryWrapper, SudoMsg as SeiSudoMsg,
+    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, Epoch, EpochResponse,
+    ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
+    OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderStatus, SeiMsg, SeiQuery,
+    SeiQueryWrapper, SudoMsg as SeiSudoMsg,
 };
 use sei_tester::msg::{ExecuteMsg, QueryMsg};
 use serde::de::DeserializeOwned;
@@ -28,9 +29,10 @@ use std::{
 pub struct SeiModule {
     epoch: Epoch,
     exchange_rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
+    denom_fee_whitelist: Vec<String>,
 }
 
-const genesis_epoch: Epoch = Epoch {
+const GENESIS_EPOCH: Epoch = Epoch {
     genesis_time: String::new(),
     duration: 60,
     current_epoch: 1,
@@ -41,8 +43,11 @@ const genesis_epoch: Epoch = Epoch {
 impl SeiModule {
     pub fn new() -> Self {
         SeiModule {
-            epoch: genesis_epoch,
+            epoch: GENESIS_EPOCH,
             exchange_rates: HashMap::new(),
+            denom_fee_whitelist: ["whitelist1", "whitelist2", "whitelist3"]
+                .map(String::from)
+                .to_vec(),
         }
     }
 
@@ -65,8 +70,11 @@ impl SeiModule {
         }
 
         SeiModule {
-            epoch: genesis_epoch,
+            epoch: GENESIS_EPOCH,
             exchange_rates: exchange_rates,
+            denom_fee_whitelist: ["whitelist1", "whitelist2", "whitelist3"]
+                .map(String::from)
+                .to_vec(),
         }
     }
 
@@ -74,6 +82,9 @@ impl SeiModule {
         SeiModule {
             epoch: new_epoch,
             exchange_rates: (&self.exchange_rates).clone(),
+            denom_fee_whitelist: ["whitelist1", "whitelist2", "whitelist3"]
+                .map(String::from)
+                .to_vec(),
         }
     }
 }
@@ -125,20 +136,6 @@ impl Module for SeiModule {
             SeiMsg::BurnTokens { amount } => {
                 return execute_burn_tokens_helper(api, storage, router, block, sender, amount);
             }
-            // SeiMsg::SeiSudoMsg::NewBlock { epoch } => {
-            //     let new_epoch = Epoch {
-            //         genesis_time: self.epoch.clone().genesis_time,
-            //         duration: self.epoch.duration,
-            //         current_epoch: epoch as u64,
-            //         current_epoch_start_time: self.epoch.clone().current_epoch_start_time,
-            //         current_epoch_height: self.epoch.current_epoch_height + 1,
-            //     };
-            //     self.set_epoch(new_epoch);
-            //     return Ok(AppResponse {
-            //         events: vec![],
-            //         data: None,
-            //     });
-            // }
             _ => panic!("Unexpected custom exec msg"),
         }
     }
@@ -188,8 +185,15 @@ impl Module for SeiModule {
                     id,
                 );
             }
-            SeiQuery::GetDenomFeeWhitelist {} => Ok(Binary::default()),
-            SeiQuery::CreatorInDenomFeeWhitelist { creator: _ } => Ok(Binary::default()),
+            SeiQuery::GetDenomFeeWhitelist {} => {
+                return query_get_denom_fee_whitelist_helper(self.denom_fee_whitelist.clone())
+            }
+            SeiQuery::CreatorInDenomFeeWhitelist { creator } => {
+                return query_get_creator_in_denom_fee_whitelist_helper(
+                    creator,
+                    self.denom_fee_whitelist.clone(),
+                )
+            }
         }
     }
 
@@ -205,7 +209,6 @@ impl Module for SeiModule {
         ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
         QueryC: CustomQuery + DeserializeOwned + 'static,
     {
-        println!("HELLO..");
         match msg {
             SeiSudoMsg::Settlement { epoch, entries } => Ok(AppResponse {
                 events: vec![],
@@ -541,6 +544,32 @@ fn get_epoch(epoch: Epoch) -> EpochResponse {
 // Query: GetEpoch()
 fn query_get_epoch_helper(epoch: Epoch) -> AnyResult<Binary> {
     return Ok(to_binary(&get_epoch(epoch))?);
+}
+
+fn get_denom_fee_whitelist(denom_fee_whitelist: Vec<String>) -> GetDenomFeeWhitelistResponse {
+    GetDenomFeeWhitelistResponse {
+        creators: denom_fee_whitelist,
+    }
+}
+
+// Query: GetDenomFeeWhitelist()
+fn query_get_denom_fee_whitelist_helper(denom_fee_whitelist: Vec<String>) -> AnyResult<Binary> {
+    return Ok(to_binary(&get_denom_fee_whitelist(denom_fee_whitelist))?);
+}
+
+fn get_creator_in_denom_fee_whitelist(whitelisted: bool) -> CreatorInDenomFeeWhitelistResponse {
+    CreatorInDenomFeeWhitelistResponse {
+        whitelisted: whitelisted,
+    }
+}
+
+// Query: CreatorInDenomFeeWhitelistResponse()
+fn query_get_creator_in_denom_fee_whitelist_helper(
+    creator: Addr,
+    denom_fee_whitelist: Vec<String>,
+) -> AnyResult<Binary> {
+    let whitelisted: bool = denom_fee_whitelist.contains(&creator.to_string());
+    return Ok(to_binary(&get_creator_in_denom_fee_whitelist(whitelisted))?);
 }
 
 // TokenFactory Msg

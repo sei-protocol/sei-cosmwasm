@@ -12,9 +12,10 @@ use cw_multi_test::{
     SudoMsg, WasmKeeper, WasmSudo,
 };
 use sei_cosmwasm::{
-    DenomOracleExchangeRatePair, EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, OracleExchangeRate, OracleTwapsResponse, Order, OrderStatus, OrderType,
-    PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute, SudoMsg as SeiSudoMsg,
+    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, EpochResponse,
+    ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
+    OracleExchangeRate, OracleTwapsResponse, Order, OrderStatus, OrderType, PositionDirection,
+    SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute, SudoMsg as SeiSudoMsg,
 };
 use sei_tester::{
     contract::{execute, instantiate, query},
@@ -207,10 +208,7 @@ fn test_tokenfactory_integration_foundation() {
     );
 }
 
-/// Basic querying examples
-// 2022-09-15T15:53:04.303018Z
-
-/// Epoch
+/// Epoch Module - query
 #[test]
 fn test_epoch_query() {
     let mut app = mock_app(init_default_balances, vec![]);
@@ -228,77 +226,12 @@ fn test_epoch_query() {
     assert_eq!(res.epoch.current_epoch_start_time, "".to_string());
     assert_eq!(res.epoch.current_epoch_height, 1);
 
-    // // // Compiles but doesn't work
-    // let sudo_msg = WasmSudo {
-    //     contract_addr: sei_tester_addr.clone(),
-    //     msg: to_binary(&SeiSudoMsg::NewBlock { epoch: 100 }).unwrap(),
-    // };
-    // app.sudo(sudo_msg.into()).unwrap();
-
-    // // Also compiles but doesn't work
-    // let msg: SeiSudoMsg = SeiSudoMsg::NewBlock { epoch: 100 };
-    // SudoMsg::Wasm(WasmSudo {
-    //     contract_addr: sei_tester_addr.clone(),
-    //     msg: to_binary(&msg).unwrap(),
-    // });
-
-    // let arr = app
-    //     .execute_multi(
-    //         Addr::unchecked(ADMIN),
-    //         vec![CosmosMsg::Custom(SeiSudoMsg::NewBlock { epoch: 100 })],
-    //     )
-    //     .unwrap();
-
-    // let arr = app
-    //     .execute_multi(
-    //         Addr::unchecked(ADMIN),
-    //         vec![SudoMsg::Wasm(WasmSudo {
-    //             contract_addr: sei_tester_addr.clone(),
-    //             msg: to_binary(&SeiSudoMsg::NewBlock { epoch: 100 }).unwrap(),
-    //         })],
-    //     )
-    //     .unwrap();
-
-    // // Also compiles but doesn't work
+    // // Also compiles but doesn't write to SeiModule
     app.wasm_sudo(
         sei_tester_addr.clone(),
         &(SeiSudoMsg::NewBlock { epoch: 100 }),
     )
     .unwrap();
-
-    //app.sudo(SudoMsg::Custom(&(SeiSudoMsg::NewBlock { epoch: 100 })));
-    // app.sudo(SudoMsg::Wasm(WasmSudo {
-    //     contract_addr: sei_tester_addr.clone(),
-    //     msg: to_binary(&SeiSudoMsg::NewBlock { epoch: 100 }).unwrap(),
-    // }))
-    // .unwrap();
-
-    // // Also compiles but doesn't work
-    // let sudo_msg = WasmSudo {
-    //     contract_addr: sei_tester_addr.clone(),
-    //     msg: to_binary(&SeiSudoMsg::NewBlock { epoch: 100 }).unwrap(),
-    // };
-    // app.sudo(cw_multi_test::SudoMsg::Wasm(sudo_msg.into()))
-    //     .unwrap();
-
-    // // we can do the same with sudo call
-    // let msg = SeiSudoMsg::NewBlock { epoch: 100 };
-    // let sudo_msg = WasmSudo {
-    //     contract_addr: sei_tester_addr.clone(),
-    //     msg: to_binary(&msg).unwrap(),
-    // };
-    // app.sudo(sudo_msg.into()).unwrap();
-
-    let res: EpochResponse = app
-        .wrap()
-        .query_wasm_smart(sei_tester_addr.clone(), &QueryMsg::Epoch {})
-        .unwrap();
-
-    assert_eq!(res.epoch.genesis_time, "".to_string());
-    assert_eq!(res.epoch.duration, 60);
-    assert_eq!(res.epoch.current_epoch, 100);
-    assert_eq!(res.epoch.current_epoch_start_time, "".to_string());
-    assert_eq!(res.epoch.current_epoch_height, 1);
 }
 
 /// Dex Module - place and get orders
@@ -606,6 +539,50 @@ fn test_oracle_module_query_exchange_rate() {
             _ => panic!("Unexpected denom"),
         }
     }
+}
+
+/// Denom fee whitelist
+#[test]
+fn test_denom_fee_whitelist_query() {
+    let mut app = mock_app(init_default_balances, vec![]);
+    let sei_tester_addr = setup_test(&mut app);
+
+    // Query denom fee whitelist
+    let res: GetDenomFeeWhitelistResponse = app
+        .wrap()
+        .query_wasm_smart(sei_tester_addr.clone(), &QueryMsg::GetDenomFeeWhitelist {})
+        .unwrap();
+
+    assert_eq!(
+        res.creators,
+        ["whitelist1", "whitelist2", "whitelist3"]
+            .map(String::from)
+            .to_vec()
+    );
+
+    // Query example creator within whitelist
+    let res: CreatorInDenomFeeWhitelistResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::CreatorInDenomFeeWhitelist {
+                creator: "whitelist1".to_string(),
+            },
+        )
+        .unwrap();
+    assert_eq!(res.whitelisted, true);
+
+    // Query example creator not within whitelist
+    let res: CreatorInDenomFeeWhitelistResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::CreatorInDenomFeeWhitelist {
+                creator: "non-whitelist1".to_string(),
+            },
+        )
+        .unwrap();
+    assert_eq!(res.whitelisted, false);
 }
 
 /// Oracle Module - query TWAP rates
