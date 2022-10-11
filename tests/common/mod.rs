@@ -10,10 +10,10 @@ use cw_multi_test::{
 };
 use schemars::JsonSchema;
 use sei_cosmwasm::{
-    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, DexTwap, DexTwapsResponse,
-    Epoch, EpochResponse, ExchangeRatesResponse, GetDenomFeeWhitelistResponse,
-    GetOrderByIdResponse, GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse,
-    OrderSimulationResponse, OrderStatus, PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper,
+    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, Epoch, EpochResponse,
+    ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
+    OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderSimulationResponse, OrderStatus,
+    PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper,
 };
 use serde::de::DeserializeOwned;
 use std::{
@@ -134,13 +134,9 @@ impl Module for SeiModule {
                 lookback_seconds,
             ))?),
             SeiQuery::DexTwaps {
-                contract_address,
-                lookback_seconds,
-            } => Ok(to_binary(&get_dex_twaps(
-                storage,
-                contract_address,
-                lookback_seconds,
-            ))?),
+                contract_address: _,
+                lookback_seconds: _,
+            } => Ok(Binary::default()),
             SeiQuery::OrderSimulation {
                 order,
                 contract_address,
@@ -429,22 +425,6 @@ fn get_oracle_twaps(
     OracleTwapsResponse {
         oracle_twaps: oracle_twaps,
     }
-}
-
-fn get_dex_twaps(
-    storage: &dyn Storage,
-    contract_address: Addr,
-    lookback_seconds: u64,
-) -> DexTwapsResponse {
-    let mut dex_twaps: Vec<DexTwap> = Vec::new();
-    let lbs = lookback_seconds as u64;
-
-    let orders: GetOrdersResponse = from_binary(
-        &query_get_orders_helper(storage, contract_address, Addr::unchecked("")).unwrap(),
-    )
-    .unwrap();
-
-    DexTwapsResponse { twaps: dex_twaps }
 }
 
 fn get_order_simulation(
