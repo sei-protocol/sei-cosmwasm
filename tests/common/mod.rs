@@ -449,7 +449,8 @@ fn get_order_simulation(
         if order_response.position_direction == valid_orders {
             if (order_response.position_direction == PositionDirection::Long
                 && order.price <= order_response.price)
-                || order.price >= order_response.price
+                || (order_response.position_direction == PositionDirection::Short
+                    && order.price >= order_response.price)
             {
                 executed_quantity += order_response.quantity;
             }

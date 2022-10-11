@@ -631,6 +631,34 @@ fn test_dex_module_query_order_simulation() {
     };
 
     assert_eq!(res, expected_order_sim_res);
+
+    // Test none of sim order can be fulfilled
+    let res: OrderSimulationResponse = app
+        .wrap()
+        .query(&QueryRequest::Custom(SeiQueryWrapper {
+            route: SeiRoute::Dex,
+            query_data: SeiQuery::OrderSimulation {
+                contract_address: Addr::unchecked(sei_tester_addr.to_string()),
+                order: Order {
+                    price: Decimal::raw(10000),
+                    quantity: Decimal::raw(1000),
+                    price_denom: "USDC".to_string(),
+                    asset_denom: "ATOM".to_string(),
+                    order_type: OrderType::Limit,
+                    position_direction: PositionDirection::Short,
+                    data: "".to_string(),
+                    status_description: "test_order".to_string(),
+                    nominal: Decimal::zero(),
+                },
+            },
+        }))
+        .unwrap();
+
+    let expected_order_sim_res = OrderSimulationResponse {
+        executed_quantity: Decimal::raw(0),
+    };
+
+    assert_eq!(res, expected_order_sim_res);
 }
 
 /// Oracle Module - set and query exchange rates
