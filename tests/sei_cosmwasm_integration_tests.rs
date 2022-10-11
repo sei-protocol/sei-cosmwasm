@@ -13,8 +13,8 @@ use cw_multi_test::{
 use sei_cosmwasm::{
     CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, EpochResponse,
     ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
-    OracleExchangeRate, OracleTwapsResponse, Order, OrderStatus, OrderType, PositionDirection,
-    SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute,
+    OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus,
+    OrderType, PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute,
 };
 use sei_tester::{
     contract::{execute, instantiate, query},
@@ -262,6 +262,7 @@ fn test_dex_module_integration_orders() {
         position_direction: position_direction,
         data: data, // serialized order data, defined by the specific target contract
         status_description: status_description,
+        nominal: Decimal::zero(),
     };
     orders.push(order1);
 
@@ -284,6 +285,7 @@ fn test_dex_module_integration_orders() {
         position_direction: position_direction2,
         data: data2, // serialized order data, defined by the specific target contract
         status_description: status_description2,
+        nominal: Decimal::zero(),
     };
     orders.push(order2);
 
@@ -474,6 +476,189 @@ fn test_dex_module_integration_orders() {
     );
     let error = res.err();
     assert!(error.is_some());
+}
+
+/// Dex Module - query order simulation
+#[test]
+fn test_dex_module_query_order_simulation() {
+    let mut app = mock_app(init_default_balances, vec![]);
+    let sei_tester_addr = setup_test(&mut app);
+
+    let mut orders: Vec<Order> = Vec::new();
+    let mut funds = Vec::<Coin>::new();
+
+    // Make order1
+    let price = Decimal::raw(100);
+    let quantity = Decimal::raw(1000);
+    let price_denom = "USDC".to_string();
+    let asset_denom = "ATOM".to_string();
+    let order_type = OrderType::Market;
+    let position_direction = PositionDirection::Long;
+    let data = "".to_string();
+    let status_description = "order1".to_string();
+
+    let order1: Order = Order {
+        price: price,
+        quantity: quantity,
+        price_denom: price_denom.clone(),
+        asset_denom: asset_denom.clone(),
+        order_type: order_type,
+        position_direction: position_direction,
+        data: data, // serialized order data, defined by the specific target contract
+        status_description: status_description,
+        nominal: Decimal::zero(),
+    };
+    orders.push(order1);
+
+    // Make order2
+    let price2 = Decimal::raw(500);
+    let quantity2 = Decimal::raw(5000);
+    let price_denom2 = "USDC".to_string();
+    let asset_denom2 = "ATOM".to_string();
+    let order_type2 = OrderType::Limit;
+    let position_direction2 = PositionDirection::Long;
+    let data2 = "".to_string();
+    let status_description2 = "order2".to_string();
+
+    let order2: Order = Order {
+        price: price2,
+        quantity: quantity2,
+        price_denom: price_denom2.clone(),
+        asset_denom: asset_denom2.clone(),
+        order_type: order_type2,
+        position_direction: position_direction2,
+        data: data2, // serialized order data, defined by the specific target contract
+        status_description: status_description2,
+        nominal: Decimal::zero(),
+    };
+    orders.push(order2);
+
+    funds.push(Coin {
+        denom: "usei".to_string(),
+        amount: Uint128::new(10),
+    });
+
+    app.execute_multi(
+        Addr::unchecked(ADMIN),
+        vec![CosmosMsg::Custom(SeiMsg::PlaceOrders {
+            orders: orders,
+            funds: funds,
+            contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
+        })],
+    )
+    .unwrap();
+
+    // Test all of sim order can be fulfilled
+    let res: OrderSimulationResponse = app
+        .wrap()
+        .query(&QueryRequest::Custom(SeiQueryWrapper {
+            route: SeiRoute::Dex,
+            query_data: SeiQuery::OrderSimulation {
+                contract_address: Addr::unchecked(sei_tester_addr.to_string()),
+                order: Order {
+                    price: Decimal::raw(100),
+                    quantity: Decimal::raw(500),
+                    price_denom: "USDC".to_string(),
+                    asset_denom: "ATOM".to_string(),
+                    order_type: OrderType::Limit,
+                    position_direction: PositionDirection::Short,
+                    data: "".to_string(),
+                    status_description: "test_order".to_string(),
+                    nominal: Decimal::zero(),
+                },
+            },
+        }))
+        .unwrap();
+
+    let expected_order_sim_res = OrderSimulationResponse {
+        executed_quantity: Decimal::raw(500),
+    };
+
+    assert_eq!(res, expected_order_sim_res);
+
+    // Test part of sim order can be fulfilled
+    let res: OrderSimulationResponse = app
+        .wrap()
+        .query(&QueryRequest::Custom(SeiQueryWrapper {
+            route: SeiRoute::Dex,
+            query_data: SeiQuery::OrderSimulation {
+                contract_address: Addr::unchecked(sei_tester_addr.to_string()),
+                order: Order {
+                    price: Decimal::raw(100),
+                    quantity: Decimal::raw(10000),
+                    price_denom: "USDC".to_string(),
+                    asset_denom: "ATOM".to_string(),
+                    order_type: OrderType::Limit,
+                    position_direction: PositionDirection::Short,
+                    data: "".to_string(),
+                    status_description: "test_order".to_string(),
+                    nominal: Decimal::zero(),
+                },
+            },
+        }))
+        .unwrap();
+
+    let expected_order_sim_res = OrderSimulationResponse {
+        executed_quantity: Decimal::raw(6000),
+    };
+
+    assert_eq!(res, expected_order_sim_res);
+
+    // Test none of sim order can be fulfilled
+    let res: OrderSimulationResponse = app
+        .wrap()
+        .query(&QueryRequest::Custom(SeiQueryWrapper {
+            route: SeiRoute::Dex,
+            query_data: SeiQuery::OrderSimulation {
+                contract_address: Addr::unchecked(sei_tester_addr.to_string()),
+                order: Order {
+                    price: Decimal::raw(100),
+                    quantity: Decimal::raw(1000),
+                    price_denom: "USDC".to_string(),
+                    asset_denom: "ATOM".to_string(),
+                    order_type: OrderType::Limit,
+                    position_direction: PositionDirection::Long,
+                    data: "".to_string(),
+                    status_description: "test_order".to_string(),
+                    nominal: Decimal::zero(),
+                },
+            },
+        }))
+        .unwrap();
+
+    let expected_order_sim_res = OrderSimulationResponse {
+        executed_quantity: Decimal::raw(0),
+    };
+
+    assert_eq!(res, expected_order_sim_res);
+
+    // Test none of sim order can be fulfilled
+    let res: OrderSimulationResponse = app
+        .wrap()
+        .query(&QueryRequest::Custom(SeiQueryWrapper {
+            route: SeiRoute::Dex,
+            query_data: SeiQuery::OrderSimulation {
+                contract_address: Addr::unchecked(sei_tester_addr.to_string()),
+                order: Order {
+                    price: Decimal::raw(10000),
+                    quantity: Decimal::raw(1000),
+                    price_denom: "USDC".to_string(),
+                    asset_denom: "ATOM".to_string(),
+                    order_type: OrderType::Limit,
+                    position_direction: PositionDirection::Short,
+                    data: "".to_string(),
+                    status_description: "test_order".to_string(),
+                    nominal: Decimal::zero(),
+                },
+            },
+        }))
+        .unwrap();
+
+    let expected_order_sim_res = OrderSimulationResponse {
+        executed_quantity: Decimal::raw(0),
+    };
+
+    assert_eq!(res, expected_order_sim_res);
 }
 
 /// Oracle Module - set and query exchange rates
