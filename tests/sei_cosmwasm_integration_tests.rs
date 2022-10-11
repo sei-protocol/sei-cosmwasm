@@ -262,6 +262,7 @@ fn test_dex_module_integration_orders() {
         position_direction: position_direction,
         data: data, // serialized order data, defined by the specific target contract
         status_description: status_description,
+        nominal: Decimal::zero(),
     };
     orders.push(order1);
 
@@ -284,6 +285,7 @@ fn test_dex_module_integration_orders() {
         position_direction: position_direction2,
         data: data2, // serialized order data, defined by the specific target contract
         status_description: status_description2,
+        nominal: Decimal::zero(),
     };
     orders.push(order2);
 

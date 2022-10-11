@@ -10,10 +10,10 @@ use cw_multi_test::{
 };
 use schemars::JsonSchema;
 use sei_cosmwasm::{
-    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, Epoch, EpochResponse,
-    ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
-    OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderStatus, SeiMsg, SeiQuery,
-    SeiQueryWrapper,
+    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, DexTwap, DexTwapsResponse,
+    Epoch, EpochResponse, ExchangeRatesResponse, GetDenomFeeWhitelistResponse,
+    GetOrderByIdResponse, GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse,
+    OrderSimulationResponse, OrderStatus, PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper,
 };
 use serde::de::DeserializeOwned;
 use std::{
@@ -134,13 +134,21 @@ impl Module for SeiModule {
                 lookback_seconds,
             ))?),
             SeiQuery::DexTwaps {
-                contract_address: _,
-                lookback_seconds: _,
-            } => Ok(Binary::default()),
+                contract_address,
+                lookback_seconds,
+            } => Ok(to_binary(&get_dex_twaps(
+                storage,
+                contract_address,
+                lookback_seconds,
+            ))?),
             SeiQuery::OrderSimulation {
-                order: _,
-                contract_address: _,
-            } => Ok(Binary::default()),
+                order,
+                contract_address,
+            } => Ok(to_binary(&get_order_simulation(
+                storage,
+                order,
+                contract_address,
+            ))?),
             // TODO: replace with app stored data
             SeiQuery::Epoch {} => Ok(to_binary(&EpochResponse {
                 epoch: Epoch {
@@ -213,7 +221,7 @@ fn execute_place_orders_helper(
     // Storage:
     // OrderIdCounter -> OrderId
     // contract_address + "-" + OrderResponses -> OrderResponse[]
-    // contract_address + "-" + OrdeResponseById + "-" + Price Denom + "-" + Asset Denom + "-" + OrderId -> OrderResponse
+    // contract_address + "-" + OrderResponseById + "-" + Price Denom + "-" + Asset Denom + "-" + OrderId -> OrderResponse
 
     // Get latest order id
     let mut latest_order_id: u64 = 0;
@@ -420,6 +428,60 @@ fn get_oracle_twaps(
 
     OracleTwapsResponse {
         oracle_twaps: oracle_twaps,
+    }
+}
+
+fn get_dex_twaps(
+    storage: &dyn Storage,
+    contract_address: Addr,
+    lookback_seconds: u64,
+) -> DexTwapsResponse {
+    let mut dex_twaps: Vec<DexTwap> = Vec::new();
+    let lbs = lookback_seconds as u64;
+
+    let orders: GetOrdersResponse = from_binary(
+        &query_get_orders_helper(storage, contract_address, Addr::unchecked("")).unwrap(),
+    )
+    .unwrap();
+
+    DexTwapsResponse { twaps: dex_twaps }
+}
+
+fn get_order_simulation(
+    storage: &dyn Storage,
+    order: Order,
+    contract_address: Addr,
+) -> OrderSimulationResponse {
+    let mut executed_quantity = Decimal::zero();
+
+    let orders: GetOrdersResponse = from_binary(
+        &query_get_orders_helper(storage, contract_address, Addr::unchecked("")).unwrap(),
+    )
+    .unwrap();
+
+    let valid_orders = if order.position_direction == PositionDirection::Long {
+        PositionDirection::Short
+    } else {
+        PositionDirection::Long
+    };
+
+    for order_response in orders.orders {
+        if order_response.position_direction == valid_orders {
+            if (order_response.position_direction == PositionDirection::Long
+                && order.price <= order_response.price)
+                || order.price >= order_response.price
+            {
+                executed_quantity += order_response.quantity;
+            }
+        }
+    }
+
+    OrderSimulationResponse {
+        executed_quantity: if executed_quantity > order.quantity {
+            order.quantity
+        } else {
+            executed_quantity
+        },
     }
 }
 
