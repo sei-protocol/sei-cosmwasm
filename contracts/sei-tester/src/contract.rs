@@ -1,7 +1,7 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
-    coin, entry_point, to_binary, BankMsg, Binary, Decimal, Deps, DepsMut, Env, MessageInfo,
-    QueryResponse, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse,
+    coin, entry_point, to_binary, BankMsg, Binary, Decimal, Deps, DepsMut, Env, MessageInfo, Reply,
+    Response, StdError, StdResult, SubMsg, SubMsgResponse,
 };
 
 use crate::{
@@ -27,7 +27,6 @@ const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub fn validate_migration(
     deps: Deps<SeiQueryWrapper>,
     contract_name: &str,
-    contract_version: &str,
 ) -> Result<(), StdError> {
     let ver = cw2::get_contract_version(deps.storage)?;
     // ensure we are migrating from an allowed contract
@@ -69,7 +68,7 @@ pub fn execute(
 
 pub fn place_orders(
     deps: DepsMut<SeiQueryWrapper>,
-    env: Env,
+    _env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
     let order_data = OrderData {
@@ -212,7 +211,7 @@ pub fn handle_new_block(
 }
 
 pub fn process_bulk_order_placements(
-    _deps: DepsMut<SeiQueryWrapper>,
+    deps: DepsMut<SeiQueryWrapper>,
     _orders: Vec<Order>,
     _deposits: Vec<DepositInfo>,
 ) -> Result<Response<SeiMsg>, StdError> {
@@ -231,7 +230,8 @@ pub fn process_bulk_order_placements(
 
     let mut response: Response = Response::new();
     response = response.set_data(binary);
-    //return Ok(response.clone());
+    deps.api
+        .debug(&format!("process_bulk_order_placements: {:?}", response));
     return Ok(Response::new());
 }
 
@@ -243,7 +243,7 @@ pub fn process_bulk_order_cancellations(
 }
 
 pub fn process_bulk_liquidation(
-    _deps: DepsMut<SeiQueryWrapper>,
+    deps: DepsMut<SeiQueryWrapper>,
     _env: Env,
     _requests: Vec<LiquidationRequest>,
 ) -> Result<Response<SeiMsg>, StdError> {
@@ -263,7 +263,11 @@ pub fn process_bulk_liquidation(
 
     let mut response: Response = Response::new();
     response = response.set_data(binary);
-    //Ok(response)
+    deps.api.debug(&format!(
+        "pub fn process_bulk_liquidation(
+            : {:?}",
+        response
+    ));
     return Ok(Response::new());
 }
 

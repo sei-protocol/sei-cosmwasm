@@ -718,30 +718,3 @@ where
 
     appbuilder.build(init_fn)
 }
-
-// #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-// pub struct RateLimitingContract(pub Addr);
-
-// impl RateLimitingContract {
-//     pub fn addr(&self) -> Addr {
-//         self.0.clone()
-//     }
-
-//     pub fn call<T: Into<ExecuteMsg>>(&self, msg: T) -> StdResult<CosmosMsg> {
-//         let msg = to_binary(&msg.into())?;
-//         Ok(WasmMsg::Execute {
-//             contract_addr: self.addr().into(),
-//             msg,
-//             funds: vec![],
-//         }
-//         .into())
-//     }
-
-//     pub fn sudo<T: Into<SudoMsg>>(&self, msg: T) -> cw_multi_test::SudoMsg {
-//         let msg = to_binary(&msg.into()).unwrap();
-//         cw_multi_test::SudoMsg::Wasm(cw_multi_test::WasmSudo {
-//             contract_addr: self.addr().into(),
-//             msg,
-//         })
-//     }
-// }
