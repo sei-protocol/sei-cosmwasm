@@ -1,8 +1,10 @@
+use anyhow::Result as AnyResult;
 use cosmwasm_std::{
     from_binary,
     testing::{MockApi, MockQuerier, MockStorage},
     to_binary, Addr, Api, BalanceResponse, BankMsg, BankQuery, Binary, BlockInfo, Coin, CosmosMsg,
-    CustomQuery, Decimal, Empty, MemoryStorage, Querier, Storage, Timestamp, Uint128, Uint64,
+    CustomQuery, Decimal, Empty, MemoryStorage, Querier, StdResult, Storage, Timestamp, Uint128,
+    Uint64, WasmMsg,
 };
 use cw_multi_test::{
     App, AppBuilder, AppResponse, BankKeeper, BankSudo, CosmosRouter, FailingDistribution,
@@ -13,25 +15,35 @@ use sei_cosmwasm::{
     CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, Epoch, EpochResponse,
     ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
     OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderSimulationResponse, OrderStatus,
-    PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper,
+    PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SudoMsg as SeiSudoMsg,
 };
+use sei_tester::msg::{ExecuteMsg, QueryMsg};
 use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fmt::Debug,
     ops::{Div, Mul, Sub},
 };
 
-use anyhow::Result as AnyResult;
-
 pub struct SeiModule {
+    epoch: Epoch,
     exchange_rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
     denom_fee_whitelist: Vec<String>,
 }
 
+const GENESIS_EPOCH: Epoch = Epoch {
+    genesis_time: String::new(),
+    duration: 60,
+    current_epoch: 1,
+    current_epoch_start_time: String::new(),
+    current_epoch_height: 1,
+};
+
 impl SeiModule {
     pub fn new() -> Self {
         SeiModule {
+            epoch: GENESIS_EPOCH,
             exchange_rates: HashMap::new(),
             denom_fee_whitelist: ["whitelist1", "whitelist2", "whitelist3"]
                 .map(String::from)
@@ -58,7 +70,18 @@ impl SeiModule {
         }
 
         SeiModule {
+            epoch: GENESIS_EPOCH,
             exchange_rates: exchange_rates,
+            denom_fee_whitelist: ["whitelist1", "whitelist2", "whitelist3"]
+                .map(String::from)
+                .to_vec(),
+        }
+    }
+
+    pub fn set_epoch(&self, new_epoch: Epoch) -> Self {
+        SeiModule {
+            epoch: new_epoch,
+            exchange_rates: (&self.exchange_rates).clone(),
             denom_fee_whitelist: ["whitelist1", "whitelist2", "whitelist3"]
                 .map(String::from)
                 .to_vec(),
@@ -75,7 +98,7 @@ impl Default for SeiModule {
 impl Module for SeiModule {
     type ExecT = SeiMsg;
     type QueryT = SeiQueryWrapper;
-    type SudoT = Empty;
+    type SudoT = SeiSudoMsg;
 
     fn execute<ExecC, QueryC>(
         &self,
@@ -145,6 +168,7 @@ impl Module for SeiModule {
                 order,
                 contract_address,
             ))?),
+            SeiQuery::Epoch {} => return query_get_epoch_helper(self.epoch.clone()),
             // TODO: replace with app stored data
             SeiQuery::Epoch {} => Ok(to_binary(&EpochResponse {
                 epoch: Epoch {
@@ -193,19 +217,57 @@ impl Module for SeiModule {
         _storage: &mut dyn Storage,
         _router: &dyn CosmosRouter<ExecC = ExecC, QueryC = QueryC>,
         _block: &BlockInfo,
-        _msg: Self::SudoT,
+        msg: Self::SudoT,
     ) -> AnyResult<AppResponse>
     where
         ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
         QueryC: CustomQuery + DeserializeOwned + 'static,
     {
-        todo!()
+        match msg {
+            SeiSudoMsg::Settlement { epoch, entries } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
+            SeiSudoMsg::NewBlock { epoch } => {
+                let new_epoch = Epoch {
+                    genesis_time: self.epoch.clone().genesis_time,
+                    duration: self.epoch.duration,
+                    current_epoch: epoch as u64,
+                    current_epoch_start_time: self.epoch.clone().current_epoch_start_time,
+                    current_epoch_height: self.epoch.current_epoch_height + 1,
+                };
+                self.set_epoch(new_epoch);
+                return Ok(AppResponse {
+                    events: vec![],
+                    data: None,
+                });
+            }
+            SeiSudoMsg::BulkOrderPlacements { orders, deposits } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
+            SeiSudoMsg::BulkOrderCancellations { ids } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
+            SeiSudoMsg::Liquidation { requests } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
+            SeiSudoMsg::FinalizeBlock {
+                contract_order_results,
+            } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
+            _ => panic!("Unexpected sudo exec msg"),
+        }
     }
 }
 
 // Helper functions
 
-// Dex Module
+// Dex Module Msg
 
 // Execute: PlaceOrders()
 fn execute_place_orders_helper(
@@ -350,6 +412,8 @@ fn execute_cancel_orders_helper(
         data: Some(to_binary(&contract_address).unwrap()),
     })
 }
+
+// Oracle Module
 
 fn get_exchange_rates(
     rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
@@ -522,6 +586,17 @@ fn query_get_order_by_id_helper(
     })?);
 }
 
+// Epoch Module Queries
+
+fn get_epoch(epoch: Epoch) -> EpochResponse {
+    EpochResponse { epoch: epoch }
+}
+
+// Query: GetEpoch()
+fn query_get_epoch_helper(epoch: Epoch) -> AnyResult<Binary> {
+    return Ok(to_binary(&get_epoch(epoch))?);
+}
+
 fn get_denom_fee_whitelist(denom_fee_whitelist: Vec<String>) -> GetDenomFeeWhitelistResponse {
     GetDenomFeeWhitelistResponse {
         creators: denom_fee_whitelist,
@@ -548,7 +623,7 @@ fn query_get_creator_in_denom_fee_whitelist_helper(
     return Ok(to_binary(&get_creator_in_denom_fee_whitelist(whitelisted))?);
 }
 
-// TokenFactory
+// TokenFactory Msg
 
 // Execute: CreateDenom()
 fn execute_create_denom_helper(

@@ -4,17 +4,19 @@ use cosmwasm_std::Uint64;
 use cosmwasm_std::{
     coin, from_binary,
     testing::{MockApi, MockStorage},
-    Addr, Api, BalanceResponse, Coin, CosmosMsg, Decimal, QueryRequest, StdError, Storage, Uint128,
+    to_binary, Addr, Api, BalanceResponse, Binary, Coin, CosmosMsg, Decimal, QueryRequest,
+    StdError, StdResult, Storage, Uint128,
 };
 use cw_multi_test::{
     App, BankKeeper, ContractWrapper, Executor, FailingDistribution, FailingStaking, Router,
-    WasmKeeper,
+    SudoMsg, WasmKeeper, WasmSudo,
 };
 use sei_cosmwasm::{
     CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, EpochResponse,
     ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
     OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus,
     OrderType, PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute,
+    SudoMsg as SeiSudoMsg,
 };
 use sei_tester::{
     contract::{execute, instantiate, query},
@@ -99,8 +101,10 @@ fn setup_test(
     >,
 ) -> Addr {
     let sei_tester_code = app.store_code(Box::new(
-        ContractWrapper::new(execute, instantiate, query).with_reply(sei_tester::contract::reply),
-    ));
+        ContractWrapper::new(execute, instantiate, query)
+            .with_reply(sei_tester::contract::reply)
+            .with_sudo(sei_tester::contract::sudo),
+    )); //::<SeiMsg, SeiQueryWrapper>
 
     let sei_tester_addr = app
         .instantiate_contract(
@@ -205,9 +209,7 @@ fn test_tokenfactory_integration_foundation() {
     );
 }
 
-/// Basic querying examples
-
-/// Epoch: TODO -> replace with app stored data
+/// Epoch Module - query
 #[test]
 fn test_epoch_query() {
     let mut app = mock_app(init_default_balances, vec![]);
@@ -219,17 +221,18 @@ fn test_epoch_query() {
         .query_wasm_smart(sei_tester_addr.clone(), &QueryMsg::Epoch {})
         .unwrap();
 
-    assert_eq!(
-        res.epoch.genesis_time,
-        "2022-09-15T15:53:04.303018Z".to_string()
-    );
+    assert_eq!(res.epoch.genesis_time, "".to_string());
     assert_eq!(res.epoch.duration, 60);
     assert_eq!(res.epoch.current_epoch, 1);
-    assert_eq!(
-        res.epoch.current_epoch_start_time,
-        "2022-09-15T15:53:04.303018Z".to_string()
-    );
+    assert_eq!(res.epoch.current_epoch_start_time, "".to_string());
     assert_eq!(res.epoch.current_epoch_height, 1);
+
+    // // Also compiles but doesn't write to SeiModule
+    app.wasm_sudo(
+        sei_tester_addr.clone(),
+        &(SeiSudoMsg::NewBlock { epoch: 100 }),
+    )
+    .unwrap();
 }
 
 /// Dex Module - place and get orders
