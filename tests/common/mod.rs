@@ -3,8 +3,7 @@ use cosmwasm_std::{
     from_binary,
     testing::{MockApi, MockQuerier, MockStorage},
     to_binary, Addr, Api, BalanceResponse, BankMsg, BankQuery, Binary, BlockInfo, Coin, CosmosMsg,
-    CustomQuery, Decimal, Empty, MemoryStorage, Querier, StdResult, Storage, Timestamp, Uint128,
-    Uint64, WasmMsg,
+    CustomQuery, Decimal, MemoryStorage, Querier, Storage, Timestamp, Uint128, Uint64,
 };
 use cw_multi_test::{
     App, AppBuilder, AppResponse, BankKeeper, BankSudo, CosmosRouter, FailingDistribution,
@@ -12,18 +11,17 @@ use cw_multi_test::{
 };
 use schemars::JsonSchema;
 use sei_cosmwasm::{
-    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, Epoch, EpochResponse,
-    ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
-    OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderSimulationResponse, OrderStatus,
-    PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SudoMsg as SeiSudoMsg,
+    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, DexPair, DexTwap,
+    DexTwapsResponse, Epoch, EpochResponse, ExchangeRatesResponse, GetDenomFeeWhitelistResponse,
+    GetOrderByIdResponse, GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse,
+    OrderSimulationResponse, OrderStatus, PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper,
+    SudoMsg as SeiSudoMsg,
 };
-use sei_tester::msg::{ExecuteMsg, QueryMsg};
 use serde::de::DeserializeOwned;
-use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fmt::Debug,
-    ops::{Div, Mul, Sub},
+    ops::{Add, Div, Mul, Sub},
 };
 
 pub struct SeiModule {
@@ -119,7 +117,13 @@ impl Module for SeiModule {
                 funds,
                 contract_address,
             } => {
-                return execute_place_orders_helper(storage, orders, funds, contract_address);
+                return execute_place_orders_helper(
+                    storage,
+                    block,
+                    orders,
+                    funds,
+                    contract_address,
+                );
             }
             SeiMsg::CancelOrders {
                 order_ids,
@@ -145,7 +149,7 @@ impl Module for SeiModule {
         _api: &dyn Api,
         storage: &dyn Storage,
         _querier: &dyn Querier,
-        _block: &BlockInfo,
+        block: &BlockInfo,
         request: Self::QueryT,
     ) -> AnyResult<Binary> {
         match request.query_data {
@@ -153,13 +157,19 @@ impl Module for SeiModule {
                 Ok(to_binary(&get_exchange_rates(self.exchange_rates.clone()))?)
             }
             SeiQuery::OracleTwaps { lookback_seconds } => Ok(to_binary(&get_oracle_twaps(
+                block,
                 self.exchange_rates.clone(),
                 lookback_seconds,
             ))?),
             SeiQuery::DexTwaps {
-                contract_address: _,
-                lookback_seconds: _,
-            } => Ok(Binary::default()),
+                contract_address,
+                lookback_seconds,
+            } => Ok(to_binary(&get_dex_twaps(
+                storage,
+                block,
+                contract_address,
+                lookback_seconds,
+            ))?),
             SeiQuery::OrderSimulation {
                 order,
                 contract_address,
@@ -169,16 +179,6 @@ impl Module for SeiModule {
                 contract_address,
             ))?),
             SeiQuery::Epoch {} => return query_get_epoch_helper(self.epoch.clone()),
-            // TODO: replace with app stored data
-            SeiQuery::Epoch {} => Ok(to_binary(&EpochResponse {
-                epoch: Epoch {
-                    genesis_time: "2022-09-15T15:53:04.303018Z".to_string(),
-                    duration: 60,
-                    current_epoch: 1,
-                    current_epoch_start_time: "2022-09-15T15:53:04.303018Z".to_string(),
-                    current_epoch_height: 1,
-                },
-            })?),
             SeiQuery::GetOrders {
                 contract_address,
                 account,
@@ -224,7 +224,10 @@ impl Module for SeiModule {
         QueryC: CustomQuery + DeserializeOwned + 'static,
     {
         match msg {
-            SeiSudoMsg::Settlement { epoch, entries } => Ok(AppResponse {
+            SeiSudoMsg::Settlement {
+                epoch: _,
+                entries: _,
+            } => Ok(AppResponse {
                 events: vec![],
                 data: None,
             }),
@@ -242,25 +245,27 @@ impl Module for SeiModule {
                     data: None,
                 });
             }
-            SeiSudoMsg::BulkOrderPlacements { orders, deposits } => Ok(AppResponse {
-                events: vec![],
-                data: None,
-            }),
-            SeiSudoMsg::BulkOrderCancellations { ids } => Ok(AppResponse {
-                events: vec![],
-                data: None,
-            }),
-            SeiSudoMsg::Liquidation { requests } => Ok(AppResponse {
-                events: vec![],
-                data: None,
-            }),
-            SeiSudoMsg::FinalizeBlock {
-                contract_order_results,
+            SeiSudoMsg::BulkOrderPlacements {
+                orders: _,
+                deposits: _,
             } => Ok(AppResponse {
                 events: vec![],
                 data: None,
             }),
-            _ => panic!("Unexpected sudo exec msg"),
+            SeiSudoMsg::BulkOrderCancellations { ids: _ } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
+            SeiSudoMsg::Liquidation { requests: _ } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
+            SeiSudoMsg::FinalizeBlock {
+                contract_order_results: _,
+            } => Ok(AppResponse {
+                events: vec![],
+                data: None,
+            }),
         }
     }
 }
@@ -272,6 +277,7 @@ impl Module for SeiModule {
 // Execute: PlaceOrders()
 fn execute_place_orders_helper(
     storage: &mut dyn Storage,
+    block: &BlockInfo,
     orders: Vec<Order>,
     _funds: Vec<Coin>,
     contract_address: Addr,
@@ -280,6 +286,7 @@ fn execute_place_orders_helper(
     // OrderIdCounter -> OrderId
     // contract_address + "-" + OrderResponses -> OrderResponse[]
     // contract_address + "-" + OrderResponseById + "-" + Price Denom + "-" + Asset Denom + "-" + OrderId -> OrderResponse
+    // "OrderTimestamp-" + OrderId -> OrderTimestamp
 
     // Get latest order id
     let mut latest_order_id: u64 = 0;
@@ -331,6 +338,10 @@ fn execute_place_orders_helper(
         storage.set(
             order_id_key.as_bytes(),
             &serde_json::to_vec(&response_json.unwrap_or_default()).unwrap(),
+        );
+        storage.set(
+            format!("OrderTimestamp-{}", latest_order_id).as_bytes(),
+            &block.time.seconds().to_be_bytes(),
         );
 
         latest_order_id += 1;
@@ -431,6 +442,7 @@ fn get_exchange_rates(
 }
 
 fn get_oracle_twaps(
+    block: &BlockInfo,
     rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
     lookback_seconds: i64,
 ) -> OracleTwapsResponse {
@@ -440,8 +452,8 @@ fn get_oracle_twaps(
     for key in rates.keys() {
         let pair_rates = rates.get(key).unwrap();
         let mut sum = Decimal::zero();
-        let start: u64 = 1_571_797_419;
-        let mut time: u64 = 1_571_797_419;
+        let start: u64 = block.time.seconds();
+        let mut time: u64 = block.time.seconds();
         let mut last_rate = Decimal::zero();
 
         if pair_rates[0].oracle_exchange_rate.last_update < Uint64::new(start - lbs) {
@@ -489,6 +501,78 @@ fn get_oracle_twaps(
     OracleTwapsResponse {
         oracle_twaps: oracle_twaps,
     }
+}
+
+fn get_dex_twaps(
+    storage: &dyn Storage,
+    block: &BlockInfo,
+    contract_address: Addr,
+    lookback_seconds: u64,
+) -> DexTwapsResponse {
+    let mut dex_twaps: HashMap<(String, String), Decimal> = HashMap::new();
+    let mut prev_time = block.time.seconds();
+
+    let order_response: GetOrdersResponse = from_binary(
+        &query_get_orders_helper(storage, contract_address, Addr::unchecked("")).unwrap(),
+    )
+    .unwrap();
+
+    let mut orders = order_response.orders.clone();
+    orders.sort_by(|a, b| b.id.cmp(&a.id));
+
+    for order in orders {
+        let timestamp = u64::from_be_bytes(
+            storage
+                .get(format!("OrderTimestamp-{}", order.id).as_bytes())
+                .unwrap()
+                .try_into()
+                .unwrap(),
+        );
+
+        let mut update_fn = |time: u64| {
+            if !dex_twaps.contains_key(&(order.asset_denom.clone(), order.price_denom.clone())) {
+                dex_twaps.insert(
+                    (order.asset_denom.clone(), order.price_denom.clone()),
+                    Decimal::zero(),
+                );
+            }
+
+            let sum = dex_twaps
+                .get(&(order.asset_denom.clone(), order.price_denom.clone()))
+                .unwrap();
+
+            let new_sum = sum.add(order.price.mul(Decimal::from_ratio(time, 1u64)));
+
+            dex_twaps.insert(
+                (order.asset_denom.clone(), order.price_denom.clone()),
+                new_sum,
+            );
+        };
+
+        if block.time.seconds() - timestamp >= lookback_seconds {
+            update_fn(lookback_seconds - (block.time.seconds() - prev_time));
+            prev_time = timestamp;
+        } else if block.time.seconds() - prev_time < lookback_seconds {
+            update_fn(prev_time - timestamp);
+            prev_time = timestamp;
+        }
+    }
+
+    let mut twaps: Vec<DexTwap> = Vec::new();
+    for key in dex_twaps.keys() {
+        let sum = dex_twaps.get(key).unwrap();
+        twaps.push(DexTwap {
+            pair: DexPair {
+                asset_denom: key.0.clone(),
+                price_denom: key.1.clone(),
+                tick_size: Decimal::from_ratio(1u128, 10000u128),
+            },
+            twap: sum.div(Decimal::from_ratio(lookback_seconds, 1u64)),
+            lookback_seconds: lookback_seconds,
+        });
+    }
+
+    DexTwapsResponse { twaps }
 }
 
 fn get_order_simulation(

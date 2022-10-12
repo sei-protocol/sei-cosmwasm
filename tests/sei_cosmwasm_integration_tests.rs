@@ -1,22 +1,21 @@
 use common::SeiModule;
 use common::{get_balance, mock_app};
-use cosmwasm_std::Uint64;
 use cosmwasm_std::{
     coin, from_binary,
     testing::{MockApi, MockStorage},
-    to_binary, Addr, Api, BalanceResponse, Binary, Coin, CosmosMsg, Decimal, QueryRequest,
-    StdError, StdResult, Storage, Uint128,
+    Addr, Api, BalanceResponse, Coin, CosmosMsg, Decimal, QueryRequest, StdError, Storage, Uint128,
 };
+use cosmwasm_std::{BlockInfo, Uint64};
 use cw_multi_test::{
     App, BankKeeper, ContractWrapper, Executor, FailingDistribution, FailingStaking, Router,
-    SudoMsg, WasmKeeper, WasmSudo,
+    WasmKeeper,
 };
 use sei_cosmwasm::{
-    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, EpochResponse,
-    ExchangeRatesResponse, GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse,
-    OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus,
-    OrderType, PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute,
-    SudoMsg as SeiSudoMsg,
+    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, DexPair, DexTwap,
+    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetDenomFeeWhitelistResponse,
+    GetOrderByIdResponse, GetOrdersResponse, OracleExchangeRate, OracleTwapsResponse, Order,
+    OrderSimulationResponse, OrderStatus, OrderType, PositionDirection, SeiMsg, SeiQuery,
+    SeiQueryWrapper, SeiRoute, SudoMsg as SeiSudoMsg,
 };
 use sei_tester::{
     contract::{execute, instantiate, query},
@@ -822,4 +821,123 @@ fn test_oracle_module_query_twaps() {
             _ => panic!("Unexpected denom"),
         }
     }
+}
+
+#[test]
+fn test_dex_module_query_dex_twap() {
+    let mut app = mock_app(init_default_balances, vec![]);
+    let sei_tester_addr = setup_test(&mut app);
+
+    let mut orders: Vec<Order> = Vec::new();
+
+    // Make order1
+    let price = Decimal::raw(100);
+    let quantity = Decimal::raw(1000);
+    let price_denom = "USDC".to_string();
+    let asset_denom = "ATOM".to_string();
+    let order_type = OrderType::Market;
+    let position_direction = PositionDirection::Long;
+    let data = "".to_string();
+    let status_description = "order1".to_string();
+
+    let order1: Order = Order {
+        price: price,
+        quantity: quantity,
+        price_denom: price_denom.clone(),
+        asset_denom: asset_denom.clone(),
+        order_type: order_type,
+        position_direction: position_direction,
+        data: data, // serialized order data, defined by the specific target contract
+        status_description: status_description,
+        nominal: Decimal::zero(),
+    };
+    orders.push(order1);
+
+    app.execute_multi(
+        Addr::unchecked(ADMIN),
+        vec![CosmosMsg::Custom(SeiMsg::PlaceOrders {
+            orders: orders,
+            funds: vec![Coin {
+                denom: "usei".to_string(),
+                amount: Uint128::new(10),
+            }],
+            contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
+        })],
+    )
+    .unwrap();
+
+    app.set_block(BlockInfo {
+        height: 2,
+        time: app.block_info().time.plus_seconds(5),
+        chain_id: "test-chain".to_string(),
+    });
+
+    let mut orders: Vec<Order> = Vec::new();
+
+    // Make order2
+    let price2 = Decimal::raw(500);
+    let quantity2 = Decimal::raw(5000);
+    let price_denom2 = "USDC".to_string();
+    let asset_denom2 = "ATOM".to_string();
+    let order_type2 = OrderType::Limit;
+    let position_direction2 = PositionDirection::Long;
+    let data2 = "".to_string();
+    let status_description2 = "order2".to_string();
+
+    let order2: Order = Order {
+        price: price2,
+        quantity: quantity2,
+        price_denom: price_denom2.clone(),
+        asset_denom: asset_denom2.clone(),
+        order_type: order_type2,
+        position_direction: position_direction2,
+        data: data2, // serialized order data, defined by the specific target contract
+        status_description: status_description2,
+        nominal: Decimal::zero(),
+    };
+    orders.push(order2);
+
+    app.execute_multi(
+        Addr::unchecked(ADMIN),
+        vec![CosmosMsg::Custom(SeiMsg::PlaceOrders {
+            orders: orders,
+            funds: vec![Coin {
+                denom: "usei".to_string(),
+                amount: Uint128::new(10),
+            }],
+            contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
+        })],
+    )
+    .unwrap();
+
+    app.set_block(BlockInfo {
+        height: 3,
+        time: app.block_info().time.plus_seconds(5),
+        chain_id: "test-chain".to_string(),
+    });
+
+    let res: DexTwapsResponse = app
+        .wrap()
+        .query(&QueryRequest::Custom(SeiQueryWrapper {
+            route: SeiRoute::Dex,
+            query_data: SeiQuery::DexTwaps {
+                contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
+                lookback_seconds: 6,
+            },
+        }))
+        .unwrap();
+
+    let expected_twap: DexTwapsResponse = DexTwapsResponse {
+        twaps: vec![DexTwap {
+            pair: DexPair {
+                price_denom: "USDC".to_string(),
+                asset_denom: "ATOM".to_string(),
+                tick_size: Decimal::from_ratio(1u128, 10000u128),
+            },
+            twap: Decimal::raw(433),
+            lookback_seconds: 6,
+        }],
+    };
+
+    assert_eq!(res, expected_twap);
 }
