@@ -53,7 +53,8 @@ Messages:
 Queries:
 
 - `GetOrders(contract_address, account)`: returns `orders` for a given account
-- `GetOrderById(contract_address, price_denom, asset_denom, id)`: returns particular `order` based on `id` and `price_denom`, and `asset_denom`.
+- `GetOrderById(contract_address, price_denom, asset_denom, id)`: returns particular `order` based on `id` and `price_denom`, and `asset_denom`. 
+- `OrderSimulation(contract_address, order)`: retuns the simulation of an `order` against the existing placed orders for a given `contract_address`. 
 
 Examples:
 
@@ -119,6 +120,31 @@ assert_eq!(res.orders[0].id, 0);
 assert_eq!(res.orders[0].status, OrderStatus::Placed);
 ...
 
+```
+
+To simulate an order: 
+
+```rust
+let res: OrderSimulationResponse = app
+    .wrap()
+    .query(&QueryRequest::Custom(SeiQueryWrapper {
+        route: SeiRoute::Dex,
+        query_data: SeiQuery::OrderSimulation {
+            contract_address: Addr::unchecked(contract_addr.to_string()),
+            order: Order {
+                price: Decimal::raw(100),
+                quantity: Decimal::raw(10000),
+                price_denom: "USDC".to_string(),
+                asset_denom: "ATOM".to_string(),
+                order_type: OrderType::Limit,
+                position_direction: PositionDirection::Short,
+                data: "".to_string(),
+                status_description: "test_order".to_string(),
+                nominal: Decimal::zero(),
+            },
+        },
+    }))
+    .unwrap();
 ```
 
 ### Oracle Module
