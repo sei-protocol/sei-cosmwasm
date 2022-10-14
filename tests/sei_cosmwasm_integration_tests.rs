@@ -1,5 +1,3 @@
-use common::SeiModule;
-use common::{get_balance, mock_app};
 use cosmwasm_std::{
     coin, from_binary,
     testing::{MockApi, MockStorage},
@@ -17,12 +15,14 @@ use sei_cosmwasm::{
     OrderSimulationResponse, OrderStatus, OrderType, PositionDirection, SeiMsg, SeiQuery,
     SeiQueryWrapper, SeiRoute, SudoMsg as SeiSudoMsg,
 };
+use sei_integration_tests::{
+    helper::{get_balance, mock_app},
+    module::SeiModule,
+};
 use sei_tester::{
     contract::{execute, instantiate, query},
     msg::{InstantiateMsg, QueryMsg},
 };
-
-mod common;
 
 const ADMIN: &str = "admin";
 const NATIVE_DENOM: &str = "usei";

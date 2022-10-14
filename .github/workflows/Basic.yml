@@ -28,12 +28,12 @@ jobs:
         env:
           RUST_BACKTRACE: 1
 
-      - name: Compile WASM contract
-        uses: actions-rs/cargo@v1
-        with:
-          command: wasm
-        env:
-          RUSTFLAGS: "-C link-arg=-s"
+      # - name: Compile WASM contract
+      #   uses: actions-rs/cargo@v1
+      #   with:
+      #     command: wasm
+      #   env:
+      #     RUSTFLAGS: "-C link-arg=-s"
 
   lints:
     name: Lints
