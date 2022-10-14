@@ -8,6 +8,7 @@ sei-tester = { path = "../contracts/sei-tester" }
 cw-multi-test = "0.14.0"
 anyhow = "1"
 sei-cosmwasm = { path = "../packages/sei-cosmwasm" }
+sei-integration-tests = { path = "../packages/sei-integration-tests" }
 cosmwasm-std = "1.0.0"
 cw20-base = "0.13.4"
 schemars = "0.8.8"

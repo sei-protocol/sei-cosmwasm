@@ -1,14 +1,9 @@
 use anyhow::Result as AnyResult;
 use cosmwasm_std::{
-    from_binary,
-    testing::{MockApi, MockQuerier, MockStorage},
-    to_binary, Addr, Api, BalanceResponse, BankMsg, BankQuery, Binary, BlockInfo, Coin, CosmosMsg,
-    CustomQuery, Decimal, MemoryStorage, Querier, Storage, Timestamp, Uint128, Uint64,
+    from_binary, to_binary, Addr, Api, BankMsg, Binary, BlockInfo, Coin, CosmosMsg, CustomQuery,
+    Decimal, Querier, Storage, Uint128, Uint64,
 };
-use cw_multi_test::{
-    App, AppBuilder, AppResponse, BankKeeper, BankSudo, CosmosRouter, FailingDistribution,
-    FailingStaking, Module, Router, SudoMsg, WasmKeeper,
-};
+use cw_multi_test::{AppResponse, BankSudo, CosmosRouter, Module, SudoMsg};
 use schemars::JsonSchema;
 use sei_cosmwasm::{
     CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, DexPair, DexTwap,
@@ -786,70 +781,4 @@ where
             }),
         )
         .unwrap())
-}
-
-// Get balance
-pub fn get_balance(
-    app: &App<BankKeeper, MockApi, MemoryStorage, SeiModule, WasmKeeper<SeiMsg, SeiQueryWrapper>>,
-    addr: String,
-    denom: String,
-) -> BalanceResponse {
-    let arr = app.read_module(|router, api, storage| {
-        router.bank.query(
-            api,
-            storage,
-            &MockQuerier::default(),
-            &BlockInfo {
-                height: 0,
-                time: Timestamp::from_seconds(0u64),
-                chain_id: "test".to_string(),
-            },
-            BankQuery::Balance {
-                address: addr,
-                denom: denom,
-            },
-        )
-    });
-    from_binary(&arr.unwrap()).unwrap()
-}
-
-// Mock app
-pub fn mock_app<F>(
-    init_fn: F,
-    rates: Vec<DenomOracleExchangeRatePair>,
-) -> App<
-    BankKeeper,
-    MockApi,
-    MockStorage,
-    SeiModule,
-    WasmKeeper<SeiMsg, SeiQueryWrapper>,
-    FailingStaking,
-    FailingDistribution,
->
-where
-    F: FnOnce(
-        &mut Router<
-            BankKeeper,
-            SeiModule,
-            WasmKeeper<SeiMsg, SeiQueryWrapper>,
-            FailingStaking,
-            FailingDistribution,
-        >,
-        &dyn Api,
-        &mut dyn Storage,
-    ),
-{
-    let appbuilder: AppBuilder<
-        BankKeeper,
-        MockApi,
-        MockStorage,
-        SeiModule,
-        WasmKeeper<SeiMsg, SeiQueryWrapper>,
-        FailingStaking,
-        FailingDistribution,
-    > = AppBuilder::new()
-        .with_custom(SeiModule::new_with_oracle_exchange_rates(rates))
-        .with_wasm::<SeiModule, WasmKeeper<SeiMsg, SeiQueryWrapper>>(WasmKeeper::new());
-
-    appbuilder.build(init_fn)
 }
