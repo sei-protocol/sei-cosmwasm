@@ -24,7 +24,8 @@ jobs:
       - name: Run unit tests
         uses: actions-rs/cargo@v1
         with:
-          command: unit-test
+          command: test
+          args: --verbose --all
         env:
           RUST_BACKTRACE: 1
 
@@ -65,14 +66,14 @@ jobs:
       - name: Generate Schema For sei-tester
         uses: actions-rs/cargo@v1
         with:
-          command: schema
-          args: -p sei-tester
+          command: run
+          args: --example schema -p sei-tester
 
       - name: Generate Schema For sei-cosmwasm
         uses: actions-rs/cargo@v1
         with:
-          command: schema
-          args: -p sei-cosmwasm
+          command: run
+          args: --example schema -p sei-cosmwasm
 
       - name: Schema Changes
         # fails if any changes not committed
