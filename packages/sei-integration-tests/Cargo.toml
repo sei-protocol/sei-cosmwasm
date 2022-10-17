@@ -1,6 +1,6 @@
 [package]
 name = "sei-integration-tests"
-version = "0.1.0"
+version = "0.4.7"
 edition = "2021"
 description = "Custom module to support integration tests for Sei chain contracts"
 license = "Apache-2.0"
