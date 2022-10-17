@@ -2,7 +2,7 @@ use cosmwasm_std::{Addr, CustomQuery, Decimal};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::proto_structs::{DenomOracleExchangeRatePair, DexTwap, DexPair, Epoch, OracleTwap};
+use crate::proto_structs::{DenomOracleExchangeRatePair, DexPair, DexTwap, Epoch, OracleTwap};
 use crate::route::SeiRoute;
 use crate::sei_types::OrderResponse;
 use crate::Order;

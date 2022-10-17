@@ -12,8 +12,8 @@ use protobuf::Message;
 use sei_cosmwasm::{
     BulkOrderPlacementsResponse, ContractOrderResult, CreatorInDenomFeeWhitelistResponse,
     DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
-    GetDenomFeeWhitelistResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, LiquidationRequest,
-    LiquidationResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
+    GetDenomFeeWhitelistResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
+    LiquidationRequest, LiquidationResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
     OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
     SettlementEntry, SudoMsg,
 };
@@ -384,7 +384,7 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
         QueryMsg::GetDenomFeeWhitelist {} => to_binary(&query_get_denom_fee_whitelist(deps)?),
         QueryMsg::CreatorInDenomFeeWhitelist { creator } => {
             to_binary(&query_creator_in_denom_fee_whitelist(deps, creator)?)
-        },
+        }
         QueryMsg::GetLatestPrice {
             contract_address,
             price_denom,

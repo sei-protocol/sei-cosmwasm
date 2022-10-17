@@ -2,8 +2,8 @@ use cosmwasm_std::{Addr, QuerierWrapper, StdResult};
 
 use crate::query::{
     CreatorInDenomFeeWhitelistResponse, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
-    GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetLatestPriceResponse, GetOrdersResponse, OracleTwapsResponse,
-    OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
+    GetDenomFeeWhitelistResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
+    OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
 };
 use crate::route::SeiRoute;
 use crate::Order;
