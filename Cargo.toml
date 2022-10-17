@@ -1,5 +1,5 @@
 [workspace]
-members = ["packages/*", "contracts/*", "tests"]
+members = ["packages/*", "contracts/*"]
 
 [profile.release.package.sei-cosmwasm]
 opt-level = 3
