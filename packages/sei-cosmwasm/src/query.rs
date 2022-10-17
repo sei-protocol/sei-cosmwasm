@@ -2,7 +2,7 @@ use cosmwasm_std::{Addr, CustomQuery, Decimal};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::proto_structs::{DenomOracleExchangeRatePair, DexTwap, Epoch, OracleTwap};
+use crate::proto_structs::{DenomOracleExchangeRatePair, DexTwap, DexPair, Epoch, OracleTwap};
 use crate::route::SeiRoute;
 use crate::sei_types::OrderResponse;
 use crate::Order;
@@ -40,6 +40,11 @@ pub enum SeiQuery {
         price_denom: String,
         asset_denom: String,
         id: u64,
+    },
+    GetLatestPrice {
+        contract_address: Addr,
+        price_denom: String,
+        asset_denom: String,
     },
     OrderSimulation {
         contract_address: Addr,
@@ -85,6 +90,21 @@ pub struct GetOrdersResponse {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct GetOrderByIdResponse {
     pub order: OrderResponse,
+}
+
+/// PriceResponse is data format for a price of an asset pair
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct PriceResponse {
+    pub snapshot_timestamp_in_seconds: u64,
+    pub price: Decimal,
+    pub pair: DexPair,
+}
+
+/// GetLatestPriceResponse is data format returned from GetLatestPrice query
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct GetLatestPriceResponse {
+    pub price: PriceResponse,
 }
 
 /// OrderSimulationResponse is data format returned from OrderSimulation query

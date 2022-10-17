@@ -14,7 +14,7 @@ pub use querier::SeiQuerier;
 pub use query::{
     CreatorInDenomFeeWhitelistResponse, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
     GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwapsResponse,
-    OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
+    GetLatestPriceResponse, PriceResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
 };
 pub use route::SeiRoute;
 pub use sei_types::{
