@@ -466,7 +466,7 @@ fn get_oracle_twaps(
             if Uint64::new(start) - rate.oracle_exchange_rate.last_update < Uint64::new(lbs) {
                 sum += last_rate.mul(Decimal::from_ratio(
                     Uint128::new((time - rate.oracle_exchange_rate.last_update.u64()).into()),
-                    Uint128::one(),
+                    Uint128::new(1),
                 ));
                 time = rate.oracle_exchange_rate.last_update.u64();
             } else {
@@ -479,7 +479,7 @@ fn get_oracle_twaps(
             let diff = sec.sub(start - time);
             sum += last_rate.mul(Decimal::from_ratio(
                 Uint128::new(diff.into()),
-                Uint128::one(),
+                Uint128::new(1),
             ));
         }
 
@@ -487,7 +487,7 @@ fn get_oracle_twaps(
             denom: key.clone(),
             twap: sum.div(Decimal::from_ratio(
                 Uint128::new(lbs.into()),
-                Uint128::one(),
+                Uint128::new(1),
             )),
             lookback_seconds: lookback_seconds,
         });
