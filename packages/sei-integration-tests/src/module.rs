@@ -181,7 +181,7 @@ impl Module for SeiModule {
                 return query_get_orders_helper(storage, contract_address, account);
             }
             // TODO: Implement Set and Get latest price in integration tests
-            SeiQuery::GetLatestPrice {..} => {
+            SeiQuery::GetLatestPrice { .. } => {
                 panic!("Get Latest Price Query not implemented")
             }
             SeiQuery::GetOrderById {
