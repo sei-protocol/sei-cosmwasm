@@ -12,8 +12,8 @@ use protobuf::Message;
 use sei_cosmwasm::{
     BulkOrderPlacementsResponse, ContractOrderResult, CreatorInDenomFeeWhitelistResponse,
     DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
-    GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse, LiquidationRequest,
-    LiquidationResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
+    GetDenomFeeWhitelistResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
+    LiquidationRequest, LiquidationResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
     OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
     SettlementEntry, SudoMsg,
 };
@@ -385,6 +385,16 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
         QueryMsg::CreatorInDenomFeeWhitelist { creator } => {
             to_binary(&query_creator_in_denom_fee_whitelist(deps, creator)?)
         }
+        QueryMsg::GetLatestPrice {
+            contract_address,
+            price_denom,
+            asset_denom,
+        } => to_binary(&query_get_latest_price(
+            deps,
+            contract_address,
+            price_denom,
+            asset_denom,
+        )?),
     }
 }
 
@@ -460,6 +470,20 @@ pub fn query_get_order_by_id(
     let querier = SeiQuerier::new(&deps.querier);
     let res: GetOrderByIdResponse =
         querier.query_get_order_by_id(valid_addr, price_denom, asset_denom, order_id)?;
+
+    Ok(res)
+}
+
+pub fn query_get_latest_price(
+    deps: Deps<SeiQueryWrapper>,
+    contract_address: String,
+    price_denom: String,
+    asset_denom: String,
+) -> StdResult<GetLatestPriceResponse> {
+    let valid_addr = deps.api.addr_validate(&contract_address)?;
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: GetLatestPriceResponse =
+        querier.query_get_latest_price(valid_addr, price_denom, asset_denom)?;
 
     Ok(res)
 }

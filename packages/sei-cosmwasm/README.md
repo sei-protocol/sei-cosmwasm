@@ -27,6 +27,8 @@ Currently, Sei Bindings support query and message support for the sei custom mod
             - Gets time weighted average prices for assets on the specific order book
         - GetOrders
             - Get orders by a specific account on the dex order book
+        - GetLatestPrice
+            - Get latest price by a specific contract and asset pair
         - GetOrderById
             - Get individual order by order ID
     - Message

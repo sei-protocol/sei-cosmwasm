@@ -2,8 +2,8 @@ use cosmwasm_std::{Addr, QuerierWrapper, StdResult};
 
 use crate::query::{
     CreatorInDenomFeeWhitelistResponse, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
-    GetDenomFeeWhitelistResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwapsResponse,
-    OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
+    GetDenomFeeWhitelistResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
+    OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
 };
 use crate::route::SeiRoute;
 use crate::Order;
@@ -145,6 +145,24 @@ impl<'a> SeiQuerier<'a> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Tokenfactory,
             query_data: SeiQuery::CreatorInDenomFeeWhitelist { creator },
+        }
+        .into();
+        self.querier.query(&request)
+    }
+
+    pub fn query_get_latest_price(
+        &self,
+        contract_address: Addr,
+        price_denom: String,
+        asset_denom: String,
+    ) -> StdResult<GetLatestPriceResponse> {
+        let request = SeiQueryWrapper {
+            route: SeiRoute::Dex,
+            query_data: SeiQuery::GetLatestPrice {
+                contract_address,
+                price_denom,
+                asset_denom,
+            },
         }
         .into();
         self.querier.query(&request)
