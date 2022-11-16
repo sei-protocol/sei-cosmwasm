@@ -50,10 +50,6 @@ pub enum SeiQuery {
         contract_address: Addr,
         order: Order,
     },
-    GetDenomFeeWhitelist {},
-    CreatorInDenomFeeWhitelist {
-        creator: Addr,
-    },
 }
 
 /// ExchangeRatesResponse is data format returned from OracleRequest::ExchangeRates query
@@ -111,16 +107,4 @@ pub struct GetLatestPriceResponse {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct OrderSimulationResponse {
     pub executed_quantity: Decimal,
-}
-
-/// GetDenomFeeWhitelistResponse is data format returned from GetDenomFeeWhitelist query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct GetDenomFeeWhitelistResponse {
-    pub creators: Vec<String>,
-}
-
-/// CreatorInDenomFeeWhitelistResponse is data format returned from CreatorInDenomFeeWhitelist query
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct CreatorInDenomFeeWhitelistResponse {
-    pub whitelisted: bool,
 }

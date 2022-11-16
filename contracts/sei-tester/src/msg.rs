@@ -42,13 +42,9 @@ pub enum QueryMsg {
         asset_denom: String,
         id: u64,
     },
-    GetDenomFeeWhitelist {},
     GetLatestPrice {
         contract_address: String,
         price_denom: String,
         asset_denom: String,
-    },
-    CreatorInDenomFeeWhitelist {
-        creator: String,
     },
 }

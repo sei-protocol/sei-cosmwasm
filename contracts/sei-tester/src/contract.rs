@@ -10,9 +10,8 @@ use crate::{
 };
 use protobuf::Message;
 use sei_cosmwasm::{
-    BulkOrderPlacementsResponse, ContractOrderResult, CreatorInDenomFeeWhitelistResponse,
-    DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
-    GetDenomFeeWhitelistResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
+    BulkOrderPlacementsResponse, ContractOrderResult, DepositInfo, DexTwapsResponse, EpochResponse,
+    ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
     LiquidationRequest, LiquidationResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
     OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
     SettlementEntry, SudoMsg,
@@ -381,10 +380,6 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
             asset_denom,
             id,
         )?),
-        QueryMsg::GetDenomFeeWhitelist {} => to_binary(&query_get_denom_fee_whitelist(deps)?),
-        QueryMsg::CreatorInDenomFeeWhitelist { creator } => {
-            to_binary(&query_creator_in_denom_fee_whitelist(deps, creator)?)
-        }
         QueryMsg::GetLatestPrice {
             contract_address,
             price_denom,
@@ -484,27 +479,6 @@ pub fn query_get_latest_price(
     let querier = SeiQuerier::new(&deps.querier);
     let res: GetLatestPriceResponse =
         querier.query_get_latest_price(valid_addr, price_denom, asset_denom)?;
-
-    Ok(res)
-}
-
-pub fn query_get_denom_fee_whitelist(
-    deps: Deps<SeiQueryWrapper>,
-) -> StdResult<GetDenomFeeWhitelistResponse> {
-    let querier = SeiQuerier::new(&deps.querier);
-    let res: GetDenomFeeWhitelistResponse = querier.query_get_denom_fee_whitelist()?;
-
-    Ok(res)
-}
-
-pub fn query_creator_in_denom_fee_whitelist(
-    deps: Deps<SeiQueryWrapper>,
-    creator: String,
-) -> StdResult<CreatorInDenomFeeWhitelistResponse> {
-    let valid_addr = deps.api.addr_validate(&creator)?;
-    let querier = SeiQuerier::new(&deps.querier);
-    let res: CreatorInDenomFeeWhitelistResponse =
-        querier.query_creator_in_denom_fee_whitelist(valid_addr)?;
 
     Ok(res)
 }
