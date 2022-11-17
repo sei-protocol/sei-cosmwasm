@@ -1,9 +1,9 @@
 use cosmwasm_std::{Addr, QuerierWrapper, StdResult};
 
 use crate::query::{
-    CreatorInDenomFeeWhitelistResponse, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
-    GetDenomFeeWhitelistResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
-    OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
+    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse,
+    GetOrderByIdResponse, GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse,
+    SeiQuery, SeiQueryWrapper,
 };
 use crate::route::SeiRoute;
 use crate::Order;
@@ -121,30 +121,6 @@ impl<'a> SeiQuerier<'a> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Epoch,
             query_data: SeiQuery::Epoch {},
-        }
-        .into();
-        self.querier.query(&request)
-    }
-
-    /*
-    query tokenfactory module
-    */
-    pub fn query_get_denom_fee_whitelist(&self) -> StdResult<GetDenomFeeWhitelistResponse> {
-        let request = SeiQueryWrapper {
-            route: SeiRoute::Tokenfactory,
-            query_data: SeiQuery::GetDenomFeeWhitelist {},
-        }
-        .into();
-        self.querier.query(&request)
-    }
-
-    pub fn query_creator_in_denom_fee_whitelist(
-        &self,
-        creator: Addr,
-    ) -> StdResult<CreatorInDenomFeeWhitelistResponse> {
-        let request = SeiQueryWrapper {
-            route: SeiRoute::Tokenfactory,
-            query_data: SeiQuery::CreatorInDenomFeeWhitelist { creator },
         }
         .into();
         self.querier.query(&request)

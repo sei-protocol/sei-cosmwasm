@@ -6,11 +6,10 @@ use cosmwasm_std::{
 use cw_multi_test::{AppResponse, BankSudo, CosmosRouter, Module, SudoMsg};
 use schemars::JsonSchema;
 use sei_cosmwasm::{
-    CreatorInDenomFeeWhitelistResponse, DenomOracleExchangeRatePair, DexPair, DexTwap,
-    DexTwapsResponse, Epoch, EpochResponse, ExchangeRatesResponse, GetDenomFeeWhitelistResponse,
-    GetOrderByIdResponse, GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse,
-    OrderSimulationResponse, OrderStatus, PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper,
-    SudoMsg as SeiSudoMsg,
+    DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, Epoch, EpochResponse,
+    ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwap,
+    OracleTwapsResponse, Order, OrderResponse, OrderSimulationResponse, OrderStatus,
+    PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SudoMsg as SeiSudoMsg,
 };
 use serde::de::DeserializeOwned;
 use std::{
@@ -22,7 +21,6 @@ use std::{
 pub struct SeiModule {
     epoch: Epoch,
     exchange_rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
-    denom_fee_whitelist: Vec<String>,
 }
 
 const GENESIS_EPOCH: Epoch = Epoch {
@@ -38,9 +36,6 @@ impl SeiModule {
         SeiModule {
             epoch: GENESIS_EPOCH,
             exchange_rates: HashMap::new(),
-            denom_fee_whitelist: ["whitelist1", "whitelist2", "whitelist3"]
-                .map(String::from)
-                .to_vec(),
         }
     }
 
@@ -65,9 +60,6 @@ impl SeiModule {
         SeiModule {
             epoch: GENESIS_EPOCH,
             exchange_rates: exchange_rates,
-            denom_fee_whitelist: ["whitelist1", "whitelist2", "whitelist3"]
-                .map(String::from)
-                .to_vec(),
         }
     }
 
@@ -75,9 +67,6 @@ impl SeiModule {
         SeiModule {
             epoch: new_epoch,
             exchange_rates: (&self.exchange_rates).clone(),
-            denom_fee_whitelist: ["whitelist1", "whitelist2", "whitelist3"]
-                .map(String::from)
-                .to_vec(),
         }
     }
 }
@@ -197,15 +186,6 @@ impl Module for SeiModule {
                     asset_denom,
                     id,
                 );
-            }
-            SeiQuery::GetDenomFeeWhitelist {} => {
-                return query_get_denom_fee_whitelist_helper(self.denom_fee_whitelist.clone())
-            }
-            SeiQuery::CreatorInDenomFeeWhitelist { creator } => {
-                return query_get_creator_in_denom_fee_whitelist_helper(
-                    creator,
-                    self.denom_fee_whitelist.clone(),
-                )
             }
         }
     }
@@ -678,32 +658,6 @@ fn get_epoch(epoch: Epoch) -> EpochResponse {
 // Query: GetEpoch()
 fn query_get_epoch_helper(epoch: Epoch) -> AnyResult<Binary> {
     return Ok(to_binary(&get_epoch(epoch))?);
-}
-
-fn get_denom_fee_whitelist(denom_fee_whitelist: Vec<String>) -> GetDenomFeeWhitelistResponse {
-    GetDenomFeeWhitelistResponse {
-        creators: denom_fee_whitelist,
-    }
-}
-
-// Query: GetDenomFeeWhitelist()
-fn query_get_denom_fee_whitelist_helper(denom_fee_whitelist: Vec<String>) -> AnyResult<Binary> {
-    return Ok(to_binary(&get_denom_fee_whitelist(denom_fee_whitelist))?);
-}
-
-fn get_creator_in_denom_fee_whitelist(whitelisted: bool) -> CreatorInDenomFeeWhitelistResponse {
-    CreatorInDenomFeeWhitelistResponse {
-        whitelisted: whitelisted,
-    }
-}
-
-// Query: CreatorInDenomFeeWhitelistResponse()
-fn query_get_creator_in_denom_fee_whitelist_helper(
-    creator: Addr,
-    denom_fee_whitelist: Vec<String>,
-) -> AnyResult<Binary> {
-    let whitelisted: bool = denom_fee_whitelist.contains(&creator.to_string());
-    return Ok(to_binary(&get_creator_in_denom_fee_whitelist(whitelisted))?);
 }
 
 // TokenFactory Msg
