@@ -28,7 +28,8 @@ pub struct OracleTwap {
 pub struct DexPair {
     pub price_denom: String,
     pub asset_denom: String,
-    pub tick_size: Decimal,
+    pub price_tick_size: Decimal,
+    pub quantity_tick_size: Decimal,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

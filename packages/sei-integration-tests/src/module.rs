@@ -544,7 +544,8 @@ fn get_dex_twaps(
             pair: DexPair {
                 asset_denom: key.0.clone(),
                 price_denom: key.1.clone(),
-                tick_size: Decimal::from_ratio(1u128, 10000u128),
+                price_tick_size: Decimal::from_ratio(1u128, 10000u128),
+                quantity_tick_size: Decimal::from_ratio(1u128, 10000u128),
             },
             twap: sum.div(Decimal::from_ratio(lookback_seconds, 1u64)),
             lookback_seconds: lookback_seconds,

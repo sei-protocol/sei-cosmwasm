@@ -887,7 +887,8 @@ fn test_dex_module_query_dex_twap() {
             pair: DexPair {
                 price_denom: "USDC".to_string(),
                 asset_denom: "ATOM".to_string(),
-                tick_size: Decimal::from_ratio(1u128, 10000u128),
+                price_tick_size: Decimal::from_ratio(1u128, 10000u128),
+                quantity_tick_size: Decimal::from_ratio(1u128, 10000u128),
             },
             twap: Decimal::raw(433),
             lookback_seconds: 6,
