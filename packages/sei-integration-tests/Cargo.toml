@@ -1,6 +1,6 @@
 [package]
 name = "sei-integration-tests"
-version = "0.4.7"
+version = "0.4.9"
 edition = "2021"
 description = "Custom module to support integration tests for Sei chain contracts"
 license = "Apache-2.0"
@@ -9,7 +9,7 @@ readme = "README.md"
 [dependencies]
 cw-multi-test = "0.14.0"
 anyhow = "1"
-sei-cosmwasm = { path = "../sei-cosmwasm", version = "0.4.7" }
+sei-cosmwasm = { path = "../sei-cosmwasm", version = "0.4.9" }
 cosmwasm-std = "1.0.0"
 cw20-base = "0.13.4"
 schemars = "0.8.8"
