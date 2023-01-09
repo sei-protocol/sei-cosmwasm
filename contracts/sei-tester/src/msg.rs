@@ -11,6 +11,8 @@ pub enum ExecuteMsg {
     PlaceOrders {},
     CancelOrders { order_ids: Vec<u64> },
     CreateDenom {},
+    PrintOraclePrice {},
+    PrintDexPrice {},
     Mint {},
     Burn {},
     ChangeAdmin {},

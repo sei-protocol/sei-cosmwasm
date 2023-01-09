@@ -59,10 +59,40 @@ pub fn execute(
         ExecuteMsg::PlaceOrders {} => place_orders(deps, env, info),
         ExecuteMsg::CancelOrders { order_ids } => cancel_orders(deps, env, info, order_ids),
         ExecuteMsg::CreateDenom {} => create_denom(deps, env, info),
+        ExecuteMsg::PrintOraclePrice {} => print_oracle_price(deps, env, info),
+        ExecuteMsg::PrintDexPrice {} => print_dex_price(deps, env, info),
         ExecuteMsg::Mint {} => mint(deps, env, info),
         ExecuteMsg::Burn {} => burn(deps, env, info),
         ExecuteMsg::ChangeAdmin {} => change_admin(deps, env, info),
     }
+}
+
+pub fn print_oracle_price(
+    deps: DepsMut<SeiQueryWrapper>,
+    _env: Env,
+    _info: MessageInfo,
+) -> Result<Response<SeiMsg>, StdError> {
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: OracleTwapsResponse = querier.query_oracle_twaps(10)?;
+
+    // print out oracle twap price
+    deps.api.debug(&format!("Current oracle twap price {} - {}", res.oracle_twaps[0].denom, res.oracle_twaps[0].twap));
+
+    Ok(Response::new())
+}
+
+pub fn print_dex_price(
+    deps: DepsMut<SeiQueryWrapper>,
+    _env: Env,
+    _info: MessageInfo,
+) -> Result<Response<SeiMsg>, StdError> {
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: ExchangeRatesResponse = querier.query_exchange_rates()?;
+
+    // print out oracle twap price
+    deps.api.debug(&format!("Current dex twap price {}", res.denom_oracle_exchange_rate_pairs[0].denom));
+
+    Ok(Response::new())
 }
 
 pub fn place_orders(

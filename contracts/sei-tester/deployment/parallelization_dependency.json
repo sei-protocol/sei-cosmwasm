@@ -1,0 +1,59 @@
+{
+    "wasm_dependency_mapping": {
+      "enabled": true,
+      "contract_address": "sei14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9sh9m79m",
+      "access_ops": [
+        {
+          "operation": {
+            "access_type": "WRITE",
+            "resource_type": "KV_WASM_CONTRACT_STORE",
+            "identifier_template": "03%s"
+          },
+          "selector_type": "CONTRACT_ADDRESS",
+          "selector": "sei14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9sh9m79m"
+        },
+        {
+          "operation": {
+            "access_type": "READ",
+            "resource_type": "KV_WASM_CONTRACT_STORE",
+            "identifier_template": "03%s"
+          },
+          "selector_type": "CONTRACT_ADDRESS",
+          "selector": "sei14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9sh9m79m"
+        },
+        {
+          "operation": {
+            "access_type": "READ",
+            "resource_type": "KV_WASM_CODE",
+            "identifier_template": "010000000000000001"
+          },
+          "selector_type": "NONE"
+        },
+        {
+          "operation": {
+            "access_type": "READ",
+            "resource_type": "KV_WASM_PINNED_CODE_INDEX",
+            "identifier_template": "070000000000000001"
+          },
+          "selector_type": "NONE"
+        },
+        {
+          "operation": {
+            "access_type": "READ",
+            "resource_type": "KV_WASM_CONTRACT_ADDRESS",
+            "identifier_template": "02%s"
+          },
+          "selector_type": "CONTRACT_ADDRESS",
+          "selector": "sei14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9sh9m79m"
+        },
+        {
+          "operation": {
+            "access_type": "COMMIT",
+            "resource_type": "ANY",
+            "identifier_template": "*"
+          },
+          "selector_type": "NONE"
+        }
+      ]
+    }
+  }
