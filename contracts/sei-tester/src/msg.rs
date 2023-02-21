@@ -21,7 +21,7 @@ pub enum ExecuteMsg {
 pub enum QueryMsg {
     ExchangeRates {},
     OracleTwaps {
-        lookback_seconds: i64,
+        lookback_seconds: u64,
     },
     DexTwaps {
         contract_address: String,

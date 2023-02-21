@@ -402,7 +402,7 @@ pub fn query_exchange_rates(deps: Deps<SeiQueryWrapper>) -> StdResult<ExchangeRa
 
 pub fn query_oracle_twaps(
     deps: Deps<SeiQueryWrapper>,
-    lookback_seconds: i64,
+    lookback_seconds: u64,
 ) -> StdResult<OracleTwapsResponse> {
     let querier = SeiQuerier::new(&deps.querier);
     let res: OracleTwapsResponse = querier.query_oracle_twaps(lookback_seconds)?;

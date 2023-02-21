@@ -31,7 +31,7 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
-    pub fn query_oracle_twaps(&self, lookback_seconds: i64) -> StdResult<OracleTwapsResponse> {
+    pub fn query_oracle_twaps(&self, lookback_seconds: u64) -> StdResult<OracleTwapsResponse> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Oracle,
             query_data: SeiQuery::OracleTwaps { lookback_seconds },

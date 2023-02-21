@@ -21,7 +21,7 @@ pub struct DenomOracleExchangeRatePair {
 pub struct OracleTwap {
     pub denom: String,
     pub twap: Decimal,
-    pub lookback_seconds: i64,
+    pub lookback_seconds: u64,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

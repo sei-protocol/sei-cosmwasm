@@ -423,7 +423,7 @@ fn get_exchange_rates(
 fn get_oracle_twaps(
     block: &BlockInfo,
     rates: HashMap<String, Vec<DenomOracleExchangeRatePair>>,
-    lookback_seconds: i64,
+    lookback_seconds: u64,
 ) -> OracleTwapsResponse {
     let mut oracle_twaps: Vec<OracleTwap> = Vec::new();
     let lbs = lookback_seconds as u64;
