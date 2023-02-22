@@ -1,12 +1,13 @@
 use cosmwasm_std::{
     coin, from_binary,
     testing::{MockApi, MockStorage},
-    Addr, Api, BalanceResponse, Coin, CosmosMsg, Decimal, QueryRequest, StdError, Storage, Uint128, IbcMsg, GovMsg, IbcQuery, Empty,
+    Addr, Api, BalanceResponse, Coin, CosmosMsg, Decimal, Empty, GovMsg, IbcMsg, IbcQuery,
+    QueryRequest, StdError, Storage, Uint128,
 };
 use cosmwasm_std::{BlockInfo, Uint64};
 use cw_multi_test::{
-    App, BankKeeper, ContractWrapper, Executor, Router,
-    WasmKeeper, StakeKeeper, DistributionKeeper, FailingModule,
+    App, BankKeeper, ContractWrapper, DistributionKeeper, Executor, FailingModule, Router,
+    StakeKeeper, WasmKeeper,
 };
 use sei_cosmwasm::{
     DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse,

@@ -1,10 +1,12 @@
 use cosmwasm_std::{
     from_binary,
     testing::{MockApi, MockQuerier, MockStorage},
-    Api, BalanceResponse, BankQuery, BlockInfo, MemoryStorage, Storage, Timestamp, Empty, IbcMsg, IbcQuery, GovMsg,
+    Api, BalanceResponse, BankQuery, BlockInfo, Empty, GovMsg, IbcMsg, IbcQuery, MemoryStorage,
+    Storage, Timestamp,
 };
 use cw_multi_test::{
-    App, AppBuilder, BankKeeper, StakeKeeper, DistributionKeeper, Module, Router, WasmKeeper, FailingModule,
+    App, AppBuilder, BankKeeper, DistributionKeeper, FailingModule, Module, Router, StakeKeeper,
+    WasmKeeper,
 };
 use sei_cosmwasm::{DenomOracleExchangeRatePair, SeiMsg, SeiQueryWrapper};
 
