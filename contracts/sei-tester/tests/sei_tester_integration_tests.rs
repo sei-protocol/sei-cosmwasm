@@ -1,12 +1,12 @@
 use cosmwasm_std::{
     coin, from_binary,
     testing::{MockApi, MockStorage},
-    Addr, Api, BalanceResponse, Coin, CosmosMsg, Decimal, QueryRequest, StdError, Storage, Uint128,
+    Addr, Api, BalanceResponse, Coin, CosmosMsg, Decimal, QueryRequest, StdError, Storage, Uint128, IbcMsg, GovMsg, IbcQuery, Empty,
 };
 use cosmwasm_std::{BlockInfo, Uint64};
 use cw_multi_test::{
-    App, BankKeeper, ContractWrapper, Executor, FailingDistribution, FailingStaking, Router,
-    WasmKeeper,
+    App, BankKeeper, ContractWrapper, Executor, Router,
+    WasmKeeper, StakeKeeper, DistributionKeeper, FailingModule,
 };
 use sei_cosmwasm::{
     DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse,
@@ -33,8 +33,10 @@ fn init_default_balances(
         BankKeeper,
         SeiModule,
         WasmKeeper<SeiMsg, SeiQueryWrapper>,
-        FailingStaking,
-        FailingDistribution,
+        StakeKeeper,
+        DistributionKeeper,
+        FailingModule<IbcMsg, IbcQuery, Empty>,
+        FailingModule<GovMsg, Empty, Empty>,
     >,
     _api: &dyn Api,
     storage: &mut dyn Storage,
@@ -94,8 +96,10 @@ fn setup_test(
         MockStorage,
         SeiModule,
         WasmKeeper<SeiMsg, SeiQueryWrapper>,
-        FailingStaking,
-        FailingDistribution,
+        StakeKeeper,
+        DistributionKeeper,
+        FailingModule<IbcMsg, IbcQuery, Empty>,
+        FailingModule<GovMsg, Empty, Empty>,
     >,
 ) -> Addr {
     let sei_tester_code = app.store_code(Box::new(
