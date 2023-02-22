@@ -24,7 +24,7 @@ impl CustomQuery for SeiQueryWrapper {}
 pub enum SeiQuery {
     ExchangeRates {},
     OracleTwaps {
-        lookback_seconds: i64,
+        lookback_seconds: u64,
     },
     DexTwaps {
         contract_address: Addr,
