@@ -1,10 +1,10 @@
 use cosmwasm_std::{
     from_binary,
     testing::{MockApi, MockQuerier, MockStorage},
-    Api, BalanceResponse, BankQuery, BlockInfo, MemoryStorage, Storage, Timestamp,
+    Api, BalanceResponse, BankQuery, BlockInfo, MemoryStorage, Storage, Timestamp, Empty, IbcMsg, IbcQuery, GovMsg,
 };
 use cw_multi_test::{
-    App, AppBuilder, BankKeeper, FailingDistribution, FailingStaking, Module, Router, WasmKeeper,
+    App, AppBuilder, BankKeeper, StakeKeeper, DistributionKeeper, Module, Router, WasmKeeper, FailingModule,
 };
 use sei_cosmwasm::{DenomOracleExchangeRatePair, SeiMsg, SeiQueryWrapper};
 
@@ -45,8 +45,10 @@ pub fn mock_app<F>(
     MockStorage,
     SeiModule,
     WasmKeeper<SeiMsg, SeiQueryWrapper>,
-    FailingStaking,
-    FailingDistribution,
+    StakeKeeper,
+    DistributionKeeper,
+    FailingModule<IbcMsg, IbcQuery, Empty>,
+    FailingModule<GovMsg, Empty, Empty>,
 >
 where
     F: FnOnce(
@@ -54,8 +56,10 @@ where
             BankKeeper,
             SeiModule,
             WasmKeeper<SeiMsg, SeiQueryWrapper>,
-            FailingStaking,
-            FailingDistribution,
+            StakeKeeper,
+            DistributionKeeper,
+            FailingModule<IbcMsg, IbcQuery, Empty>,
+            FailingModule<GovMsg, Empty, Empty>,
         >,
         &dyn Api,
         &mut dyn Storage,
@@ -67,11 +71,15 @@ where
         MockStorage,
         SeiModule,
         WasmKeeper<SeiMsg, SeiQueryWrapper>,
-        FailingStaking,
-        FailingDistribution,
+        StakeKeeper,
+        DistributionKeeper,
+        FailingModule<IbcMsg, IbcQuery, Empty>,
+        FailingModule<GovMsg, Empty, Empty>,
     > = AppBuilder::new()
         .with_custom(SeiModule::new_with_oracle_exchange_rates(rates))
-        .with_wasm::<SeiModule, WasmKeeper<SeiMsg, SeiQueryWrapper>>(WasmKeeper::new());
+        .with_wasm::<SeiModule, WasmKeeper<SeiMsg, SeiQueryWrapper>>(WasmKeeper::new())
+        .with_staking(StakeKeeper::new())
+        .with_distribution(DistributionKeeper::new());
 
     appbuilder.build(init_fn)
 }
