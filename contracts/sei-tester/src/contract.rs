@@ -58,8 +58,8 @@ pub fn execute(
     match msg {
         ExecuteMsg::PlaceOrders {} => place_orders(deps, env, info),
         ExecuteMsg::CancelOrders { order_ids } => cancel_orders(deps, env, info, order_ids),
-        ExecuteMsg::CreateDenom {} => create_denom(deps, env, info),
-        ExecuteMsg::Mint {} => mint(deps, env, info),
+        ExecuteMsg::CreateDenom { subdenom } => create_denom(deps, env, info, subdenom),
+        ExecuteMsg::Mint { subdenom, amount_mint } => mint(deps, env, info, subdenom, amount_mint),
         ExecuteMsg::Burn {} => burn(deps, env, info),
         ExecuteMsg::ChangeAdmin {} => change_admin(deps, env, info),
     }
@@ -120,9 +120,10 @@ pub fn create_denom(
     _deps: DepsMut<SeiQueryWrapper>,
     _env: Env,
     _info: MessageInfo,
+    subdenom: String,
 ) -> Result<Response<SeiMsg>, StdError> {
     let test_create_denom = sei_cosmwasm::SeiMsg::CreateDenom {
-        subdenom: "subdenom".to_string(),
+        subdenom: subdenom,
     };
     Ok(Response::new().add_message(test_create_denom))
 }
@@ -133,10 +134,12 @@ pub fn mint(
     _deps: DepsMut<SeiQueryWrapper>,
     env: Env,
     info: MessageInfo,
+    subdenom: String,
+    amount_mint: u128,
 ) -> Result<Response<SeiMsg>, StdError> {
     let tokenfactory_denom =
-        "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
-    let amount = coin(100, tokenfactory_denom);
+        "factory/".to_string() + env.contract.address.to_string().as_ref() + subdenom.as_ref();
+    let amount = coin(amount_mint, tokenfactory_denom);
 
     let test_mint = sei_cosmwasm::SeiMsg::MintTokens {
         amount: amount.to_owned(),

@@ -10,8 +10,8 @@ pub struct InstantiateMsg {}
 pub enum ExecuteMsg {
     PlaceOrders {},
     CancelOrders { order_ids: Vec<u64> },
-    CreateDenom {},
-    Mint {},
+    CreateDenom { subdenom: String },
+    Mint { subdenom: String, amount_mint: u128 },
     Burn {},
     ChangeAdmin {},
 }
