@@ -11,7 +11,7 @@ pub enum ExecuteMsg {
     PlaceOrders {},
     CancelOrders { order_ids: Vec<u64> },
     CreateDenom { input_subdenom: String },
-    Mint { subdenom: String, amount_mint: u128 },
+    Mint { input_subdenom: String, amount_mint: u128 },
     Burn {},
     ChangeAdmin {},
 }

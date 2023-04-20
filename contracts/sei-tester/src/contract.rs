@@ -59,7 +59,7 @@ pub fn execute(
         ExecuteMsg::PlaceOrders {} => place_orders(deps, env, info),
         ExecuteMsg::CancelOrders { order_ids } => cancel_orders(deps, env, info, order_ids),
         ExecuteMsg::CreateDenom { input_subdenom } => create_denom(deps, env, info, input_subdenom),
-        ExecuteMsg::Mint { subdenom, amount_mint } => mint(deps, env, info, subdenom, amount_mint),
+        ExecuteMsg::Mint { input_subdenom, amount_mint } => mint(deps, env, info, input_subdenom, amount_mint),
         ExecuteMsg::Burn {} => burn(deps, env, info),
         ExecuteMsg::ChangeAdmin {} => change_admin(deps, env, info),
     }
