@@ -118,13 +118,32 @@ pub fn cancel_orders(
 // This will create a denom with fullname "factory/{creator address}/{subdenom}"
 pub fn create_denom(
     _deps: DepsMut<SeiQueryWrapper>,
-    _env: Env,
-    _info: MessageInfo,
+    env: Env,
+    info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
     let test_create_denom = sei_cosmwasm::SeiMsg::CreateDenom {
         subdenom: "subdenom".to_string(),
     };
-    Ok(Response::new().add_message(test_create_denom))
+
+    let tokenfactory_denom =
+        "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
+    let amount = coin(1000, tokenfactory_denom.to_owned());
+
+    let test_mint = sei_cosmwasm::SeiMsg::MintTokens {
+        amount: amount.to_owned(),
+    };
+
+    let invalid_amount = coin(1000, tokenfactory_denom);
+    let send_msg = SubMsg::new(BankMsg::Send {
+        to_address: info.sender.to_string(),
+        amount: vec![invalid_amount],
+    });
+
+    Ok(Response::new()
+        .add_message(test_create_denom)
+        .add_message(test_mint)
+        .add_submessage(send_msg)
+    )
 }
 
 // mint a token and send to a designated receiver
