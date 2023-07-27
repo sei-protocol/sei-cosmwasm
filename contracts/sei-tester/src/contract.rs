@@ -10,11 +10,11 @@ use crate::{
 };
 use protobuf::Message;
 use sei_cosmwasm::{
-    BulkOrderPlacementsResponse, ContractOrderResult, DepositInfo, DexTwapsResponse, EpochResponse,
-    ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
-    LiquidationRequest, LiquidationResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
-    OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
-    SettlementEntry, SudoMsg,
+    BulkOrderPlacementsResponse, ContractOrderResult, DenomMetadata, DenomUnit, DepositInfo,
+    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse,
+    GetOrderByIdResponse, GetOrdersResponse, LiquidationRequest, LiquidationResponse,
+    MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
+    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
@@ -62,6 +62,7 @@ pub fn execute(
         ExecuteMsg::Mint {} => mint(deps, env, info),
         ExecuteMsg::Burn {} => burn(deps, env, info),
         ExecuteMsg::ChangeAdmin {} => change_admin(deps, env, info),
+        ExecuteMsg::SetMetadata {} => set_metadata(deps, env, info),
     }
 }
 
@@ -176,6 +177,37 @@ pub fn change_admin(
         new_admin_address,
     };
     Ok(Response::new().add_message(test_change_admin))
+}
+
+// set coin metadata for a tokenfactory denom.
+pub fn set_metadata(
+    _deps: DepsMut<SeiQueryWrapper>,
+    _env: Env,
+    _info: MessageInfo,
+) -> Result<Response<SeiMsg>, StdError> {
+    let test_metadata = DenomMetadata {
+        description: "Token Metadata".to_string(),
+        base: "token".to_string(),
+        display: "TOKEN".to_string(),
+        name: "token_name".to_string(),
+        symbol: "TOKEN".to_string(),
+        denom_units: vec![
+            DenomUnit {
+                denom: "token1".to_string(),
+                exponent: 6 as u32,
+                aliases: vec!["microtoken1".to_string(), "token1".to_string()],
+            },
+            DenomUnit {
+                denom: "token".to_string(),
+                exponent: 0 as u32,
+                aliases: vec!["token".to_string()],
+            },
+        ],
+    };
+    let test_set_metadata = sei_cosmwasm::SeiMsg::SetMetadata {
+        metadata: test_metadata,
+    };
+    Ok(Response::new().add_message(test_set_metadata))
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]

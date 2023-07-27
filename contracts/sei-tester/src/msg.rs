@@ -14,6 +14,7 @@ pub enum ExecuteMsg {
     Mint {},
     Burn {},
     ChangeAdmin {},
+    SetMetadata {},
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

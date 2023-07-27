@@ -3,6 +3,25 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+/// Replicates the cosmos-sdk bank module Metadata type
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq, Eq, JsonSchema)]
+pub struct DenomMetadata {
+    pub description: String,
+    pub denom_units: Vec<DenomUnit>,
+    pub base: String,
+    pub display: String,
+    pub name: String,
+    pub symbol: String,
+}
+
+/// Replicates the cosmos-sdk bank module DenomUnit type
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq, Eq, JsonSchema)]
+pub struct DenomUnit {
+    pub denom: String,
+    pub exponent: u32,
+    pub aliases: Vec<String>,
+}
+
 #[derive(Serialize_repr, Deserialize_repr, Copy, Clone, Debug, PartialEq, Eq, Hash, JsonSchema)]
 #[repr(i32)]
 pub enum PositionDirection {

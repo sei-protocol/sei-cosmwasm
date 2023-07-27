@@ -50,6 +50,8 @@ Currently, Sei Bindings support query and message support for the sei custom mod
             - Burns an amount of a factory denom. Only the creater of the denom (admin) can mint.
         - ChangeAdmin
             - Change the Admin of the Denom. Only the current admin can change the admin.
+        - SetMetadata
+            - Set the denom metadata of a factory denom. Only the current admin can set metadata.
 
 ## Usage
 
