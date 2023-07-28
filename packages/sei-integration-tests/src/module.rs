@@ -188,11 +188,11 @@ impl Module for SeiModule {
                 );
             }
             // TODO: Implement get denom authority metadata in integration tests
-            SeiQuery::DenomAuthorityMetadata { .. } => {
+            SeiQuery::GetDenomAuthorityMetadata { .. } => {
                 panic!("Denom Authority Metadata not implemented")
             }
             // TODO: Implement get denom from creator in integration tests
-            SeiQuery::DenomsFromCreator { .. } => {
+            SeiQuery::GetDenomsFromCreator { .. } => {
                 panic!("Denoms From Creator not implemented")
             }
         }

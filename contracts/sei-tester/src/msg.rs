@@ -48,10 +48,10 @@ pub enum QueryMsg {
         price_denom: String,
         asset_denom: String,
     },
-    DenomAuthorityMetadata {
+    GetDenomAuthorityMetadata {
         denom: String,
     },
-    DenomsFromCreator {
+    GetDenomsFromCreator {
         creator: String,
     },
 }

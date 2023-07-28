@@ -50,10 +50,10 @@ pub enum SeiQuery {
         contract_address: Addr,
         order: Order,
     },
-    DenomAuthorityMetadata {
+    GetDenomAuthorityMetadata {
         denom: String,
     },
-    DenomsFromCreator {
+    GetDenomsFromCreator {
         creator: Addr,
     },
 }
@@ -115,13 +115,13 @@ pub struct OrderSimulationResponse {
     pub executed_quantity: Decimal,
 }
 
-/// DenomAuthorityMetadataResponse is data format returned from DenomAuthorityMetadata query
+/// DenomAuthorityMetadataResponse is data format returned from GetDenomAuthorityMetadata query
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct DenomAuthorityMetadataResponse {
     pub authority_metadata: DenomAuthorityMetadata,
 }
 
-/// DenomsFromCreatorResponse is data format returned from DenomsFromCreator query
+/// DenomsFromCreatorResponse is data format returned from GetDenomsFromCreator query
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct DenomsFromCreatorResponse {
     pub denoms: Vec<String>,

@@ -423,10 +423,10 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
             price_denom,
             asset_denom,
         )?),
-        QueryMsg::DenomAuthorityMetadata { denom } => {
+        QueryMsg::GetDenomAuthorityMetadata { denom } => {
             to_binary(&query_denom_authority_metadata(deps, denom)?)
         }
-        QueryMsg::DenomsFromCreator { creator } => {
+        QueryMsg::GetDenomsFromCreator { creator } => {
             to_binary(&query_denoms_from_creator(deps, creator)?)
         }
     }
