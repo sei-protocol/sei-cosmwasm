@@ -10,11 +10,12 @@ use crate::{
 };
 use protobuf::Message;
 use sei_cosmwasm::{
-    BulkOrderPlacementsResponse, ContractOrderResult, DenomMetadata, DenomUnit, DepositInfo,
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse,
-    GetOrderByIdResponse, GetOrdersResponse, LiquidationRequest, LiquidationResponse,
-    MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
-    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
+    BulkOrderPlacementsResponse, ContractOrderResult, DenomAuthorityMetadataResponse,
+    DenomMetadata, DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse,
+    EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse,
+    GetOrdersResponse, LiquidationRequest, LiquidationResponse, MsgPlaceOrdersResponse,
+    OracleTwapsResponse, Order, OrderSimulationResponse, OrderType, PositionDirection, SeiMsg,
+    SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
@@ -422,6 +423,12 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
             price_denom,
             asset_denom,
         )?),
+        QueryMsg::DenomAuthorityMetadata { denom } => {
+            to_binary(&query_denom_authority_metadata(deps, denom)?)
+        }
+        QueryMsg::DenomsFromCreator { creator } => {
+            to_binary(&query_denoms_from_creator(deps, creator)?)
+        }
     }
 }
 
@@ -511,6 +518,27 @@ pub fn query_get_latest_price(
     let querier = SeiQuerier::new(&deps.querier);
     let res: GetLatestPriceResponse =
         querier.query_get_latest_price(valid_addr, price_denom, asset_denom)?;
+
+    Ok(res)
+}
+
+pub fn query_denom_authority_metadata(
+    deps: Deps<SeiQueryWrapper>,
+    denom: String,
+) -> StdResult<DenomAuthorityMetadataResponse> {
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: DenomAuthorityMetadataResponse = querier.query_denom_authority_metadata(denom)?;
+
+    Ok(res)
+}
+
+pub fn query_denoms_from_creator(
+    deps: Deps<SeiQueryWrapper>,
+    creator: String,
+) -> StdResult<DenomsFromCreatorResponse> {
+    let creator_addr = deps.api.addr_validate(&creator)?;
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: DenomsFromCreatorResponse = querier.query_denoms_from_creator(creator_addr)?;
 
     Ok(res)
 }

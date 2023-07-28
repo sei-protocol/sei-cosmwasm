@@ -14,6 +14,12 @@ pub struct DenomMetadata {
     pub symbol: String,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct DenomAuthorityMetadata {
+    pub admin: String,
+}
+
 /// Replicates the cosmos-sdk bank module DenomUnit type
 #[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq, Eq, JsonSchema)]
 pub struct DenomUnit {
