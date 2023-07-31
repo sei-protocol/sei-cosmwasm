@@ -186,7 +186,6 @@ pub fn sudo(
 ) -> Result<Response<SeiMsg>, StdError> {
     match msg {
         SudoMsg::Settlement { epoch, entries } => process_settlements(deps, entries, epoch),
-        SudoMsg::NewBlock { epoch } => handle_new_block(deps, env, epoch),
         SudoMsg::BulkOrderPlacements { orders, deposits } => {
             process_bulk_order_placements(deps, orders, deposits)
         }
@@ -197,14 +196,6 @@ pub fn sudo(
 pub fn process_settlements(
     _deps: DepsMut<SeiQueryWrapper>,
     _entries: Vec<SettlementEntry>,
-    _epoch: i64,
-) -> Result<Response<SeiMsg>, StdError> {
-    Ok(Response::new())
-}
-
-pub fn handle_new_block(
-    _deps: DepsMut<SeiQueryWrapper>,
-    _env: Env,
     _epoch: i64,
 ) -> Result<Response<SeiMsg>, StdError> {
     Ok(Response::new())
