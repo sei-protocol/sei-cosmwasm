@@ -5,7 +5,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /// Replicates the cosmos-sdk bank module Metadata type
 #[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq, Eq, JsonSchema)]
-pub struct DenomMetadata {
+pub struct Metadata {
     pub description: String,
     pub denom_units: Vec<DenomUnit>,
     pub base: String,

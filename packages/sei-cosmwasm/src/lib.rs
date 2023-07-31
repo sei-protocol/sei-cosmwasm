@@ -18,7 +18,7 @@ pub use query::{
 };
 pub use route::SeiRoute;
 pub use sei_types::{
-    BulkOrderPlacementsResponse, ContractOrderResult, DenomMetadata, DenomUnit, DepositInfo,
+    BulkOrderPlacementsResponse, ContractOrderResult, Metadata, DenomUnit, DepositInfo,
     LiquidationRequest, LiquidationResponse, Order, OrderExecutionResult, OrderPlacementResult,
     OrderResponse, OrderStatus, OrderType, PositionDirection, SettlementEntry,
 };

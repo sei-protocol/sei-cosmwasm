@@ -11,7 +11,7 @@ use crate::{
 use protobuf::Message;
 use sei_cosmwasm::{
     BulkOrderPlacementsResponse, ContractOrderResult, DenomAuthorityMetadataResponse,
-    DenomMetadata, DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse,
+    Metadata, DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse,
     EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse,
     GetOrdersResponse, LiquidationRequest, LiquidationResponse, MsgPlaceOrdersResponse,
     OracleTwapsResponse, Order, OrderSimulationResponse, OrderType, PositionDirection, SeiMsg,
@@ -186,7 +186,7 @@ pub fn set_metadata(
     _env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
-    let test_metadata = DenomMetadata {
+    let test_metadata = Metadata {
         description: "Token Metadata".to_string(),
         base: "token".to_string(),
         display: "TOKEN".to_string(),
