@@ -1,6 +1,4 @@
-use crate::sei_types::{
-    Cancellation, DepositInfo, Order, SettlementEntry,
-};
+use crate::sei_types::{Cancellation, DepositInfo, Order, SettlementEntry};
 use cosmwasm_std::{Addr, Coin, CosmosMsg, CustomMsg};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};

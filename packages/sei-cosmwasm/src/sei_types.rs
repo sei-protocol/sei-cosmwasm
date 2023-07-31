@@ -98,18 +98,6 @@ pub struct DepositInfo {
     pub amount: Decimal,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct LiquidationRequest {
-    pub requestor: String,
-    pub account: String,
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema)]
-pub struct LiquidationResponse {
-    pub successful_accounts: Vec<String>,
-    pub liquidation_orders: Vec<Order>,
-}
-
 #[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema)]
 pub struct BulkOrderPlacementsResponse {
     pub unsuccessful_orders: Vec<UnsuccessfulOrder>,
