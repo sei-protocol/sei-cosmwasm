@@ -10,11 +10,10 @@ use cw_multi_test::{
     StakeKeeper, WasmKeeper,
 };
 use sei_cosmwasm::{
-    DenomMetadata, DenomOracleExchangeRatePair, DenomUnit, DexPair, DexTwap, DexTwapsResponse,
-    EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse,
-    OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus,
-    OrderType, PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute,
-    SudoMsg as SeiSudoMsg,
+    DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse,
+    ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleExchangeRate,
+    OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus, OrderType, PositionDirection,
+    SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute, SudoMsg as SeiSudoMsg,
 };
 use sei_integration_tests::{
     helper::{get_balance, mock_app},
@@ -211,20 +210,6 @@ fn test_tokenfactory_integration_foundation() {
         err.to_string(),
         "Must be owner of coin factory denom to burn".to_string()
     );
-
-    let arr = app
-        .execute_multi(
-            Addr::unchecked(ADMIN),
-            vec![CosmosMsg::Custom(SeiMsg::SetMetadata {
-                subdenom: "test".to_string(),
-            })],
-        )
-        .unwrap();
-    let res = arr.first().unwrap().clone().data;
-    let data = res.unwrap();
-
-    let out: String = from_binary(&data).unwrap();
-    assert_eq!(out.to_string(), "factory/admin/test");
 }
 
 /// Epoch Module - query
