@@ -43,6 +43,27 @@ pub struct Order {
     pub nominal: Decimal, // only needed for Fokmarketbyvalue order
 }
 
+#[derive(Serialize_repr, Deserialize_repr, Copy, Clone, Debug, PartialEq, Eq, Hash, JsonSchema)]
+#[repr(i32)]
+pub enum CancellationInitiator {
+    User = 0,
+    Liquidated = 1,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct Cancellation {
+    pub id: u64,
+    pub initiator: CancellationInitiator,
+    pub creator: String,
+    pub contract_address: String,
+    pub price_denom: String,
+    pub asset_denom: String,
+    pub order_type: OrderType,
+    pub position_direction: PositionDirection,
+    pub price: Decimal,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub struct OrderResponse {
@@ -55,29 +76,6 @@ pub struct OrderResponse {
     pub order_type: OrderType,
     pub position_direction: PositionDirection,
     pub data: String,
-}
-
-// The following are the types used in the sudo response for finalize block
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct ContractOrderResult {
-    pub contract_address: String,
-    pub order_placement_results: Vec<OrderPlacementResult>,
-    pub order_execution_results: Vec<OrderExecutionResult>,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct OrderPlacementResult {
-    pub order_id: u64,
-    pub status_code: i32,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct OrderExecutionResult {
-    pub order_id: u64,
-    pub execution_price: Decimal,
-    pub executed_quantity: Decimal,
-    pub total_notional: Decimal,
-    pub position_direction: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
