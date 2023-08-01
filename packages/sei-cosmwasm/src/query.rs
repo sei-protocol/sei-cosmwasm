@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::proto_structs::{DenomOracleExchangeRatePair, DexPair, DexTwap, Epoch, OracleTwap};
 use crate::route::SeiRoute;
-use crate::sei_types::OrderResponse;
+use crate::sei_types::{DenomAuthorityMetadata, OrderResponse};
 use crate::Order;
 
 /// SeiQueryWrapper is an override of QueryRequest::Custom to access Sei-specific modules
@@ -49,6 +49,12 @@ pub enum SeiQuery {
     OrderSimulation {
         contract_address: Addr,
         order: Order,
+    },
+    GetDenomAuthorityMetadata {
+        denom: String,
+    },
+    GetDenomsFromCreator {
+        creator: Addr,
     },
 }
 
@@ -107,4 +113,16 @@ pub struct GetLatestPriceResponse {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct OrderSimulationResponse {
     pub executed_quantity: Decimal,
+}
+
+/// DenomAuthorityMetadataResponse is data format returned from GetDenomAuthorityMetadata query
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct DenomAuthorityMetadataResponse {
+    pub authority_metadata: DenomAuthorityMetadata,
+}
+
+/// DenomsFromCreatorResponse is data format returned from GetDenomsFromCreator query
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct DenomsFromCreatorResponse {
+    pub denoms: Vec<String>,
 }

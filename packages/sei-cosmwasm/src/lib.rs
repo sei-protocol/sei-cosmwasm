@@ -12,15 +12,15 @@ pub use proto_structs::{
 };
 pub use querier::SeiQuerier;
 pub use query::{
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse,
-    GetOrderByIdResponse, GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse,
-    PriceResponse, SeiQuery, SeiQueryWrapper,
+    DenomAuthorityMetadataResponse, DenomsFromCreatorResponse, DexTwapsResponse, EpochResponse,
+    ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
+    OracleTwapsResponse, OrderSimulationResponse, PriceResponse, SeiQuery, SeiQueryWrapper,
 };
 pub use route::SeiRoute;
 pub use sei_types::{
-    BulkOrderPlacementsResponse, ContractOrderResult, DepositInfo, LiquidationRequest,
-    LiquidationResponse, Order, OrderExecutionResult, OrderPlacementResult, OrderResponse,
-    OrderStatus, OrderType, PositionDirection, SettlementEntry,
+    BulkOrderPlacementsResponse, ContractOrderResult, Metadata, DenomUnit, DepositInfo,
+    LiquidationRequest, LiquidationResponse, Order, OrderExecutionResult, OrderPlacementResult,
+    OrderResponse, OrderStatus, OrderType, PositionDirection, SettlementEntry,
 };
 pub use tx::MsgPlaceOrdersResponse;
 

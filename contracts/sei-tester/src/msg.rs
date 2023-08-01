@@ -14,6 +14,7 @@ pub enum ExecuteMsg {
     Mint {},
     Burn {},
     ChangeAdmin {},
+    SetMetadata {},
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -46,5 +47,11 @@ pub enum QueryMsg {
         contract_address: String,
         price_denom: String,
         asset_denom: String,
+    },
+    GetDenomAuthorityMetadata {
+        denom: String,
+    },
+    GetDenomsFromCreator {
+        creator: String,
     },
 }

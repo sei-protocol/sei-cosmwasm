@@ -1,9 +1,9 @@
 use cosmwasm_std::{Addr, QuerierWrapper, StdResult};
 
 use crate::query::{
-    DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse,
-    GetOrderByIdResponse, GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse,
-    SeiQuery, SeiQueryWrapper,
+    DenomAuthorityMetadataResponse, DenomsFromCreatorResponse, DexTwapsResponse, EpochResponse,
+    ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
+    OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper,
 };
 use crate::route::SeiRoute;
 use crate::Order;
@@ -139,6 +139,30 @@ impl<'a> SeiQuerier<'a> {
                 price_denom,
                 asset_denom,
             },
+        }
+        .into();
+        self.querier.query(&request)
+    }
+
+    /*
+    query tokenfactory module
+    */
+    pub fn query_denom_authority_metadata(
+        &self,
+        denom: String,
+    ) -> StdResult<DenomAuthorityMetadataResponse> {
+        let request = SeiQueryWrapper {
+            route: SeiRoute::Tokenfactory,
+            query_data: SeiQuery::GetDenomAuthorityMetadata { denom },
+        }
+        .into();
+        self.querier.query(&request)
+    }
+
+    pub fn query_denoms_from_creator(&self, creator: Addr) -> StdResult<DenomsFromCreatorResponse> {
+        let request = SeiQueryWrapper {
+            route: SeiRoute::Tokenfactory,
+            query_data: SeiQuery::GetDenomsFromCreator { creator },
         }
         .into();
         self.querier.query(&request)

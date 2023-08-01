@@ -10,11 +10,12 @@ use crate::{
 };
 use protobuf::Message;
 use sei_cosmwasm::{
-    BulkOrderPlacementsResponse, ContractOrderResult, DepositInfo, DexTwapsResponse, EpochResponse,
-    ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
-    LiquidationRequest, LiquidationResponse, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
-    OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
-    SettlementEntry, SudoMsg,
+    BulkOrderPlacementsResponse, ContractOrderResult, DenomAuthorityMetadataResponse,
+    Metadata, DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse,
+    EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse,
+    GetOrdersResponse, LiquidationRequest, LiquidationResponse, MsgPlaceOrdersResponse,
+    OracleTwapsResponse, Order, OrderSimulationResponse, OrderType, PositionDirection, SeiMsg,
+    SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
@@ -62,6 +63,7 @@ pub fn execute(
         ExecuteMsg::Mint {} => mint(deps, env, info),
         ExecuteMsg::Burn {} => burn(deps, env, info),
         ExecuteMsg::ChangeAdmin {} => change_admin(deps, env, info),
+        ExecuteMsg::SetMetadata {} => set_metadata(deps, env, info),
     }
 }
 
@@ -176,6 +178,37 @@ pub fn change_admin(
         new_admin_address,
     };
     Ok(Response::new().add_message(test_change_admin))
+}
+
+// set coin metadata for a tokenfactory denom.
+pub fn set_metadata(
+    _deps: DepsMut<SeiQueryWrapper>,
+    _env: Env,
+    _info: MessageInfo,
+) -> Result<Response<SeiMsg>, StdError> {
+    let test_metadata = Metadata {
+        description: "Token Metadata".to_string(),
+        base: "token".to_string(),
+        display: "TOKEN".to_string(),
+        name: "token_name".to_string(),
+        symbol: "TOKEN".to_string(),
+        denom_units: vec![
+            DenomUnit {
+                denom: "token1".to_string(),
+                exponent: 6 as u32,
+                aliases: vec!["microtoken1".to_string(), "token1".to_string()],
+            },
+            DenomUnit {
+                denom: "token".to_string(),
+                exponent: 0 as u32,
+                aliases: vec!["token".to_string()],
+            },
+        ],
+    };
+    let test_set_metadata = sei_cosmwasm::SeiMsg::SetMetadata {
+        metadata: test_metadata,
+    };
+    Ok(Response::new().add_message(test_set_metadata))
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -390,6 +423,12 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
             price_denom,
             asset_denom,
         )?),
+        QueryMsg::GetDenomAuthorityMetadata { denom } => {
+            to_binary(&query_denom_authority_metadata(deps, denom)?)
+        }
+        QueryMsg::GetDenomsFromCreator { creator } => {
+            to_binary(&query_denoms_from_creator(deps, creator)?)
+        }
     }
 }
 
@@ -479,6 +518,27 @@ pub fn query_get_latest_price(
     let querier = SeiQuerier::new(&deps.querier);
     let res: GetLatestPriceResponse =
         querier.query_get_latest_price(valid_addr, price_denom, asset_denom)?;
+
+    Ok(res)
+}
+
+pub fn query_denom_authority_metadata(
+    deps: Deps<SeiQueryWrapper>,
+    denom: String,
+) -> StdResult<DenomAuthorityMetadataResponse> {
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: DenomAuthorityMetadataResponse = querier.query_denom_authority_metadata(denom)?;
+
+    Ok(res)
+}
+
+pub fn query_denoms_from_creator(
+    deps: Deps<SeiQueryWrapper>,
+    creator: String,
+) -> StdResult<DenomsFromCreatorResponse> {
+    let creator_addr = deps.api.addr_validate(&creator)?;
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: DenomsFromCreatorResponse = querier.query_denoms_from_creator(creator_addr)?;
 
     Ok(res)
 }
