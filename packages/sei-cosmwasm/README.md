@@ -42,9 +42,9 @@ Currently, Sei Bindings support query and message support for the sei custom mod
             - Get current epoch information
 - TokenFactory
     - Query
-        - GetDenomAuthorityMetadata
+        - DenomAuthorityMetadata
             - Gets the denom authority metadata for a tokenfactory denom
-        - GetDenomsFromCreator
+        - DenomsFromCreator
             - Gets all the tokenfactory denoms from a creator
     - Message
         - CreateDenom

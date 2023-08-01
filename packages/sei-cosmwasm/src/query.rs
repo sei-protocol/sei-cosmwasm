@@ -50,10 +50,10 @@ pub enum SeiQuery {
         contract_address: Addr,
         order: Order,
     },
-    GetDenomAuthorityMetadata {
+    DenomAuthorityMetadata {
         denom: String,
     },
-    GetDenomsFromCreator {
+    DenomsFromCreator {
         creator: Addr,
     },
 }
