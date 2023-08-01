@@ -183,25 +183,25 @@ pub fn change_admin(
 // set coin metadata for a tokenfactory denom.
 pub fn set_metadata(
     _deps: DepsMut<SeiQueryWrapper>,
-    _env: Env,
+    env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
     let test_metadata = Metadata {
         description: "Token Metadata".to_string(),
-        base: "token".to_string(),
-        display: "TOKEN".to_string(),
-        name: "token_name".to_string(),
-        symbol: "TOKEN".to_string(),
+        base: "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom",
+        display: "SUBDENOM".to_string(),
+        name: "subdenom".to_string(),
+        symbol: "SUB".to_string(),
         denom_units: vec![
             DenomUnit {
-                denom: "token1".to_string(),
+                denom: "SUBDENOM".to_string(),
                 exponent: 6 as u32,
-                aliases: vec!["microtoken1".to_string(), "token1".to_string()],
+                aliases: vec!["subdenom".to_string()],
             },
             DenomUnit {
-                denom: "token".to_string(),
+                denom: "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom",
                 exponent: 0 as u32,
-                aliases: vec!["token".to_string()],
+                aliases: vec!["usubdenom".to_string()],
             },
         ],
     };
