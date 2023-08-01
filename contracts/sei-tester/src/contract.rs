@@ -10,12 +10,12 @@ use crate::{
 };
 use protobuf::Message;
 use sei_cosmwasm::{
-    BulkOrderPlacementsResponse, ContractOrderResult, DenomAuthorityMetadataResponse,
-    Metadata, DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse,
-    EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse,
-    GetOrdersResponse, LiquidationRequest, LiquidationResponse, MsgPlaceOrdersResponse,
-    OracleTwapsResponse, Order, OrderSimulationResponse, OrderType, PositionDirection, SeiMsg,
-    SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
+    BulkOrderPlacementsResponse, ContractOrderResult, DenomAuthorityMetadataResponse, DenomUnit,
+    DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
+    GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, LiquidationRequest,
+    LiquidationResponse, Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
+    OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
+    SettlementEntry, SudoMsg,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
@@ -194,14 +194,16 @@ pub fn set_metadata(
         symbol: "SUB".to_string(),
         denom_units: vec![
             DenomUnit {
+                denom: "factory/".to_string()
+                    + env.contract.address.to_string().as_ref()
+                    + "/subdenom",
+                exponent: 0 as u32,
+                aliases: vec!["usubdenom".to_string()],
+            },
+            DenomUnit {
                 denom: "SUBDENOM".to_string(),
                 exponent: 6 as u32,
                 aliases: vec!["subdenom".to_string()],
-            },
-            DenomUnit {
-                denom: "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom",
-                exponent: 0 as u32,
-                aliases: vec!["usubdenom".to_string()],
             },
         ],
     };
