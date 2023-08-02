@@ -153,7 +153,7 @@ impl<'a> SeiQuerier<'a> {
     ) -> StdResult<DenomAuthorityMetadataResponse> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Tokenfactory,
-            query_data: SeiQuery::GetDenomAuthorityMetadata { denom },
+            query_data: SeiQuery::DenomAuthorityMetadata { denom },
         }
         .into();
         self.querier.query(&request)
@@ -162,7 +162,7 @@ impl<'a> SeiQuerier<'a> {
     pub fn query_denoms_from_creator(&self, creator: Addr) -> StdResult<DenomsFromCreatorResponse> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Tokenfactory,
-            query_data: SeiQuery::GetDenomsFromCreator { creator },
+            query_data: SeiQuery::DenomsFromCreator { creator },
         }
         .into();
         self.querier.query(&request)

@@ -10,12 +10,12 @@ use crate::{
 };
 use protobuf::Message;
 use sei_cosmwasm::{
-    BulkOrderPlacementsResponse, ContractOrderResult, DenomAuthorityMetadataResponse,
-    Metadata, DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse,
-    EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse,
-    GetOrdersResponse, LiquidationRequest, LiquidationResponse, MsgPlaceOrdersResponse,
-    OracleTwapsResponse, Order, OrderSimulationResponse, OrderType, PositionDirection, SeiMsg,
-    SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
+    BulkOrderPlacementsResponse, ContractOrderResult, DenomAuthorityMetadataResponse, DenomUnit,
+    DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
+    GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, LiquidationRequest,
+    LiquidationResponse, Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
+    OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
+    SettlementEntry, SudoMsg,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
@@ -183,25 +183,27 @@ pub fn change_admin(
 // set coin metadata for a tokenfactory denom.
 pub fn set_metadata(
     _deps: DepsMut<SeiQueryWrapper>,
-    _env: Env,
+    env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
+    let tokenfactory_denom =
+        "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
     let test_metadata = Metadata {
         description: "Token Metadata".to_string(),
-        base: "token".to_string(),
-        display: "TOKEN".to_string(),
-        name: "token_name".to_string(),
-        symbol: "TOKEN".to_string(),
+        base: tokenfactory_denom.clone(),
+        display: "SUBDENOM".to_string(),
+        name: "subdenom".to_string(),
+        symbol: "SUB".to_string(),
         denom_units: vec![
             DenomUnit {
-                denom: "token1".to_string(),
-                exponent: 6 as u32,
-                aliases: vec!["microtoken1".to_string(), "token1".to_string()],
+                denom: tokenfactory_denom.clone(),
+                exponent: 0 as u32,
+                aliases: vec!["usubdenom".to_string()],
             },
             DenomUnit {
-                denom: "token".to_string(),
-                exponent: 0 as u32,
-                aliases: vec!["token".to_string()],
+                denom: "SUBDENOM".to_string(),
+                exponent: 6 as u32,
+                aliases: vec!["subdenom".to_string()],
             },
         ],
     };

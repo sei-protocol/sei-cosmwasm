@@ -1,5 +1,5 @@
 use crate::sei_types::{
-    ContractOrderResult, Metadata, DepositInfo, LiquidationRequest, Order, SettlementEntry,
+    ContractOrderResult, DepositInfo, LiquidationRequest, Metadata, Order, SettlementEntry,
 };
 use cosmwasm_std::{Addr, Coin, CosmosMsg, CustomMsg};
 use schemars::JsonSchema;
