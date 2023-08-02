@@ -186,17 +186,17 @@ pub fn set_metadata(
     env: Env,
     _info: MessageInfo,
 ) -> Result<Response<SeiMsg>, StdError> {
+    let tokenfactory_denom =
+        "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom";
     let test_metadata = Metadata {
         description: "Token Metadata".to_string(),
-        base: "factory/".to_string() + env.contract.address.to_string().as_ref() + "/subdenom",
+        base: tokenfactory_denom.clone(),
         display: "SUBDENOM".to_string(),
         name: "subdenom".to_string(),
         symbol: "SUB".to_string(),
         denom_units: vec![
             DenomUnit {
-                denom: "factory/".to_string()
-                    + env.contract.address.to_string().as_ref()
-                    + "/subdenom",
+                denom: tokenfactory_denom.clone(),
                 exponent: 0 as u32,
                 aliases: vec!["usubdenom".to_string()],
             },
