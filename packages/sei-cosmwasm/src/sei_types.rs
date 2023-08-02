@@ -60,6 +60,7 @@ pub struct OrderResponse {
     pub id: u64,
     pub status: OrderStatus,
     pub account: String,
+    pub contract_address: String,
     pub price: Decimal,
     pub quantity: Decimal,
     pub price_denom: String,
@@ -67,7 +68,7 @@ pub struct OrderResponse {
     pub order_type: OrderType,
     pub position_direction: PositionDirection,
     pub data: String,
-    pub nominal: Decimal, // only needed for Fokmarketbyvalue order
+    pub status_description: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

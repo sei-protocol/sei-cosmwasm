@@ -18,8 +18,8 @@ pub use query::{
 };
 pub use route::SeiRoute;
 pub use sei_types::{
-    BulkOrderPlacementsResponse, Cancellation, DepositInfo, Order, OrderResponse, OrderStatus, OrderType,
-    PositionDirection, SettlementEntry,
+    BulkOrderPlacementsResponse, Cancellation, DepositInfo, Order, OrderResponse, OrderStatus,
+    OrderType, PositionDirection, SettlementEntry,
 };
 pub use tx::MsgPlaceOrdersResponse;
 
