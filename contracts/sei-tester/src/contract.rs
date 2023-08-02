@@ -10,11 +10,10 @@ use crate::{
 };
 use protobuf::Message;
 use sei_cosmwasm::{
-    BulkOrderPlacementsResponse, DepositInfo, DexTwapsResponse, EpochResponse,
+    BulkOrderPlacementsResponse, Cancellation, DepositInfo, DexTwapsResponse, EpochResponse,
     ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
-    MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
-    OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
-    SettlementEntry, SudoMsg,
+    MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
+    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
@@ -107,8 +106,20 @@ pub fn cancel_orders(
     _info: MessageInfo,
     order_ids: Vec<u64>,
 ) -> Result<Response<SeiMsg>, StdError> {
+    let mut cancellations: Vec<Cancellation> = vec![];
+    for id in order_ids {
+        cancellations.push(Cancellation {
+            id,
+            contract_address: env.contract.address.to_string(),
+            price_denom: "USDC".to_string(),
+            asset_denom: "ATOM".to_string(),
+            price: Decimal::from_atomics(120u128, 0).unwrap(),
+            position_direction: PositionDirection::Long,
+            order_type: OrderType::Limit,
+        });
+    }
     let test_cancel = sei_cosmwasm::SeiMsg::CancelOrders {
-        order_ids,
+        cancellations,
         contract_address: env.contract.address,
     };
     Ok(Response::new().add_message(test_cancel))
@@ -181,7 +192,7 @@ pub fn change_admin(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn sudo(
     deps: DepsMut<SeiQueryWrapper>,
-    env: Env,
+    _env: Env,
     msg: SudoMsg,
 ) -> Result<Response<SeiMsg>, StdError> {
     match msg {
