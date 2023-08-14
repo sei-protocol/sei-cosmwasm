@@ -1,3 +1,5 @@
+use std::vec;
+
 use cosmwasm_std::{
     coin, from_binary,
     testing::{MockApi, MockStorage},
@@ -27,18 +29,12 @@ use sei_tester::{
 const ADMIN: &str = "admin";
 const NATIVE_DENOM: &str = "usei";
 
+pub type SeiRouter = Router<BankKeeper, SeiModule, WasmKeeper<SeiMsg, SeiQueryWrapper>, StakeKeeper, DistributionKeeper, FailingModule<IbcMsg, IbcQuery, Empty>, FailingModule<GovMsg, Empty, Empty>>;
+pub type SeiApp = App<BankKeeper, MockApi, MockStorage, SeiModule, WasmKeeper<SeiMsg, SeiQueryWrapper>, StakeKeeper, DistributionKeeper, FailingModule<IbcMsg, IbcQuery, Empty>, FailingModule<GovMsg, Empty, Empty>>;
 /// Init balances via bank
 
 fn init_default_balances(
-    router: &mut Router<
-        BankKeeper,
-        SeiModule,
-        WasmKeeper<SeiMsg, SeiQueryWrapper>,
-        StakeKeeper,
-        DistributionKeeper,
-        FailingModule<IbcMsg, IbcQuery, Empty>,
-        FailingModule<GovMsg, Empty, Empty>,
-    >,
+    router: &mut SeiRouter,
     _api: &dyn Api,
     storage: &mut dyn Storage,
 ) {
@@ -88,20 +84,11 @@ fn init_default_balances(
         .unwrap();
 }
 
+
 /// Helper for setting up test
 
 fn setup_test(
-    app: &mut App<
-        BankKeeper,
-        MockApi,
-        MockStorage,
-        SeiModule,
-        WasmKeeper<SeiMsg, SeiQueryWrapper>,
-        StakeKeeper,
-        DistributionKeeper,
-        FailingModule<IbcMsg, IbcQuery, Empty>,
-        FailingModule<GovMsg, Empty, Empty>,
-    >,
+    app: &mut SeiApp,
 ) -> Addr {
     let sei_tester_code = app.store_code(Box::new(
         ContractWrapper::new(execute, instantiate, query)
@@ -109,7 +96,7 @@ fn setup_test(
             .with_sudo(sei_tester::contract::sudo),
     )); //::<SeiMsg, SeiQueryWrapper>
 
-    let sei_tester_addr = app
+    app
         .instantiate_contract(
             sei_tester_code,
             Addr::unchecked(ADMIN),
@@ -118,9 +105,8 @@ fn setup_test(
             "sei_tester",
             Some(ADMIN.to_string()),
         )
-        .unwrap();
+        .unwrap()
 
-    sei_tester_addr
 }
 
 /// Basic msg examples
@@ -260,14 +246,14 @@ fn test_dex_module_integration_orders() {
     let status_description = "order1".to_string();
 
     let order1: Order = Order {
-        price: price,
-        quantity: quantity,
+        price,
+        quantity,
         price_denom: price_denom.clone(),
         asset_denom: asset_denom.clone(),
-        order_type: order_type,
-        position_direction: position_direction,
-        data: data, // serialized order data, defined by the specific target contract
-        status_description: status_description,
+        order_type,
+        position_direction,
+        data, // serialized order data, defined by the specific target contract
+        status_description,
         nominal: Decimal::zero(),
     };
     orders.push(order1);
@@ -305,8 +291,8 @@ fn test_dex_module_integration_orders() {
         .execute_multi(
             Addr::unchecked(ADMIN),
             vec![CosmosMsg::Custom(SeiMsg::PlaceOrders {
-                orders: orders,
-                funds: funds,
+                orders,
+                funds,
                 contract_address: Addr::unchecked(&contract_addr),
             })],
         )
@@ -419,8 +405,7 @@ fn test_dex_module_integration_orders() {
     assert!(error.is_some());
 
     // CancelOrders for a contract address that doesn't exist
-    let mut nonexistent_order_ids: Vec<u64> = Vec::new();
-    nonexistent_order_ids.push(3);
+    let nonexistent_order_ids: Vec<u64> = vec![0];
     let res = app.execute_multi(
         Addr::unchecked(ADMIN),
         vec![CosmosMsg::Custom(SeiMsg::CancelOrders {
@@ -432,8 +417,7 @@ fn test_dex_module_integration_orders() {
     assert!(error.is_some());
 
     // CancelOrders for order id 1
-    let mut cancel_order_ids: Vec<u64> = Vec::new();
-    cancel_order_ids.push(0);
+    let cancel_order_ids: Vec<u64> = vec![0];
     let arr = app
         .execute_multi(
             Addr::unchecked(ADMIN),
@@ -504,14 +488,14 @@ fn test_dex_module_query_order_simulation() {
     let status_description = "order1".to_string();
 
     let order1: Order = Order {
-        price: price,
-        quantity: quantity,
+        price,
+        quantity,
         price_denom: price_denom.clone(),
         asset_denom: asset_denom.clone(),
-        order_type: order_type,
-        position_direction: position_direction,
-        data: data, // serialized order data, defined by the specific target contract
-        status_description: status_description,
+        order_type,
+        position_direction,
+        data, // serialized order data, defined by the specific target contract
+        status_description,
         nominal: Decimal::zero(),
     };
     orders.push(order1);
@@ -547,9 +531,9 @@ fn test_dex_module_query_order_simulation() {
     app.execute_multi(
         Addr::unchecked(ADMIN),
         vec![CosmosMsg::Custom(SeiMsg::PlaceOrders {
-            orders: orders,
-            funds: funds,
-            contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
+            orders,
+            funds,
+            contract_address: Addr::unchecked(sei_tester_addr.to_string()),
         })],
     )
     .unwrap();
@@ -801,14 +785,14 @@ fn test_dex_module_query_dex_twap() {
     let status_description = "order1".to_string();
 
     let order1: Order = Order {
-        price: price,
-        quantity: quantity,
+        price,
+        quantity,
         price_denom: price_denom.clone(),
         asset_denom: asset_denom.clone(),
-        order_type: order_type,
-        position_direction: position_direction,
-        data: data, // serialized order data, defined by the specific target contract
-        status_description: status_description,
+        order_type,
+        position_direction,
+        data, // serialized order data, defined by the specific target contract
+        status_description,
         nominal: Decimal::zero(),
     };
     orders.push(order1);
@@ -816,12 +800,12 @@ fn test_dex_module_query_dex_twap() {
     app.execute_multi(
         Addr::unchecked(ADMIN),
         vec![CosmosMsg::Custom(SeiMsg::PlaceOrders {
-            orders: orders,
+            orders,
             funds: vec![Coin {
                 denom: "usei".to_string(),
                 amount: Uint128::new(10),
             }],
-            contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
+            contract_address: Addr::unchecked(sei_tester_addr.to_string()),
         })],
     )
     .unwrap();
@@ -860,12 +844,12 @@ fn test_dex_module_query_dex_twap() {
     app.execute_multi(
         Addr::unchecked(ADMIN),
         vec![CosmosMsg::Custom(SeiMsg::PlaceOrders {
-            orders: orders,
+            orders,
             funds: vec![Coin {
                 denom: "usei".to_string(),
                 amount: Uint128::new(10),
             }],
-            contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
+            contract_address: Addr::unchecked(sei_tester_addr.to_string()),
         })],
     )
     .unwrap();
@@ -881,7 +865,7 @@ fn test_dex_module_query_dex_twap() {
         .query(&QueryRequest::Custom(SeiQueryWrapper {
             route: SeiRoute::Dex,
             query_data: SeiQuery::DexTwaps {
-                contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
+                contract_address: Addr::unchecked(sei_tester_addr.to_string()),
                 lookback_seconds: 6,
             },
         }))
