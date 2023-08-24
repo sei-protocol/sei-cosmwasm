@@ -1,4 +1,6 @@
-use crate::sei_types::{Cancellation, DepositInfo, Order, SettlementEntry};
+use crate::sei_types::{
+    Cancellation, DepositInfo, Metadata, Order, SettlementEntry,
+};
 use cosmwasm_std::{Addr, Coin, CosmosMsg, CustomMsg};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -37,6 +39,9 @@ pub enum SeiMsg {
     ChangeAdmin {
         denom: String,
         new_admin_address: String,
+    },
+    SetMetadata {
+        metadata: Metadata,
     },
 }
 
