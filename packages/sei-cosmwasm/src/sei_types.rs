@@ -40,8 +40,6 @@ pub enum PositionDirection {
 pub enum OrderType {
     Limit = 0,
     Market = 1,
-    Fokmarket = 3,        // fill-or-kill market order
-    Fokmarketbyvalue = 4, // fill-or-kill market by value order
 }
 
 #[derive(Serialize_repr, Deserialize_repr, Copy, Clone, Debug, PartialEq, Eq, Hash, JsonSchema)]
