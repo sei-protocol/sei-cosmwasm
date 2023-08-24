@@ -12,10 +12,9 @@ use protobuf::Message;
 use sei_cosmwasm::{
     BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse, DenomUnit,
     DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
-    GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
-    Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order,
-    OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper,
-    SettlementEntry, SudoMsg,
+    GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, Metadata,
+    MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
+    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
