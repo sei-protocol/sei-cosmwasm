@@ -218,20 +218,6 @@ impl Module for SeiModule {
                 events: vec![],
                 data: None,
             }),
-            SeiSudoMsg::NewBlock { epoch } => {
-                let new_epoch = Epoch {
-                    genesis_time: self.epoch.clone().genesis_time,
-                    duration: self.epoch.duration,
-                    current_epoch: epoch as u64,
-                    current_epoch_start_time: self.epoch.clone().current_epoch_start_time,
-                    current_epoch_height: self.epoch.current_epoch_height + 1,
-                };
-                self.set_epoch(new_epoch);
-                return Ok(AppResponse {
-                    events: vec![],
-                    data: None,
-                });
-            }
             SeiSudoMsg::BulkOrderPlacements {
                 orders: _,
                 deposits: _,
@@ -240,16 +226,6 @@ impl Module for SeiModule {
                 data: None,
             }),
             SeiSudoMsg::BulkOrderCancellations { ids: _ } => Ok(AppResponse {
-                events: vec![],
-                data: None,
-            }),
-            SeiSudoMsg::Liquidation { requests: _ } => Ok(AppResponse {
-                events: vec![],
-                data: None,
-            }),
-            SeiSudoMsg::FinalizeBlock {
-                contract_order_results: _,
-            } => Ok(AppResponse {
                 events: vec![],
                 data: None,
             }),

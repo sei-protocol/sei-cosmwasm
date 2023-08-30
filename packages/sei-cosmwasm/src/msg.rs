@@ -1,6 +1,4 @@
-use crate::sei_types::{
-    ContractOrderResult, DepositInfo, LiquidationRequest, Metadata, Order, SettlementEntry,
-};
+use crate::sei_types::{Cancellation, DepositInfo, Metadata, Order, SettlementEntry};
 use cosmwasm_std::{Addr, Coin, CosmosMsg, CustomMsg};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -24,7 +22,7 @@ pub enum SeiMsg {
         contract_address: Addr,
     },
     CancelOrders {
-        order_ids: Vec<u64>,
+        cancellations: Vec<Cancellation>,
         contract_address: Addr,
     },
     CreateDenom {
@@ -52,20 +50,11 @@ pub enum SudoMsg {
         epoch: i64,
         entries: Vec<SettlementEntry>,
     },
-    NewBlock {
-        epoch: i64,
-    },
     BulkOrderPlacements {
         orders: Vec<Order>,
         deposits: Vec<DepositInfo>,
     },
     BulkOrderCancellations {
         ids: Vec<u64>,
-    },
-    Liquidation {
-        requests: Vec<LiquidationRequest>,
-    },
-    FinalizeBlock {
-        contract_order_results: Vec<ContractOrderResult>,
     },
 }
