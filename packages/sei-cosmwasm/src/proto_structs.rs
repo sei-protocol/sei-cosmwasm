@@ -8,6 +8,7 @@ use cosmwasm_std::{Decimal, Uint64};
 pub struct OracleExchangeRate {
     pub exchange_rate: Decimal,
     pub last_update: Uint64,
+    pub last_update_timestamp: u64,
 }
 
 // ExchangeRateItem is data format returned from OracleRequest::ExchangeRates query
