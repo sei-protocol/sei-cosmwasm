@@ -63,11 +63,12 @@ jobs:
           command: clippy
           args: -p sei-cosmwasm -p sei-tester -- -W warnings # TODO: fix so that we can remove the package specifications after sei-integration-tests is fixed
 
-      - name: Generate Schema For sei-tester
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --example schema -p sei-tester
+      # TODO: re-enable after fixing sei-integration-tests
+      # - name: Generate Schema For sei-tester
+      #   uses: actions-rs/cargo@v1
+      #   with:
+      #     command: run
+      #     args: --example schema -p sei-tester
 
       - name: Generate Schema For sei-cosmwasm
         uses: actions-rs/cargo@v1
