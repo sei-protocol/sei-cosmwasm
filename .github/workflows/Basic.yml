@@ -55,7 +55,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: -- --check -p sei-cosmwasm # --all TODO: fix sei-integration tests
+          args: -- --check -p sei-cosmwasm # --all TODO: fix sei-integration-tests compatibility
 
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
