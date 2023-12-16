@@ -1,12 +1,14 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
     coin, entry_point, to_binary, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
-    Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128,
+    Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128, Order as IteratorOrder
 };
+use cw_storage_plus::Bound;
 
 use crate::{
     msg::{ExecuteMsg, InstantiateMsg, QueryMsg},
     types::{OrderData, PositionEffect},
+    state::{VALUES, USER_SUMS, PARALLEL_VALS},
 };
 use protobuf::Message;
 use sei_cosmwasm::{
@@ -63,7 +65,64 @@ pub fn execute(
         ExecuteMsg::Burn {} => burn(deps, env, info),
         ExecuteMsg::ChangeAdmin {} => change_admin(deps, env, info),
         ExecuteMsg::SetMetadata {} => set_metadata(deps, env, info),
+        ExecuteMsg::TestOccIteratorWrite { values } => test_occ_iterator_write(deps, env, info, values),
+        ExecuteMsg::TestOccIteratorRange { start, end } => test_occ_iterator_range(deps, env, info, start, end),
+        ExecuteMsg::TestOccParallelism { value } => test_occ_parallelism(deps, env, info, value),
     }
+}
+
+fn test_occ_iterator_write(
+    deps: DepsMut<SeiQueryWrapper>,
+    _env: Env,
+    info: MessageInfo,
+    values: Vec<(u64, u64)>,
+) -> Result<Response<SeiMsg>, StdError>  {
+    // writes all of the values (index, value) to the store
+    for (key, value) in values {
+        VALUES.save(deps.storage, key, &value)?;
+    }
+    Ok(Response::new())
+}
+
+fn test_occ_iterator_range(
+    deps: DepsMut<SeiQueryWrapper>,
+    _env: Env,
+    info: MessageInfo,
+    start: u64,
+    end: u64,
+) -> Result<Response<SeiMsg>, StdError>  {
+    // iterates through the `VALUES` and for all that exist, sums them and writes them to user_sums for the sender
+    let mut sum: u64 = 0;
+    let values: Vec<(u64, u64)> = VALUES.range(
+        deps.storage,
+        Some(Bound::inclusive(start)),
+        Some(Bound::inclusive(end)),
+        IteratorOrder::Ascending
+    ).collect::<Result<Vec<(u64, u64)>, StdError>>().unwrap();
+
+    for (_, val) in values {
+        sum += val;
+    }
+    USER_SUMS.save(deps.storage, info.sender.clone(), &sum)?;
+
+    Ok(Response::new()
+        .add_attribute("user", info.sender.to_string())
+        .add_attribute("sum", sum.to_string())
+    )
+}
+
+fn test_occ_parallelism(
+    deps: DepsMut<SeiQueryWrapper>,
+    _env: Env,
+    info: MessageInfo,
+    value: u64,
+) -> Result<Response<SeiMsg>, StdError>  {
+    // writes the value to the store for the sender
+    PARALLEL_VALS.save(deps.storage, info.sender.clone(), &value)?;
+    Ok(Response::new()
+        .add_attribute("user", info.sender.to_string())
+        .add_attribute("val", value.to_string())
+    )
 }
 
 pub fn place_orders(
