@@ -1,7 +1,7 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
     coin, entry_point, to_binary, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
-    Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128, Order as IteratorOrder
+    Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128, Order as IteratorOrder, Attribute
 };
 use cw_storage_plus::Bound;
 
@@ -100,14 +100,17 @@ fn test_occ_iterator_range(
         IteratorOrder::Ascending
     ).collect::<Result<Vec<(u64, u64)>, StdError>>().unwrap();
 
-    for (_, val) in values {
+    let mut value_attrs: Vec<Attribute> = vec![];
+    for (key, val) in values {
         sum += val;
+        value_attrs.push(Attribute::new(key.to_string(), val.to_string()));
     }
     USER_SUMS.save(deps.storage, info.sender.clone(), &sum)?;
 
     Ok(Response::new()
         .add_attribute("user", info.sender.to_string())
         .add_attribute("sum", sum.to_string())
+        .add_attributes(value_attrs)
     )
 }
 
