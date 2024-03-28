@@ -6,8 +6,8 @@ use cosmwasm_std::{
 use cw_multi_test::{AppResponse, BankSudo, CosmosRouter, Module, SudoMsg};
 use schemars::JsonSchema;
 use sei_cosmwasm::{
-    DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, Epoch, EpochResponse,
-    ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwap,
+    Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, Epoch,
+    EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwap,
     OracleTwapsResponse, Order, OrderResponse, OrderSimulationResponse, OrderStatus,
     PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SudoMsg as SeiSudoMsg,
 };
@@ -110,10 +110,10 @@ impl Module for SeiModule {
                 );
             }
             SeiMsg::CancelOrders {
-                order_ids,
+                cancellations,
                 contract_address,
             } => {
-                return execute_cancel_orders_helper(storage, order_ids, contract_address);
+                return execute_cancel_orders_helper(storage, cancellations, contract_address);
             }
             SeiMsg::CreateDenom { subdenom } => {
                 return execute_create_denom_helper(storage, sender, subdenom);
@@ -195,6 +195,7 @@ impl Module for SeiModule {
             SeiQuery::DenomsFromCreator { .. } => {
                 panic!("Denoms From Creator not implemented")
             }
+            _ => panic!("Unexpected custom query msg"),
         }
     }
 
@@ -284,6 +285,9 @@ fn execute_place_orders_helper(
             order_type: order.order_type,
             position_direction: order.position_direction,
             data: order.data.clone(),
+            account: "test account".to_string(),
+            contract_address: "test contract".to_string(),
+            status_description: "desc".to_string(),
         };
         order_responses.push(order_response.clone());
 
@@ -332,7 +336,7 @@ fn execute_place_orders_helper(
 // Execute: CancelOrders()
 fn execute_cancel_orders_helper(
     storage: &mut dyn Storage,
-    order_ids: Vec<u64>,
+    cancellations: Vec<Cancellation>,
     contract_address: Addr,
 ) -> AnyResult<AppResponse> {
     // get existing orders
@@ -349,7 +353,8 @@ fn execute_cancel_orders_helper(
         serde_json::from_slice(&existing_order_responses.clone().unwrap()).unwrap();
     let mut order_responses: Vec<OrderResponse> = serde_json::from_str(&responses_json).unwrap();
 
-    for order_id in &order_ids.clone() {
+    let order_ids: Vec<u64> = cancellations.iter().map(|c| -> u64 { c.id }).collect();
+    for order_id in order_ids.clone() {
         let order_response: Vec<OrderResponse> = order_responses
             .clone()
             .into_iter()

@@ -1,4 +1,4 @@
-use cosmwasm_std::{Addr, CustomQuery, Decimal};
+use cosmwasm_std::{Addr, CustomQuery, Decimal, Uint128};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -55,6 +55,75 @@ pub enum SeiQuery {
     },
     DenomsFromCreator {
         creator: Addr,
+    },
+    StaticCall {
+        from: String,
+        to: String,
+        data: String, // base64
+    },
+    Erc20TransferPayload {
+        recipient: String,
+        amount: Uint128,
+    },
+    Erc20TransferFromPayload {
+        owner: String,
+        recipient: String,
+        amount: Uint128,
+    },
+    Erc20ApprovePayload {
+        spender: String,
+        amount: Uint128,
+    },
+    Erc20Allowance {
+        contract_address: String,
+        owner: String,
+        spender: String,
+    },
+    Erc20TokenInfo {
+        contract_address: String,
+        caller: String,
+    },
+    Erc20Balance {
+        contract_address: String,
+        account: String,
+    },
+    Erc721TransferPayload {
+        from: String,
+        recipient: String,
+        token_id: String,
+    },
+    Erc721ApprovePayload {
+        spender: String,
+        token_id: String,
+    },
+    Erc721Owner {
+        caller: String,
+        contract_address: String,
+        token_id: String,
+    },
+    Erc721Approved {
+        caller: String,
+        contract_address: String,
+        token_id: String,
+    },
+    Erc721IsApprovedForAll {
+        caller: String,
+        contract_address: String,
+        owner: String,
+        operator: String,
+    },
+    Erc721SetApprovalAllPayload {
+        to: String,
+        approved: bool,
+    },
+    Erc721NameSymbol {
+        caller: String,
+        contract_address: String,
+    },
+    Erc721Uri {
+        caller: String,
+        contract_address: String,
+        token_id: String,
     },
 }
 
@@ -125,4 +194,45 @@ pub struct DenomAuthorityMetadataResponse {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct DenomsFromCreatorResponse {
     pub denoms: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct StaticCallResponse {
+    pub data: String, // base64
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct ErcPayloadResponse {
+    pub encoded_payload: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct Erc20AllowanceResponse {
+    pub allowance: Uint128,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct Erc721OwnerResponse {
+    pub owner: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct Erc721ApprovedResponse {
+    pub approved: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct Erc721IsApprovedForAllResponse {
+    pub is_approved: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct Erc721NameSymbolResponse {
+    pub name: String,
+    pub symbol: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct Erc721UriResponse {
+    pub uri: String,
 }

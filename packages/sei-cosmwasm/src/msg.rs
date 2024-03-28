@@ -1,5 +1,5 @@
 use crate::sei_types::{Cancellation, DepositInfo, Metadata, Order, SettlementEntry};
-use cosmwasm_std::{Addr, Coin, CosmosMsg, CustomMsg};
+use cosmwasm_std::{Addr, Coin, CosmosMsg, CustomMsg, Uint128};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -40,6 +40,15 @@ pub enum SeiMsg {
     },
     SetMetadata {
         metadata: Metadata,
+    },
+    DelegateCallEvm {
+        to: String,
+        data: String, // base64 encoded
+    },
+    CallEvm {
+        value: Uint128,
+        to: String,
+        data: String, // base64 encoded
     },
 }
 

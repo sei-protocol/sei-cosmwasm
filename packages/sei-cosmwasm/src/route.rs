@@ -9,4 +9,5 @@ pub enum SeiRoute {
     Dex,
     Epoch,
     Tokenfactory,
+    Evm,
 }

@@ -1,14 +1,15 @@
+use cosmwasm_std::to_json_binary;
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
-    coin, entry_point, to_binary, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
-    Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128, Order as IteratorOrder, Attribute
+    coin, entry_point, Attribute, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
+    Order as IteratorOrder, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128,
 };
 use cw_storage_plus::Bound;
 
 use crate::{
     msg::{ExecuteMsg, InstantiateMsg, QueryMsg},
+    state::{PARALLEL_VALS, USER_SUMS, VALUES},
     types::{OrderData, PositionEffect},
-    state::{VALUES, USER_SUMS, PARALLEL_VALS},
 };
 use protobuf::Message;
 use sei_cosmwasm::{
@@ -65,8 +66,12 @@ pub fn execute(
         ExecuteMsg::Burn {} => burn(deps, env, info),
         ExecuteMsg::ChangeAdmin {} => change_admin(deps, env, info),
         ExecuteMsg::SetMetadata {} => set_metadata(deps, env, info),
-        ExecuteMsg::TestOccIteratorWrite { values } => test_occ_iterator_write(deps, env, info, values),
-        ExecuteMsg::TestOccIteratorRange { start, end } => test_occ_iterator_range(deps, env, info, start, end),
+        ExecuteMsg::TestOccIteratorWrite { values } => {
+            test_occ_iterator_write(deps, env, info, values)
+        }
+        ExecuteMsg::TestOccIteratorRange { start, end } => {
+            test_occ_iterator_range(deps, env, info, start, end)
+        }
         ExecuteMsg::TestOccParallelism { value } => test_occ_parallelism(deps, env, info, value),
     }
 }
@@ -74,9 +79,9 @@ pub fn execute(
 fn test_occ_iterator_write(
     deps: DepsMut<SeiQueryWrapper>,
     _env: Env,
-    info: MessageInfo,
+    _info: MessageInfo,
     values: Vec<(u64, u64)>,
-) -> Result<Response<SeiMsg>, StdError>  {
+) -> Result<Response<SeiMsg>, StdError> {
     // writes all of the values (index, value) to the store
     for (key, value) in values {
         VALUES.save(deps.storage, key, &value)?;
@@ -90,15 +95,18 @@ fn test_occ_iterator_range(
     info: MessageInfo,
     start: u64,
     end: u64,
-) -> Result<Response<SeiMsg>, StdError>  {
+) -> Result<Response<SeiMsg>, StdError> {
     // iterates through the `VALUES` and for all that exist, sums them and writes them to user_sums for the sender
     let mut sum: u64 = 0;
-    let values: Vec<(u64, u64)> = VALUES.range(
-        deps.storage,
-        Some(Bound::inclusive(start)),
-        Some(Bound::inclusive(end)),
-        IteratorOrder::Ascending
-    ).collect::<Result<Vec<(u64, u64)>, StdError>>().unwrap();
+    let values: Vec<(u64, u64)> = VALUES
+        .range(
+            deps.storage,
+            Some(Bound::inclusive(start)),
+            Some(Bound::inclusive(end)),
+            IteratorOrder::Ascending,
+        )
+        .collect::<Result<Vec<(u64, u64)>, StdError>>()
+        .unwrap();
 
     let mut value_attrs: Vec<Attribute> = vec![];
     for (key, val) in values {
@@ -110,8 +118,7 @@ fn test_occ_iterator_range(
     Ok(Response::new()
         .add_attribute("user", info.sender.to_string())
         .add_attribute("sum", sum.to_string())
-        .add_attributes(value_attrs)
-    )
+        .add_attributes(value_attrs))
 }
 
 fn test_occ_parallelism(
@@ -119,13 +126,12 @@ fn test_occ_parallelism(
     _env: Env,
     info: MessageInfo,
     value: u64,
-) -> Result<Response<SeiMsg>, StdError>  {
+) -> Result<Response<SeiMsg>, StdError> {
     // writes the value to the store for the sender
     PARALLEL_VALS.save(deps.storage, info.sender.clone(), &value)?;
     Ok(Response::new()
         .add_attribute("user", info.sender.to_string())
-        .add_attribute("val", value.to_string())
-    )
+        .add_attribute("val", value.to_string()))
 }
 
 pub fn place_orders(
@@ -385,29 +391,29 @@ pub fn handle_place_order_reply(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::ExchangeRates {} => to_binary(&query_exchange_rates(deps)?),
+        QueryMsg::ExchangeRates {} => to_json_binary(&query_exchange_rates(deps)?),
         QueryMsg::OracleTwaps { lookback_seconds } => {
-            to_binary(&query_oracle_twaps(deps, lookback_seconds)?)
+            to_json_binary(&query_oracle_twaps(deps, lookback_seconds)?)
         }
         QueryMsg::DexTwaps {
             contract_address,
             lookback_seconds,
-        } => to_binary(&query_dex_twaps(deps, contract_address, lookback_seconds)?),
+        } => to_json_binary(&query_dex_twaps(deps, contract_address, lookback_seconds)?),
         QueryMsg::OrderSimulation {
             order,
             contract_address,
-        } => to_binary(&query_order_simulation(deps, order, contract_address)?),
-        QueryMsg::Epoch {} => to_binary(&query_epoch(deps)?),
+        } => to_json_binary(&query_order_simulation(deps, order, contract_address)?),
+        QueryMsg::Epoch {} => to_json_binary(&query_epoch(deps)?),
         QueryMsg::GetOrders {
             contract_address,
             account,
-        } => to_binary(&query_get_orders(deps, contract_address, account)?),
+        } => to_json_binary(&query_get_orders(deps, contract_address, account)?),
         QueryMsg::GetOrderById {
             contract_address,
             price_denom,
             asset_denom,
             id,
-        } => to_binary(&query_get_order_by_id(
+        } => to_json_binary(&query_get_order_by_id(
             deps,
             contract_address,
             price_denom,
@@ -418,17 +424,17 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
             contract_address,
             price_denom,
             asset_denom,
-        } => to_binary(&query_get_latest_price(
+        } => to_json_binary(&query_get_latest_price(
             deps,
             contract_address,
             price_denom,
             asset_denom,
         )?),
         QueryMsg::GetDenomAuthorityMetadata { denom } => {
-            to_binary(&query_denom_authority_metadata(deps, denom)?)
+            to_json_binary(&query_denom_authority_metadata(deps, denom)?)
         }
         QueryMsg::GetDenomsFromCreator { creator } => {
-            to_binary(&query_denoms_from_creator(deps, creator)?)
+            to_json_binary(&query_denoms_from_creator(deps, creator)?)
         }
     }
 }
