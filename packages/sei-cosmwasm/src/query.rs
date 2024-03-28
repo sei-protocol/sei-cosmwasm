@@ -211,7 +211,6 @@ pub struct Erc20AllowanceResponse {
     pub allowance: Uint128,
 }
 
-
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct Erc721OwnerResponse {
     pub owner: String,

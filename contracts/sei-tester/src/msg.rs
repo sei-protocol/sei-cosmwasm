@@ -15,16 +15,9 @@ pub enum ExecuteMsg {
     Burn {},
     ChangeAdmin {},
     SetMetadata {},
-    TestOccIteratorWrite {
-        values: Vec<(u64,u64)>
-    },
-    TestOccIteratorRange {
-        start: u64,
-        end: u64,
-    },
-    TestOccParallelism {
-        value: u64,
-    }
+    TestOccIteratorWrite { values: Vec<(u64, u64)> },
+    TestOccIteratorRange { start: u64, end: u64 },
+    TestOccParallelism { value: u64 },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
