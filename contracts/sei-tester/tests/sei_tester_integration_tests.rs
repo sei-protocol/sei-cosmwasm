@@ -10,7 +10,7 @@ use cw_multi_test::{
     StakeKeeper, WasmKeeper,
 };
 use sei_cosmwasm::{
-    DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse,
+    Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse,
     ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleExchangeRate,
     OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus, OrderType, PositionDirection,
     SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute, SudoMsg as SeiSudoMsg,
@@ -229,13 +229,6 @@ fn test_epoch_query() {
     assert_eq!(res.epoch.current_epoch, 1);
     assert_eq!(res.epoch.current_epoch_start_time, "".to_string());
     assert_eq!(res.epoch.current_epoch_height, 1);
-
-    // // Also compiles but doesn't write to SeiModule
-    app.wasm_sudo(
-        sei_tester_addr.clone(),
-        &(SeiSudoMsg::NewBlock { epoch: 100 }),
-    )
-    .unwrap();
 }
 
 /// Dex Module - place and get orders
@@ -421,10 +414,24 @@ fn test_dex_module_integration_orders() {
     // CancelOrders for a contract address that doesn't exist
     let mut nonexistent_order_ids: Vec<u64> = Vec::new();
     nonexistent_order_ids.push(3);
+    let cancellations: Vec<Cancellation> = nonexistent_order_ids
+        .iter()
+        .map(|id| -> Cancellation {
+            Cancellation {
+                id: *id,
+                contract_address: "test contract".to_string(),
+                price: Decimal::zero(),
+                price_denom: "pd".to_string(),
+                asset_denom: "ad".to_string(),
+                order_type: OrderType::Limit,
+                position_direction: PositionDirection::Long,
+            }
+        })
+        .collect();
     let res = app.execute_multi(
         Addr::unchecked(ADMIN),
         vec![CosmosMsg::Custom(SeiMsg::CancelOrders {
-            order_ids: nonexistent_order_ids,
+            cancellations: cancellations,
             contract_address: Addr::unchecked("fake_contract_addr".to_string()),
         })],
     );
@@ -434,11 +441,25 @@ fn test_dex_module_integration_orders() {
     // CancelOrders for order id 1
     let mut cancel_order_ids: Vec<u64> = Vec::new();
     cancel_order_ids.push(0);
+    let cancellations: Vec<Cancellation> = cancel_order_ids
+        .iter()
+        .map(|id| -> Cancellation {
+            Cancellation {
+                id: *id,
+                contract_address: "test contract".to_string(),
+                price: Decimal::zero(),
+                price_denom: "pd".to_string(),
+                asset_denom: "ad".to_string(),
+                order_type: OrderType::Limit,
+                position_direction: PositionDirection::Long,
+            }
+        })
+        .collect();
     let arr = app
         .execute_multi(
             Addr::unchecked(ADMIN),
             vec![CosmosMsg::Custom(SeiMsg::CancelOrders {
-                order_ids: cancel_order_ids,
+                cancellations: cancellations,
                 contract_address: Addr::unchecked(&contract_addr),
             })],
         )
@@ -678,6 +699,7 @@ fn test_oracle_module_query_exchange_rate() {
                 oracle_exchange_rate: OracleExchangeRate {
                     exchange_rate: Decimal::percent(80),
                     last_update: Uint64::zero(),
+                    last_update_timestamp: 0,
                 },
             },
             DenomOracleExchangeRatePair {
@@ -685,6 +707,7 @@ fn test_oracle_module_query_exchange_rate() {
                 oracle_exchange_rate: OracleExchangeRate {
                     exchange_rate: Decimal::percent(70),
                     last_update: Uint64::zero(),
+                    last_update_timestamp: 0,
                 },
             },
             DenomOracleExchangeRatePair {
@@ -692,6 +715,7 @@ fn test_oracle_module_query_exchange_rate() {
                 oracle_exchange_rate: OracleExchangeRate {
                     exchange_rate: Decimal::percent(90),
                     last_update: Uint64::new(1),
+                    last_update_timestamp: 0,
                 },
             },
         ],
@@ -713,6 +737,7 @@ fn test_oracle_module_query_exchange_rate() {
                     OracleExchangeRate {
                         exchange_rate: Decimal::percent(70),
                         last_update: Uint64::zero(),
+                        last_update_timestamp: 0,
                     }
                 );
             }
@@ -722,6 +747,7 @@ fn test_oracle_module_query_exchange_rate() {
                     OracleExchangeRate {
                         exchange_rate: Decimal::percent(90),
                         last_update: Uint64::new(1),
+                        last_update_timestamp: 0,
                     }
                 );
             }
@@ -741,6 +767,7 @@ fn test_oracle_module_query_twaps() {
                 oracle_exchange_rate: OracleExchangeRate {
                     exchange_rate: Decimal::percent(80),
                     last_update: Uint64::new(1_571_797_411),
+                    last_update_timestamp: 0,
                 },
             },
             DenomOracleExchangeRatePair {
@@ -748,6 +775,7 @@ fn test_oracle_module_query_twaps() {
                 oracle_exchange_rate: OracleExchangeRate {
                     exchange_rate: Decimal::percent(70),
                     last_update: Uint64::zero(),
+                    last_update_timestamp: 0,
                 },
             },
             DenomOracleExchangeRatePair {
@@ -755,6 +783,7 @@ fn test_oracle_module_query_twaps() {
                 oracle_exchange_rate: OracleExchangeRate {
                     exchange_rate: Decimal::percent(90),
                     last_update: Uint64::new(1_571_797_415),
+                    last_update_timestamp: 0,
                 },
             },
         ],
