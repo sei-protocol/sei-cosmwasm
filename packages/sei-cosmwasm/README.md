@@ -78,7 +78,7 @@ Currently, Sei Bindings support query and message support for the sei custom mod
         - Erc721ApprovePayload
             - Similar to the Erc20 equivalent
         - Erc721Approved
-            - Check si a caller is approved based on caller, contract address and token id
+            - Checks if a caller is approved based on caller, contract address and token id
         - Erc721IsApprovedForAll
             - Checks if the caller is approved for all based on caller, contract address, owner and operator
         - Erc721SetApprovalAllPayload
@@ -86,7 +86,12 @@ Currently, Sei Bindings support query and message support for the sei custom mod
         - Erc721NameSymbol
             - Gets the Erc721 name and symbol based on the caller and contract address
         - Erc721Uri
-            - Gets the Erc721 URI based on caller, contract address and token id
+            - Gets the Erc721 URI based on caller, contract_address and token_id
+    - Message
+        - DelegateCallEvm
+            - Performs an EVM delegate call. Requires `to` and `data`
+        - CallEvm
+             -  Performs an EVM call. Requires `value`, `to` and `data`
 
 
 ## Usage
