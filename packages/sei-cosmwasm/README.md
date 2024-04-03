@@ -57,6 +57,37 @@ Currently, Sei Bindings support query and message support for the sei custom mod
             - Change the Admin of the Denom. Only the current admin can change the admin.
         - SetMetadata
             - Set the denom metadata of a factory denom. Only the current admin can set metadata.
+- EVM
+    - Query
+        - StaticCall
+            - TODO
+        - Erc20TransferPayload
+            - Gets the Erc20 transfer payload from on recipient and amount
+        - Erc20TransferFromPayload
+            - Gets the Erc20 transfer from payload based on owner, recipient and amount
+        - Erc20ApprovePayload
+            - Gets the Erc20 approve payload from spender and amount
+        - Erc20Allowance
+            - Gets the Erc20 allowance from contract address, owner and spender
+        - Erc20TokenInfo
+            - Gets the Erc20 token info from contract address and caller
+        - Erc20Balance
+            - Gets the Erc20 balance from contract address and account
+        - Erc721TransferPayload
+            - Similar to the Erc20 equivalent
+        - Erc721ApprovePayload
+            - Similar to the Erc20 equivalent
+        - Erc721Approved
+            - Check si a caller is approved based on caller, contract address and token id
+        - Erc721IsApprovedForAll
+            - Checks if the caller is approved for all based on caller, contract address, owner and operator
+        - Erc721SetApprovalAllPayload
+            - Gets the Erc721 SetApproveAll payload from caller, contract address, owner and operator
+        - Erc721NameSymbol
+            - Gets the Erc721 name and symbol based on the caller and contract address
+        - Erc721Uri
+            - Gets the Erc721 URI based on caller, contract address and token id
+
 
 ## Usage
 
