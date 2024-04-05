@@ -1,9 +1,4 @@
-use cosmwasm_std::{
-    from_binary,
-    testing::{MockApi, MockQuerier, MockStorage},
-    Api, BalanceResponse, BankQuery, BlockInfo, Empty, GovMsg, IbcMsg, IbcQuery, MemoryStorage,
-    Storage, Timestamp,
-};
+use cosmwasm_std::{testing::{MockApi, MockQuerier, MockStorage}, Api, BalanceResponse, BankQuery, BlockInfo, Empty, GovMsg, IbcMsg, IbcQuery, MemoryStorage, Storage, Timestamp, from_json};
 use cw_multi_test::{
     App, AppBuilder, BankKeeper, DistributionKeeper, FailingModule, Module, Router, StakeKeeper,
     WasmKeeper,
@@ -34,7 +29,7 @@ pub fn get_balance(
             },
         )
     });
-    from_binary(&arr.unwrap()).unwrap()
+    from_json(&arr.unwrap()).unwrap()
 }
 
 // Mock app

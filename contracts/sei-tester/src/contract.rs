@@ -1,5 +1,5 @@
 use cosmwasm_std::to_json_binary;
-#[cfg(not(feature = "library"))]
+// #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
     coin, entry_point, Attribute, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
     Order as IteratorOrder, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128,
@@ -18,6 +18,7 @@ use sei_cosmwasm::{
     GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, Metadata,
     MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
     PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
+    EvmAddressResponse
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
@@ -436,6 +437,8 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
         QueryMsg::GetDenomsFromCreator { creator } => {
             to_json_binary(&query_denoms_from_creator(deps, creator)?)
         }
+        QueryMsg::GetEvmAddressBySeiAddress { sei_address } =>
+            to_json_binary(&query_evm_address(deps, sei_address)?),
     }
 }
 
@@ -546,6 +549,17 @@ pub fn query_denoms_from_creator(
     let creator_addr = deps.api.addr_validate(&creator)?;
     let querier = SeiQuerier::new(&deps.querier);
     let res: DenomsFromCreatorResponse = querier.query_denoms_from_creator(creator_addr)?;
+
+    Ok(res)
+}
+
+pub fn query_evm_address(
+    deps: Deps<SeiQueryWrapper>,
+    sei_address: String,
+) -> StdResult<EvmAddressResponse> {
+    let valid_addr = deps.api.addr_validate(&sei_address)?;
+    let querier = SeiQuerier::new(&deps.querier);
+    let res = querier.get_evm_address(valid_addr.to_string())?;
 
     Ok(res)
 }

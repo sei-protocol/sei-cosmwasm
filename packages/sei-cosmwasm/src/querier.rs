@@ -1,13 +1,7 @@
 use cosmwasm_std::{Addr, QuerierWrapper, StdResult, Uint128};
 use cw20::{BalanceResponse, TokenInfoResponse};
 
-use crate::query::{
-    DenomAuthorityMetadataResponse, DenomsFromCreatorResponse, DexTwapsResponse, EpochResponse,
-    Erc20AllowanceResponse, Erc721ApprovedResponse, Erc721IsApprovedForAllResponse,
-    Erc721NameSymbolResponse, Erc721OwnerResponse, Erc721UriResponse, ErcPayloadResponse,
-    ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
-    OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper, StaticCallResponse,
-};
+use crate::query::{DenomAuthorityMetadataResponse, DenomsFromCreatorResponse, DexTwapsResponse, EpochResponse, Erc20AllowanceResponse, Erc721ApprovedResponse, Erc721IsApprovedForAllResponse, Erc721NameSymbolResponse, Erc721OwnerResponse, Erc721UriResponse, ErcPayloadResponse, EvmAddressResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper, StaticCallResponse};
 use crate::route::SeiRoute;
 use crate::Order;
 
@@ -29,7 +23,7 @@ impl<'a> SeiQuerier<'a> {
             route: SeiRoute::Oracle,
             query_data: SeiQuery::ExchangeRates {},
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -39,7 +33,7 @@ impl<'a> SeiQuerier<'a> {
             route: SeiRoute::Oracle,
             query_data: SeiQuery::OracleTwaps { lookback_seconds },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -59,7 +53,7 @@ impl<'a> SeiQuerier<'a> {
                 lookback_seconds,
             },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -76,7 +70,7 @@ impl<'a> SeiQuerier<'a> {
                 order,
             },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -93,7 +87,7 @@ impl<'a> SeiQuerier<'a> {
                 account,
             },
         }
-        .into();
+            .into();
         self.querier.query(&request)
     }
 
@@ -113,7 +107,7 @@ impl<'a> SeiQuerier<'a> {
                 id: order_id,
             },
         }
-        .into();
+            .into();
         self.querier.query(&request)
     }
 
@@ -125,7 +119,7 @@ impl<'a> SeiQuerier<'a> {
             route: SeiRoute::Epoch,
             query_data: SeiQuery::Epoch {},
         }
-        .into();
+            .into();
         self.querier.query(&request)
     }
 
@@ -143,7 +137,7 @@ impl<'a> SeiQuerier<'a> {
                 asset_denom,
             },
         }
-        .into();
+            .into();
         self.querier.query(&request)
     }
 
@@ -158,7 +152,7 @@ impl<'a> SeiQuerier<'a> {
             route: SeiRoute::Tokenfactory,
             query_data: SeiQuery::DenomAuthorityMetadata { denom },
         }
-        .into();
+            .into();
         self.querier.query(&request)
     }
 
@@ -167,7 +161,7 @@ impl<'a> SeiQuerier<'a> {
             route: SeiRoute::Tokenfactory,
             query_data: SeiQuery::DenomsFromCreator { creator },
         }
-        .into();
+            .into();
         self.querier.query(&request)
     }
 
@@ -181,7 +175,7 @@ impl<'a> SeiQuerier<'a> {
             route: SeiRoute::Evm,
             query_data: SeiQuery::StaticCall { from, to, data },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -196,7 +190,7 @@ impl<'a> SeiQuerier<'a> {
             route: SeiRoute::Evm,
             query_data: SeiQuery::Erc20TransferPayload { recipient, amount },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -216,7 +210,7 @@ impl<'a> SeiQuerier<'a> {
                 amount,
             },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -231,7 +225,7 @@ impl<'a> SeiQuerier<'a> {
             route: SeiRoute::Evm,
             query_data: SeiQuery::Erc20ApprovePayload { spender, amount },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -250,7 +244,7 @@ impl<'a> SeiQuerier<'a> {
                 spender,
             },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -267,7 +261,7 @@ impl<'a> SeiQuerier<'a> {
                 caller,
             },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -284,7 +278,7 @@ impl<'a> SeiQuerier<'a> {
                 account,
             },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -303,7 +297,7 @@ impl<'a> SeiQuerier<'a> {
                 token_id,
             },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -322,7 +316,7 @@ impl<'a> SeiQuerier<'a> {
                 token_id,
             },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -343,7 +337,7 @@ impl<'a> SeiQuerier<'a> {
                 operator,
             },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -360,7 +354,7 @@ impl<'a> SeiQuerier<'a> {
                 contract_address,
             },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -379,7 +373,7 @@ impl<'a> SeiQuerier<'a> {
                 token_id,
             },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -399,7 +393,7 @@ impl<'a> SeiQuerier<'a> {
                 token_id,
             },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -414,7 +408,7 @@ impl<'a> SeiQuerier<'a> {
             route: SeiRoute::Evm,
             query_data: SeiQuery::Erc721ApprovePayload { spender, token_id },
         }
-        .into();
+            .into();
 
         self.querier.query(&request)
     }
@@ -429,7 +423,42 @@ impl<'a> SeiQuerier<'a> {
             route: SeiRoute::Evm,
             query_data: SeiQuery::Erc721SetApprovalAllPayload { to, approved },
         }
-        .into();
+            .into();
+
+        self.querier.query(&request)
+    }
+
+    /// Queries the EVM (Ethereum Virtual Machine) address associated with a given Sei address.
+    ///
+    /// This function takes a `sei_address` as a parameter, which is a `String` representing the SEI address.
+    /// It returns a `StdResult<EvmAddressResponse>`, which is a standard result type in the `cosmwasm_std` library.
+    /// The `EvmAddressResponse` struct contains the EVM address and a boolean indicating whether the EVM address is associated.
+    ///
+    /// # Arguments
+    ///
+    /// * `sei_address` - A `String` that represents the Sei address.
+    ///
+    /// # Returns
+    ///
+    /// * `StdResult<EvmAddressResponse>` - A standard result that wraps the `EvmAddressResponse` struct.
+    /// `EvmAddressResponse` contains the EVM address and a boolean indicating whether the EVM address is associated.
+    /// If the Sei address is not associated with any EVM address, the EVM address will be an empty string.
+    ///
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if the query to the EVM fails.
+    pub fn get_evm_address(
+        &self,
+        sei_address: String,
+    ) -> StdResult<EvmAddressResponse> {
+        let request = SeiQueryWrapper {
+            route: SeiRoute::Evm,
+            query_data: SeiQuery::GetEvmAddress {
+                sei_address
+            },
+        }
+            .into();
 
         self.querier.query(&request)
     }

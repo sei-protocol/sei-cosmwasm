@@ -1,16 +1,8 @@
 use anyhow::Result as AnyResult;
-use cosmwasm_std::{
-    from_binary, to_binary, Addr, Api, BankMsg, Binary, BlockInfo, Coin, CosmosMsg, CustomQuery,
-    Decimal, Querier, Storage, Uint128, Uint64,
-};
+use cosmwasm_std::{Addr, Api, BankMsg, Binary, BlockInfo, Coin, CosmosMsg, CustomQuery, Decimal, Querier, Storage, Uint128, Uint64, to_json_binary, from_json};
 use cw_multi_test::{AppResponse, BankSudo, CosmosRouter, Module, SudoMsg};
 use schemars::JsonSchema;
-use sei_cosmwasm::{
-    Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, Epoch,
-    EpochResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwap,
-    OracleTwapsResponse, Order, OrderResponse, OrderSimulationResponse, OrderStatus,
-    PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SudoMsg as SeiSudoMsg,
-};
+use sei_cosmwasm::{Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, Epoch, EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderSimulationResponse, OrderStatus, PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SudoMsg as SeiSudoMsg};
 use serde::de::DeserializeOwned;
 use std::{
     collections::HashMap,
@@ -30,6 +22,8 @@ const GENESIS_EPOCH: Epoch = Epoch {
     current_epoch_start_time: String::new(),
     current_epoch_height: 1,
 };
+
+pub const EVM_ADDRESS: &str = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B";
 
 impl SeiModule {
     pub fn new() -> Self {
@@ -138,9 +132,9 @@ impl Module for SeiModule {
     ) -> AnyResult<Binary> {
         match request.query_data {
             SeiQuery::ExchangeRates {} => {
-                Ok(to_binary(&get_exchange_rates(self.exchange_rates.clone()))?)
+                Ok(to_json_binary(&get_exchange_rates(self.exchange_rates.clone()))?)
             }
-            SeiQuery::OracleTwaps { lookback_seconds } => Ok(to_binary(&get_oracle_twaps(
+            SeiQuery::OracleTwaps { lookback_seconds } => Ok(to_json_binary(&get_oracle_twaps(
                 block,
                 self.exchange_rates.clone(),
                 lookback_seconds,
@@ -148,7 +142,7 @@ impl Module for SeiModule {
             SeiQuery::DexTwaps {
                 contract_address,
                 lookback_seconds,
-            } => Ok(to_binary(&get_dex_twaps(
+            } => Ok(to_json_binary(&get_dex_twaps(
                 storage,
                 block,
                 contract_address,
@@ -157,7 +151,7 @@ impl Module for SeiModule {
             SeiQuery::OrderSimulation {
                 order,
                 contract_address,
-            } => Ok(to_binary(&get_order_simulation(
+            } => Ok(to_json_binary(&get_order_simulation(
                 storage,
                 order,
                 contract_address,
@@ -186,6 +180,9 @@ impl Module for SeiModule {
                     asset_denom,
                     id,
                 );
+            }
+            SeiQuery::GetEvmAddress { sei_address } => {
+                Ok(to_json_binary(&get_evm_address(sei_address))?)
             }
             // TODO: Implement get denom authority metadata in integration tests
             SeiQuery::DenomAuthorityMetadata { .. } => {
@@ -329,7 +326,7 @@ fn execute_place_orders_helper(
 
     Ok(AppResponse {
         events: vec![],
-        data: Some(to_binary(&contract_address).unwrap()),
+        data: Some(to_json_binary(&contract_address).unwrap()),
     })
 }
 
@@ -388,7 +385,7 @@ fn execute_cancel_orders_helper(
 
     Ok(AppResponse {
         events: vec![],
-        data: Some(to_binary(&contract_address).unwrap()),
+        data: Some(to_json_binary(&contract_address).unwrap()),
     })
 }
 
@@ -480,7 +477,7 @@ fn get_dex_twaps(
     let mut dex_twaps: HashMap<(String, String), Decimal> = HashMap::new();
     let mut prev_time = block.time.seconds();
 
-    let order_response: GetOrdersResponse = from_binary(
+    let order_response: GetOrdersResponse = from_json(
         &query_get_orders_helper(storage, contract_address, Addr::unchecked("")).unwrap(),
     )
     .unwrap();
@@ -551,7 +548,7 @@ fn get_order_simulation(
 ) -> OrderSimulationResponse {
     let mut executed_quantity = Decimal::zero();
 
-    let orders: GetOrdersResponse = from_binary(
+    let orders: GetOrdersResponse = from_json(
         &query_get_orders_helper(storage, contract_address, Addr::unchecked("")).unwrap(),
     )
     .unwrap();
@@ -601,7 +598,7 @@ fn query_get_orders_helper(
 
     let order_responses: Vec<OrderResponse> = serde_json::from_str(&responses_json).unwrap();
 
-    return Ok(to_binary(&GetOrdersResponse {
+    return Ok(to_json_binary(&GetOrdersResponse {
         orders: order_responses,
     })?);
 }
@@ -634,7 +631,7 @@ fn query_get_order_by_id_helper(
 
     let order_response: OrderResponse = serde_json::from_str(&response_json).unwrap();
 
-    return Ok(to_binary(&GetOrderByIdResponse {
+    return Ok(to_json_binary(&GetOrderByIdResponse {
         order: order_response,
     })?);
 }
@@ -645,9 +642,21 @@ fn get_epoch(epoch: Epoch) -> EpochResponse {
     EpochResponse { epoch: epoch }
 }
 
+fn get_evm_address(sei_address: String) -> EvmAddressResponse {
+    let (evm_address, associated) = match sei_address.as_str() {
+        "contract0" => (EVM_ADDRESS.to_string(), true),
+        _ => (String::new(), false), // default case
+    };
+
+    EvmAddressResponse {
+        evm_address,
+        associated,
+    }
+}
+
 // Query: GetEpoch()
 fn query_get_epoch_helper(epoch: Epoch) -> AnyResult<Binary> {
-    return Ok(to_binary(&get_epoch(epoch))?);
+    return Ok(to_json_binary(&get_epoch(epoch))?);
 }
 
 // TokenFactory Msg
@@ -665,7 +674,7 @@ fn execute_create_denom_helper(
     storage.set(denom.as_bytes(), sender.to_string().as_bytes());
     Ok(AppResponse {
         events: vec![],
-        data: Some(to_binary(&denom).unwrap()),
+        data: Some(to_json_binary(&denom).unwrap()),
     })
 }
 

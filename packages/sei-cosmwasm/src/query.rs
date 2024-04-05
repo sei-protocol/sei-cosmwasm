@@ -125,6 +125,9 @@ pub enum SeiQuery {
         contract_address: String,
         token_id: String,
     },
+    GetEvmAddress {
+        sei_address: String,
+    },
 }
 
 /// ExchangeRatesResponse is data format returned from OracleRequest::ExchangeRates query
@@ -235,4 +238,20 @@ pub struct Erc721NameSymbolResponse {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct Erc721UriResponse {
     pub uri: String,
+}
+
+/// `EvmAddressResponse` is a struct that represents a response containing an EVM address.
+///
+/// It has two fields:
+/// * `evm_address`: a `String` that represents the EVM address.
+/// * `associated`: a `bool` that indicates whether the EVM address is associated or not.
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct EvmAddressResponse {
+    /// The 20-byte EVM address associated to Sei address that's derived from the public part of a
+    /// public-private key pair. It's represented as a hex string.
+    /// Address is empty if the Sei address is not associated with any EVM address.
+    pub evm_address: String,
+
+    /// A boolean value indicating whether the EVM address is associated.
+    pub associated: bool
 }
