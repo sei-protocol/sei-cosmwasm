@@ -50,6 +50,7 @@ serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 base64 = { version = "0.13.0" }
 thiserror = { version = "1.0.31" }
 protobuf = { version = "3.2.0", features = ["with-bytes"] }
+ethaddr = "0.2.2"
 
 [dev-dependencies]
 cosmwasm-schema = "1.0.0"

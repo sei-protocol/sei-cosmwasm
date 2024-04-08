@@ -8,7 +8,7 @@ use cw_multi_test::{
 use sei_cosmwasm::{Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus, OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute};
 use sei_integration_tests::{
     helper::{get_balance, mock_app},
-    module::{SeiModule, EVM_ADDRESS, SEI_ADDRESS}
+    module::{SeiModule, EVM_ADDRESS, SEI_ADDRESS},
 };
 use sei_tester::{
     contract::{execute, instantiate, query},
@@ -145,7 +145,7 @@ fn test_tokenfactory_integration_foundation() {
             },
         })],
     )
-    .unwrap();
+        .unwrap();
 
     let res: BalanceResponse = get_balance(&app, ADMIN.to_string(), out.to_string());
     assert_eq!(res.amount.amount, Uint128::new(1));
@@ -178,7 +178,7 @@ fn test_tokenfactory_integration_foundation() {
             },
         })],
     )
-    .unwrap();
+        .unwrap();
 
     let res: BalanceResponse = get_balance(&app, ADMIN.to_string(), out.to_string());
     assert_eq!(res.amount.amount, Uint128::new(0));
@@ -564,7 +564,7 @@ fn test_dex_module_query_order_simulation() {
             contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
         })],
     )
-    .unwrap();
+        .unwrap();
 
     // Test all of sim order can be fulfilled
     let res: OrderSimulationResponse = app
@@ -844,7 +844,7 @@ fn test_dex_module_query_dex_twap() {
             contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
         })],
     )
-    .unwrap();
+        .unwrap();
 
     app.set_block(BlockInfo {
         height: 2,
@@ -888,7 +888,7 @@ fn test_dex_module_query_dex_twap() {
             contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
         })],
     )
-    .unwrap();
+        .unwrap();
 
     app.set_block(BlockInfo {
         height: 3,
@@ -982,7 +982,7 @@ fn test_sei_address_query() {
     let res: SeiAddressResponse = app
         .wrap()
         .query_wasm_smart(sei_tester_addr.clone(), &QueryMsg::GetSeiAddressByEvmAddress {
-            evm_address: "fake_address".to_string(),
+            evm_address: "0x999999cf1046e68e36E1aA2E0E07105eDDD1f08E".to_string(),
         })
         .unwrap();
 
@@ -992,4 +992,16 @@ fn test_sei_address_query() {
     };
     assert_eq!(res, expected_res);
 
+    // Test error case when EVM address is invalid
+    let res: Result<SeiAddressResponse, StdError> = app
+        .wrap()
+        .query_wasm_smart(sei_tester_addr.clone(), &QueryMsg::GetSeiAddressByEvmAddress {
+            evm_address: "fakeaddress".to_string(),
+        });
+
+    assert!(res.is_err());
+
+    let err = res.expect_err("Expected an error because the EVM address is invalid");
+    assert_eq!(err.to_string(),
+               "Generic error: Querier contract error: Generic error: Failed to parse Ethereum address");
 }

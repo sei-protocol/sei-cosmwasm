@@ -13,6 +13,7 @@ use crate::{
 };
 use protobuf::Message;
 use sei_cosmwasm::{BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse, DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg, EvmAddressResponse, SeiAddressResponse};
+use ethaddr::Address;
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
 // version info for migration info
@@ -561,9 +562,12 @@ pub fn query_evm_address(
 
 pub fn query_sei_address(
     deps: Deps<SeiQueryWrapper>,
-    sei_address: String,
+    evm_address: String,
 ) -> StdResult<SeiAddressResponse> {
-    let valid_addr = deps.api.addr_validate(&sei_address)?;
+    let valid_addr = match Address::from_str_checksum(&*evm_address) {
+        Ok(addr) => addr,
+        Err(_) => return Err(StdError::generic_err("Failed to parse Ethereum address")),
+    };
     let querier = SeiQuerier::new(&deps.querier);
     let res = querier.get_sei_address(valid_addr.to_string())?;
 
