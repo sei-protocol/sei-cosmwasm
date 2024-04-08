@@ -1,7 +1,13 @@
 use cosmwasm_std::{Addr, QuerierWrapper, StdResult, Uint128};
 use cw20::{BalanceResponse, TokenInfoResponse};
 
-use crate::query::{DenomAuthorityMetadataResponse, DenomsFromCreatorResponse, DexTwapsResponse, EpochResponse, Erc20AllowanceResponse, Erc721ApprovedResponse, Erc721IsApprovedForAllResponse, Erc721NameSymbolResponse, Erc721OwnerResponse, Erc721UriResponse, ErcPayloadResponse, EvmAddressResponse, SeiAddressResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper, StaticCallResponse};
+use crate::query::{DenomAuthorityMetadataResponse, DenomsFromCreatorResponse, DexTwapsResponse,
+                   EpochResponse, Erc20AllowanceResponse, Erc721ApprovedResponse,
+                   Erc721IsApprovedForAllResponse, Erc721NameSymbolResponse, Erc721OwnerResponse,
+                   Erc721UriResponse, ErcPayloadResponse, EvmAddressResponse, SeiAddressResponse,
+                   ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse,
+                   GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiQuery,
+                   SeiQueryWrapper, StaticCallResponse};
 use crate::route::SeiRoute;
 use crate::Order;
 
@@ -430,9 +436,10 @@ impl<'a> SeiQuerier<'a> {
 
     /// Queries the EVM (Ethereum Virtual Machine) address associated with a given Sei address.
     ///
-    /// This function takes a `sei_address` as a parameter, which is a `String` representing the SEI address.
-    /// It returns a `StdResult<EvmAddressResponse>`, which is a standard result type in the `cosmwasm_std` library.
-    /// The `EvmAddressResponse` struct contains the EVM address and a boolean indicating whether the EVM address is associated.
+    /// This function takes a `sei_address` as a parameter, which is a `String` representing the
+    /// SEI address. It returns a `StdResult<EvmAddressResponse>`, which is a standard result type
+    /// in the `cosmwasm_std` library. The `EvmAddressResponse` struct contains the EVM address and
+    /// a boolean indicating whether the EVM address is associated.
     ///
     /// # Arguments
     ///
@@ -440,9 +447,10 @@ impl<'a> SeiQuerier<'a> {
     ///
     /// # Returns
     ///
-    /// * `StdResult<EvmAddressResponse>` - A standard result that wraps the `EvmAddressResponse` struct.
-    /// `EvmAddressResponse` contains the EVM address and a boolean indicating whether the EVM address is associated.
-    /// If the Sei address is not associated with any EVM address, the EVM address will be an empty string.
+    /// * `StdResult<EvmAddressResponse>` - A standard result that wraps the `EvmAddressResponse`
+    /// struct. `EvmAddressResponse` contains the EVM address and a boolean indicating whether the
+    /// EVM address is associated. If the Sei address is not associated with any EVM address,
+    /// the EVM address will be an empty string.
     ///
     ///
     /// # Errors

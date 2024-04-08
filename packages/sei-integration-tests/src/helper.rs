@@ -1,4 +1,9 @@
-use cosmwasm_std::{testing::{MockApi, MockQuerier, MockStorage}, Api, BalanceResponse, BankQuery, BlockInfo, Empty, GovMsg, IbcMsg, IbcQuery, MemoryStorage, Storage, Timestamp, from_json};
+use cosmwasm_std::{
+    from_json,
+    testing::{MockApi, MockQuerier, MockStorage},
+    Api, BalanceResponse, BankQuery, BlockInfo, Empty, GovMsg, IbcMsg, IbcQuery, MemoryStorage,
+    Storage, Timestamp,
+};
 use cw_multi_test::{
     App, AppBuilder, BankKeeper, DistributionKeeper, FailingModule, Module, Router, StakeKeeper,
     WasmKeeper,
@@ -47,20 +52,20 @@ pub fn mock_app<F>(
     FailingModule<IbcMsg, IbcQuery, Empty>,
     FailingModule<GovMsg, Empty, Empty>,
 >
-where
-    F: FnOnce(
-        &mut Router<
-            BankKeeper,
-            SeiModule,
-            WasmKeeper<SeiMsg, SeiQueryWrapper>,
-            StakeKeeper,
-            DistributionKeeper,
-            FailingModule<IbcMsg, IbcQuery, Empty>,
-            FailingModule<GovMsg, Empty, Empty>,
-        >,
-        &dyn Api,
-        &mut dyn Storage,
-    ),
+    where
+        F: FnOnce(
+            &mut Router<
+                BankKeeper,
+                SeiModule,
+                WasmKeeper<SeiMsg, SeiQueryWrapper>,
+                StakeKeeper,
+                DistributionKeeper,
+                FailingModule<IbcMsg, IbcQuery, Empty>,
+                FailingModule<GovMsg, Empty, Empty>,
+            >,
+            &dyn Api,
+            &mut dyn Storage,
+        ),
 {
     let appbuilder: AppBuilder<
         BankKeeper,

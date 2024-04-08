@@ -261,7 +261,8 @@ pub struct EvmAddressResponse {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct SeiAddressResponse {
-    /// The SEI address associated to EVM address. Empty if the EVM address is not associated with any SEI address.
+    /// The SEI address associated to EVM address. Empty if the EVM address is not associated with
+    /// any SEI address.
     pub sei_address: String,
 
     /// A boolean value indicating whether the SEI address is associated to EVM address.

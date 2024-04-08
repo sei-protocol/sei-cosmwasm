@@ -11,9 +11,16 @@ use crate::{
     state::{PARALLEL_VALS, USER_SUMS, VALUES},
     types::{OrderData, PositionEffect},
 };
-use protobuf::Message;
-use sei_cosmwasm::{BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse, DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg, EvmAddressResponse, SeiAddressResponse};
 use ethaddr::Address;
+use protobuf::Message;
+use sei_cosmwasm::{BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse,
+                   DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse,
+                   EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse,
+                   GetOrderByIdResponse, GetOrdersResponse, Metadata, MsgPlaceOrdersResponse,
+                   OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
+                   PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry,
+                   SudoMsg, EvmAddressResponse, SeiAddressResponse};
+
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
 // version info for migration info

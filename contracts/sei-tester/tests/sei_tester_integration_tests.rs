@@ -1,11 +1,17 @@
-use cosmwasm_std::{Addr, Api, BalanceResponse, coin, Coin, CosmosMsg, Decimal, Empty, from_json, GovMsg, IbcMsg, IbcQuery, QueryRequest, StdError, Storage, testing::{MockApi, MockStorage}, Uint128};
+use cosmwasm_std::{Addr, Api, BalanceResponse, coin, Coin, CosmosMsg, Decimal, Empty, from_json,
+                   GovMsg, IbcMsg, IbcQuery, QueryRequest, StdError, Storage,
+                   testing::{MockApi, MockStorage}, Uint128};
 use cosmwasm_std::{BlockInfo, Uint64};
 use cw_multi_test::{
     App, BankKeeper, ContractWrapper, DistributionKeeper, Executor, FailingModule, Router,
     StakeKeeper, WasmKeeper,
 };
 
-use sei_cosmwasm::{Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus, OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute};
+use sei_cosmwasm::{Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse,
+                   EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse,
+                   GetOrdersResponse, OracleExchangeRate, OracleTwapsResponse, Order,
+                   OrderSimulationResponse, OrderStatus, OrderType, PositionDirection,
+                   SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute};
 use sei_integration_tests::{
     helper::{get_balance, mock_app},
     module::{SeiModule, EVM_ADDRESS, SEI_ADDRESS},
@@ -1003,5 +1009,6 @@ fn test_sei_address_query() {
 
     let err = res.expect_err("Expected an error because the EVM address is invalid");
     assert_eq!(err.to_string(),
-               "Generic error: Querier contract error: Generic error: Failed to parse Ethereum address");
+               "Generic error: Querier contract error: Generic error: Failed to parse Ethereum \
+               address");
 }
