@@ -1012,21 +1012,4 @@ fn test_sei_address_query() {
         associated: false,
     };
     assert_eq!(res, expected_res);
-
-    // Test error case when EVM address is invalid
-    let res: Result<SeiAddressResponse, StdError> = app.wrap().query_wasm_smart(
-        sei_tester_addr.clone(),
-        &QueryMsg::GetSeiAddressByEvmAddress {
-            evm_address: "fakeaddress".to_string(),
-        },
-    );
-
-    assert!(res.is_err());
-
-    let err = res.expect_err("Expected an error because the EVM address is invalid");
-    assert_eq!(
-        err.to_string(),
-        "Generic error: Querier contract error: Generic error: Failed to parse Ethereum \
-               address"
-    );
 }

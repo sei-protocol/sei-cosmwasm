@@ -1,5 +1,5 @@
 use cosmwasm_std::to_json_binary;
-#[cfg(not(feature = "library"))]
+// #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
     coin, entry_point, Attribute, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
     Order as IteratorOrder, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128,
@@ -11,7 +11,6 @@ use crate::{
     state::{PARALLEL_VALS, USER_SUMS, VALUES},
     types::{OrderData, PositionEffect},
 };
-use ethaddr::Address;
 use protobuf::Message;
 use sei_cosmwasm::{
     BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse, DenomUnit,
@@ -573,12 +572,8 @@ pub fn query_sei_address(
     deps: Deps<SeiQueryWrapper>,
     evm_address: String,
 ) -> StdResult<SeiAddressResponse> {
-    let valid_addr = match Address::from_str_checksum(&*evm_address) {
-        Ok(addr) => addr,
-        Err(_) => return Err(StdError::generic_err("Failed to parse Ethereum address")),
-    };
     let querier = SeiQuerier::new(&deps.querier);
-    let res = querier.get_sei_address(valid_addr.to_string())?;
+    let res = querier.get_sei_address(evm_address)?;
 
     Ok(res)
 }
