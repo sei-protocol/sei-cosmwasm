@@ -252,7 +252,7 @@ pub struct EvmAddressResponse {
     pub evm_address: String,
 
     /// A boolean value indicating whether the EVM address is associated.
-    pub associated: bool
+    pub associated: bool,
 }
 
 /// `SeiAddressResponse` is a struct that represents a response containing a SEI address.
@@ -263,5 +263,5 @@ pub struct SeiAddressResponse {
     pub sei_address: String,
 
     /// A boolean value indicating whether the SEI address is associated to EVM address.
-    pub associated: bool
+    pub associated: bool,
 }

@@ -13,9 +13,9 @@ pub use proto_structs::{
 pub use querier::SeiQuerier;
 pub use query::{
     DenomAuthorityMetadataResponse, DenomsFromCreatorResponse, DexTwapsResponse, EpochResponse,
-    ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
-    OracleTwapsResponse, OrderSimulationResponse, PriceResponse, SeiQuery, SeiQueryWrapper,
-    EvmAddressResponse, SeiAddressResponse
+    EvmAddressResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse,
+    GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, PriceResponse,
+    SeiAddressResponse, SeiQuery, SeiQueryWrapper,
 };
 pub use route::SeiRoute;
 pub use sei_types::{

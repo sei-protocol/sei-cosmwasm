@@ -13,14 +13,14 @@ use crate::{
 };
 use ethaddr::Address;
 use protobuf::Message;
-use sei_cosmwasm::{BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse,
-                   DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse,
-                   EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse,
-                   GetOrderByIdResponse, GetOrdersResponse, Metadata, MsgPlaceOrdersResponse,
-                   OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
-                   PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry,
-                   SudoMsg, EvmAddressResponse, SeiAddressResponse};
-
+use sei_cosmwasm::{
+    BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse, DenomUnit,
+    DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, EvmAddressResponse,
+    ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
+    Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse,
+    OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuerier, SeiQueryWrapper,
+    SettlementEntry, SudoMsg,
+};
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
 // version info for migration info
@@ -438,10 +438,12 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
         QueryMsg::GetDenomsFromCreator { creator } => {
             to_json_binary(&query_denoms_from_creator(deps, creator)?)
         }
-        QueryMsg::GetEvmAddressBySeiAddress { sei_address } =>
-            to_json_binary(&query_evm_address(deps, sei_address)?),
-        QueryMsg::GetSeiAddressByEvmAddress { evm_address } =>
-            to_json_binary(&query_sei_address(deps, evm_address)?),
+        QueryMsg::GetEvmAddressBySeiAddress { sei_address } => {
+            to_json_binary(&query_evm_address(deps, sei_address)?)
+        }
+        QueryMsg::GetSeiAddressByEvmAddress { evm_address } => {
+            to_json_binary(&query_sei_address(deps, evm_address)?)
+        }
     }
 }
 
@@ -580,4 +582,3 @@ pub fn query_sei_address(
 
     Ok(res)
 }
-

@@ -1,17 +1,21 @@
-use cosmwasm_std::{Addr, Api, BalanceResponse, coin, Coin, CosmosMsg, Decimal, Empty, from_json,
-                   GovMsg, IbcMsg, IbcQuery, QueryRequest, StdError, Storage,
-                   testing::{MockApi, MockStorage}, Uint128};
+use cosmwasm_std::{
+    coin, from_json,
+    testing::{MockApi, MockStorage},
+    Addr, Api, BalanceResponse, Coin, CosmosMsg, Decimal, Empty, GovMsg, IbcMsg, IbcQuery,
+    QueryRequest, StdError, Storage, Uint128,
+};
 use cosmwasm_std::{BlockInfo, Uint64};
 use cw_multi_test::{
     App, BankKeeper, ContractWrapper, DistributionKeeper, Executor, FailingModule, Router,
     StakeKeeper, WasmKeeper,
 };
 
-use sei_cosmwasm::{Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse,
-                   EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-                   GetOrdersResponse, OracleExchangeRate, OracleTwapsResponse, Order,
-                   OrderSimulationResponse, OrderStatus, OrderType, PositionDirection,
-                   SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute};
+use sei_cosmwasm::{
+    Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse,
+    EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse,
+    OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus,
+    OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute,
+};
 use sei_integration_tests::{
     helper::{get_balance, mock_app},
     module::{SeiModule, EVM_ADDRESS, SEI_ADDRESS},
@@ -151,7 +155,7 @@ fn test_tokenfactory_integration_foundation() {
             },
         })],
     )
-        .unwrap();
+    .unwrap();
 
     let res: BalanceResponse = get_balance(&app, ADMIN.to_string(), out.to_string());
     assert_eq!(res.amount.amount, Uint128::new(1));
@@ -184,7 +188,7 @@ fn test_tokenfactory_integration_foundation() {
             },
         })],
     )
-        .unwrap();
+    .unwrap();
 
     let res: BalanceResponse = get_balance(&app, ADMIN.to_string(), out.to_string());
     assert_eq!(res.amount.amount, Uint128::new(0));
@@ -570,7 +574,7 @@ fn test_dex_module_query_order_simulation() {
             contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
         })],
     )
-        .unwrap();
+    .unwrap();
 
     // Test all of sim order can be fulfilled
     let res: OrderSimulationResponse = app
@@ -850,7 +854,7 @@ fn test_dex_module_query_dex_twap() {
             contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
         })],
     )
-        .unwrap();
+    .unwrap();
 
     app.set_block(BlockInfo {
         height: 2,
@@ -894,7 +898,7 @@ fn test_dex_module_query_dex_twap() {
             contract_address: Addr::unchecked(&sei_tester_addr.to_string()),
         })],
     )
-        .unwrap();
+    .unwrap();
 
     app.set_block(BlockInfo {
         height: 3,
@@ -938,9 +942,12 @@ fn test_evm_address_query() {
     // Test associated EVM address
     let res: EvmAddressResponse = app
         .wrap()
-        .query_wasm_smart(sei_tester_addr.clone(), &QueryMsg::GetEvmAddressBySeiAddress {
-            sei_address: SEI_ADDRESS.to_string(),
-        })
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::GetEvmAddressBySeiAddress {
+                sei_address: SEI_ADDRESS.to_string(),
+            },
+        )
         .unwrap();
 
     let expected_res = EvmAddressResponse {
@@ -952,9 +959,12 @@ fn test_evm_address_query() {
     // Test non-associated EVM address
     let res: EvmAddressResponse = app
         .wrap()
-        .query_wasm_smart(sei_tester_addr.clone(), &QueryMsg::GetEvmAddressBySeiAddress {
-            sei_address: "fake_address".to_string(),
-        })
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::GetEvmAddressBySeiAddress {
+                sei_address: "fake_address".to_string(),
+            },
+        )
         .unwrap();
 
     let expected_res = EvmAddressResponse {
@@ -972,9 +982,12 @@ fn test_sei_address_query() {
     // // Test associated SEI address
     let res: SeiAddressResponse = app
         .wrap()
-        .query_wasm_smart(sei_tester_addr.clone(), &QueryMsg::GetSeiAddressByEvmAddress {
-            evm_address: "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B".to_string(),
-        })
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::GetSeiAddressByEvmAddress {
+                evm_address: "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B".to_string(),
+            },
+        )
         .unwrap();
 
     let expected_res = SeiAddressResponse {
@@ -983,13 +996,15 @@ fn test_sei_address_query() {
     };
     assert_eq!(res, expected_res);
 
-
     // Test non-associated SEI address
     let res: SeiAddressResponse = app
         .wrap()
-        .query_wasm_smart(sei_tester_addr.clone(), &QueryMsg::GetSeiAddressByEvmAddress {
-            evm_address: "0x999999cf1046e68e36E1aA2E0E07105eDDD1f08E".to_string(),
-        })
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::GetSeiAddressByEvmAddress {
+                evm_address: "0x999999cf1046e68e36E1aA2E0E07105eDDD1f08E".to_string(),
+            },
+        )
         .unwrap();
 
     let expected_res = SeiAddressResponse {
@@ -999,16 +1014,19 @@ fn test_sei_address_query() {
     assert_eq!(res, expected_res);
 
     // Test error case when EVM address is invalid
-    let res: Result<SeiAddressResponse, StdError> = app
-        .wrap()
-        .query_wasm_smart(sei_tester_addr.clone(), &QueryMsg::GetSeiAddressByEvmAddress {
+    let res: Result<SeiAddressResponse, StdError> = app.wrap().query_wasm_smart(
+        sei_tester_addr.clone(),
+        &QueryMsg::GetSeiAddressByEvmAddress {
             evm_address: "fakeaddress".to_string(),
-        });
+        },
+    );
 
     assert!(res.is_err());
 
     let err = res.expect_err("Expected an error because the EVM address is invalid");
-    assert_eq!(err.to_string(),
-               "Generic error: Querier contract error: Generic error: Failed to parse Ethereum \
-               address");
+    assert_eq!(
+        err.to_string(),
+        "Generic error: Querier contract error: Generic error: Failed to parse Ethereum \
+               address"
+    );
 }

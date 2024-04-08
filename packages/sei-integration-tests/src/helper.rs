@@ -52,20 +52,20 @@ pub fn mock_app<F>(
     FailingModule<IbcMsg, IbcQuery, Empty>,
     FailingModule<GovMsg, Empty, Empty>,
 >
-    where
-        F: FnOnce(
-            &mut Router<
-                BankKeeper,
-                SeiModule,
-                WasmKeeper<SeiMsg, SeiQueryWrapper>,
-                StakeKeeper,
-                DistributionKeeper,
-                FailingModule<IbcMsg, IbcQuery, Empty>,
-                FailingModule<GovMsg, Empty, Empty>,
-            >,
-            &dyn Api,
-            &mut dyn Storage,
-        ),
+where
+    F: FnOnce(
+        &mut Router<
+            BankKeeper,
+            SeiModule,
+            WasmKeeper<SeiMsg, SeiQueryWrapper>,
+            StakeKeeper,
+            DistributionKeeper,
+            FailingModule<IbcMsg, IbcQuery, Empty>,
+            FailingModule<GovMsg, Empty, Empty>,
+        >,
+        &dyn Api,
+        &mut dyn Storage,
+    ),
 {
     let appbuilder: AppBuilder<
         BankKeeper,

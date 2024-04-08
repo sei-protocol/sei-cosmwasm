@@ -1,9 +1,7 @@
 use anyhow::Result as AnyResult;
 use cosmwasm_std::{
-    from_json,
-    to_json_binary,
-    Addr, Api, BankMsg, Binary, BlockInfo, Coin, CosmosMsg, CustomQuery, Decimal, Querier, Storage,
-    Uint128, Uint64,
+    from_json, to_json_binary, Addr, Api, BankMsg, Binary, BlockInfo, Coin, CosmosMsg, CustomQuery,
+    Decimal, Querier, Storage, Uint128, Uint64,
 };
 use cw_multi_test::{AppResponse, BankSudo, CosmosRouter, Module, SudoMsg};
 use schemars::JsonSchema;
@@ -12,7 +10,7 @@ use sei_cosmwasm::{
     EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse,
     GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse,
     OrderSimulationResponse, OrderStatus, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery,
-    SeiQueryWrapper, SudoMsg as SeiSudoMsg
+    SeiQueryWrapper, SudoMsg as SeiSudoMsg,
 };
 use serde::de::DeserializeOwned;
 use std::{
@@ -92,14 +90,14 @@ impl Module for SeiModule {
         &self,
         api: &dyn Api,
         storage: &mut dyn Storage,
-        router: &dyn CosmosRouter<ExecC=ExecC, QueryC=QueryC>,
+        router: &dyn CosmosRouter<ExecC = ExecC, QueryC = QueryC>,
         block: &BlockInfo,
         sender: Addr,
         msg: Self::ExecT,
     ) -> AnyResult<AppResponse>
-        where
-            ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
-            QueryC: CustomQuery + DeserializeOwned + 'static,
+    where
+        ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
+        QueryC: CustomQuery + DeserializeOwned + 'static,
     {
         match msg {
             SeiMsg::PlaceOrders {
@@ -143,9 +141,9 @@ impl Module for SeiModule {
         request: Self::QueryT,
     ) -> AnyResult<Binary> {
         match request.query_data {
-            SeiQuery::ExchangeRates {} => {
-                Ok(to_json_binary(&get_exchange_rates(self.exchange_rates.clone()))?)
-            }
+            SeiQuery::ExchangeRates {} => Ok(to_json_binary(&get_exchange_rates(
+                self.exchange_rates.clone(),
+            ))?),
             SeiQuery::OracleTwaps { lookback_seconds } => Ok(to_json_binary(&get_oracle_twaps(
                 block,
                 self.exchange_rates.clone(),
@@ -215,13 +213,13 @@ impl Module for SeiModule {
         &self,
         _api: &dyn Api,
         _storage: &mut dyn Storage,
-        _router: &dyn CosmosRouter<ExecC=ExecC, QueryC=QueryC>,
+        _router: &dyn CosmosRouter<ExecC = ExecC, QueryC = QueryC>,
         _block: &BlockInfo,
         msg: Self::SudoT,
     ) -> AnyResult<AppResponse>
-        where
-            ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
-            QueryC: CustomQuery + DeserializeOwned + 'static,
+    where
+        ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
+        QueryC: CustomQuery + DeserializeOwned + 'static,
     {
         match msg {
             SeiSudoMsg::Settlement {
@@ -495,7 +493,7 @@ fn get_dex_twaps(
     let order_response: GetOrdersResponse = from_json(
         &query_get_orders_helper(storage, contract_address, Addr::unchecked("")).unwrap(),
     )
-        .unwrap();
+    .unwrap();
 
     let mut orders = order_response.orders.clone();
     orders.sort_by(|a, b| b.id.cmp(&a.id));
@@ -566,7 +564,7 @@ fn get_order_simulation(
     let orders: GetOrdersResponse = from_json(
         &query_get_orders_helper(storage, contract_address, Addr::unchecked("")).unwrap(),
     )
-        .unwrap();
+    .unwrap();
 
     let valid_orders = if order.position_direction == PositionDirection::Long {
         PositionDirection::Short
@@ -579,7 +577,7 @@ fn get_order_simulation(
             if (order_response.position_direction == PositionDirection::Long
                 && order.price <= order_response.price)
                 || (order_response.position_direction == PositionDirection::Short
-                && order.price >= order_response.price)
+                    && order.price >= order_response.price)
             {
                 executed_quantity += order_response.quantity;
             }
@@ -709,14 +707,14 @@ fn execute_create_denom_helper(
 fn execute_mint_tokens_helper<ExecC, QueryC>(
     api: &dyn Api,
     storage: &mut dyn Storage,
-    router: &dyn CosmosRouter<ExecC=ExecC, QueryC=QueryC>,
+    router: &dyn CosmosRouter<ExecC = ExecC, QueryC = QueryC>,
     block: &BlockInfo,
     sender: Addr,
     amount: Coin,
 ) -> AnyResult<AppResponse>
-    where
-        ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
-        QueryC: CustomQuery + DeserializeOwned + 'static,
+where
+    ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
+    QueryC: CustomQuery + DeserializeOwned + 'static,
 {
     let owner = storage.get(amount.denom.as_bytes());
     if owner.is_none() || owner.unwrap() != sender.to_string().as_bytes() {
@@ -739,14 +737,14 @@ fn execute_mint_tokens_helper<ExecC, QueryC>(
 fn execute_burn_tokens_helper<ExecC, QueryC>(
     api: &dyn Api,
     storage: &mut dyn Storage,
-    router: &dyn CosmosRouter<ExecC=ExecC, QueryC=QueryC>,
+    router: &dyn CosmosRouter<ExecC = ExecC, QueryC = QueryC>,
     block: &BlockInfo,
     sender: Addr,
     amount: Coin,
 ) -> AnyResult<AppResponse>
-    where
-        ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
-        QueryC: CustomQuery + DeserializeOwned + 'static,
+where
+    ExecC: Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
+    QueryC: CustomQuery + DeserializeOwned + 'static,
 {
     let owner = storage.get(amount.denom.as_bytes());
     if owner.is_none() || owner.unwrap() != sender.to_string().as_bytes() {
