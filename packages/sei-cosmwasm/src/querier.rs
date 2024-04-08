@@ -471,6 +471,27 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
+    /// Queries the Sei address associated with a given EVM address.
+    ///
+    /// This function takes an `evm_address` as a parameter, which is a `String` representing the
+    /// EVM address. It returns a `StdResult<SeiAddressResponse>`, which is a standard result type
+    /// in the `cosmwasm_std` library. The `SeiAddressResponse` struct contains the Sei address.
+    /// If the EVM address is not associated with any Sei address, the Sei address will be an empty
+    /// string.
+    ///
+    /// # Arguments
+    ///
+    /// * `evm_address` - A `String` that represents the EVM address.
+    ///
+    /// # Returns
+    ///
+    /// * `StdResult<SeiAddressResponse>` - A standard result that wraps the `SeiAddressResponse`
+    /// struct. `SeiAddressResponse` contains the Sei address. If the EVM address is not associated
+    /// with any Sei address, the Sei address will be an empty string.
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if the query to the EVM fails.
     pub fn get_sei_address(
         &self,
         evm_address: String,

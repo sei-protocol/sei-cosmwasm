@@ -244,10 +244,6 @@ pub struct Erc721UriResponse {
 }
 
 /// `EvmAddressResponse` is a struct that represents a response containing an EVM address.
-///
-/// It has two fields:
-/// * `evm_address`: a `String` that represents the EVM address.
-/// * `associated`: a `bool` that indicates whether the EVM address is associated or not.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct EvmAddressResponse {
     /// The 20-byte EVM address associated to Sei address that's derived from the public part of a
@@ -259,6 +255,7 @@ pub struct EvmAddressResponse {
     pub associated: bool
 }
 
+/// `SeiAddressResponse` is a struct that represents a response containing a SEI address.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct SeiAddressResponse {
     /// The SEI address associated to EVM address. Empty if the EVM address is not associated with
