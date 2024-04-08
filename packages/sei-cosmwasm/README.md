@@ -57,6 +57,12 @@ Currently, Sei Bindings support query and message support for the sei custom mod
             - Change the Admin of the Denom. Only the current admin can change the admin.
         - SetMetadata
             - Set the denom metadata of a factory denom. Only the current admin can set metadata.
+- EVM
+    - Query
+        - GetEvmAddress
+            - Get the EVM address associated with a Sei address
+        - GetSeiAddress
+            - Get the Sei address associated with an EVM address
 
 ## Usage
 
