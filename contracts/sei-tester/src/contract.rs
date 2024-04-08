@@ -12,14 +12,7 @@ use crate::{
     types::{OrderData, PositionEffect},
 };
 use protobuf::Message;
-use sei_cosmwasm::{
-    BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse, DenomUnit,
-    DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
-    GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, Metadata,
-    MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
-    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
-    EvmAddressResponse
-};
+use sei_cosmwasm::{BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse, DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType, PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg, EvmAddressResponse, SeiAddressResponse};
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
 // version info for migration info
@@ -439,6 +432,8 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
         }
         QueryMsg::GetEvmAddressBySeiAddress { sei_address } =>
             to_json_binary(&query_evm_address(deps, sei_address)?),
+        QueryMsg::GetSeiAddressByEvmAddress { evm_address } =>
+            to_json_binary(&query_sei_address(deps, evm_address)?),
     }
 }
 
@@ -563,3 +558,15 @@ pub fn query_evm_address(
 
     Ok(res)
 }
+
+pub fn query_sei_address(
+    deps: Deps<SeiQueryWrapper>,
+    sei_address: String,
+) -> StdResult<SeiAddressResponse> {
+    let valid_addr = deps.api.addr_validate(&sei_address)?;
+    let querier = SeiQuerier::new(&deps.querier);
+    let res = querier.get_sei_address(valid_addr.to_string())?;
+
+    Ok(res)
+}
+

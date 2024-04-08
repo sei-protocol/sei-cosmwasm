@@ -1,7 +1,7 @@
 use cosmwasm_std::{Addr, QuerierWrapper, StdResult, Uint128};
 use cw20::{BalanceResponse, TokenInfoResponse};
 
-use crate::query::{DenomAuthorityMetadataResponse, DenomsFromCreatorResponse, DexTwapsResponse, EpochResponse, Erc20AllowanceResponse, Erc721ApprovedResponse, Erc721IsApprovedForAllResponse, Erc721NameSymbolResponse, Erc721OwnerResponse, Erc721UriResponse, ErcPayloadResponse, EvmAddressResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper, StaticCallResponse};
+use crate::query::{DenomAuthorityMetadataResponse, DenomsFromCreatorResponse, DexTwapsResponse, EpochResponse, Erc20AllowanceResponse, Erc721ApprovedResponse, Erc721IsApprovedForAllResponse, Erc721NameSymbolResponse, Erc721OwnerResponse, Erc721UriResponse, ErcPayloadResponse, EvmAddressResponse, SeiAddressResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiQuery, SeiQueryWrapper, StaticCallResponse};
 use crate::route::SeiRoute;
 use crate::Order;
 
@@ -456,6 +456,21 @@ impl<'a> SeiQuerier<'a> {
             route: SeiRoute::Evm,
             query_data: SeiQuery::GetEvmAddress {
                 sei_address
+            },
+        }
+            .into();
+
+        self.querier.query(&request)
+    }
+
+    pub fn get_sei_address(
+        &self,
+        evm_address: String,
+    ) -> StdResult<SeiAddressResponse> {
+        let request = SeiQueryWrapper {
+            route: SeiRoute::Evm,
+            query_data: SeiQuery::GetSeiAddress {
+                evm_address
             },
         }
             .into();

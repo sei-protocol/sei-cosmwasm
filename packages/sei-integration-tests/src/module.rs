@@ -2,7 +2,7 @@ use anyhow::Result as AnyResult;
 use cosmwasm_std::{Addr, Api, BankMsg, Binary, BlockInfo, Coin, CosmosMsg, CustomQuery, Decimal, Querier, Storage, Uint128, Uint64, to_json_binary, from_json};
 use cw_multi_test::{AppResponse, BankSudo, CosmosRouter, Module, SudoMsg};
 use schemars::JsonSchema;
-use sei_cosmwasm::{Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, Epoch, EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderSimulationResponse, OrderStatus, PositionDirection, SeiMsg, SeiQuery, SeiQueryWrapper, SudoMsg as SeiSudoMsg};
+use sei_cosmwasm::{Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, Epoch, EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderSimulationResponse, OrderStatus, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, SudoMsg as SeiSudoMsg};
 use serde::de::DeserializeOwned;
 use std::{
     collections::HashMap,
@@ -24,6 +24,7 @@ const GENESIS_EPOCH: Epoch = Epoch {
 };
 
 pub const EVM_ADDRESS: &str = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B";
+pub const SEI_ADDRESS: &str = "sei1vzxkv3lxccnttr9rs0002s93sgw72h7ghukuhs";
 
 impl SeiModule {
     pub fn new() -> Self {
@@ -183,6 +184,9 @@ impl Module for SeiModule {
             }
             SeiQuery::GetEvmAddress { sei_address } => {
                 Ok(to_json_binary(&get_evm_address(sei_address))?)
+            }
+            SeiQuery::GetSeiAddress { evm_address } => {
+                Ok(to_json_binary(&get_sei_address(evm_address))?)
             }
             // TODO: Implement get denom authority metadata in integration tests
             SeiQuery::DenomAuthorityMetadata { .. } => {
@@ -644,12 +648,24 @@ fn get_epoch(epoch: Epoch) -> EpochResponse {
 
 fn get_evm_address(sei_address: String) -> EvmAddressResponse {
     let (evm_address, associated) = match sei_address.as_str() {
-        "contract0" => (EVM_ADDRESS.to_string(), true),
+        SEI_ADDRESS => (EVM_ADDRESS.to_string(), true),
         _ => (String::new(), false), // default case
     };
 
     EvmAddressResponse {
         evm_address,
+        associated,
+    }
+}
+
+fn get_sei_address(evm_address: String) -> SeiAddressResponse {
+    let (sei_address, associated) = match evm_address.as_str() {
+        EVM_ADDRESS => (SEI_ADDRESS.to_string(), true),
+        _ => (String::new(), false), // default case
+    };
+
+    SeiAddressResponse {
+        sei_address,
         associated,
     }
 }

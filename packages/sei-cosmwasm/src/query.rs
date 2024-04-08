@@ -128,6 +128,9 @@ pub enum SeiQuery {
     GetEvmAddress {
         sei_address: String,
     },
+    GetSeiAddress {
+        evm_address: String,
+    },
 }
 
 /// ExchangeRatesResponse is data format returned from OracleRequest::ExchangeRates query
@@ -253,5 +256,14 @@ pub struct EvmAddressResponse {
     pub evm_address: String,
 
     /// A boolean value indicating whether the EVM address is associated.
+    pub associated: bool
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct SeiAddressResponse {
+    /// The SEI address associated to EVM address. Empty if the EVM address is not associated with any SEI address.
+    pub sei_address: String,
+
+    /// A boolean value indicating whether the SEI address is associated to EVM address.
     pub associated: bool
 }

@@ -60,4 +60,7 @@ pub enum QueryMsg {
     GetEvmAddressBySeiAddress {
         sei_address: String,
     },
+    GetSeiAddressByEvmAddress {
+        evm_address: String,
+    },
 }
