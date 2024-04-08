@@ -1,5 +1,5 @@
 use cosmwasm_std::to_json_binary;
-// #[cfg(not(feature = "library"))]
+#[cfg(not(feature = "library"))]
 use cosmwasm_std::{
     coin, entry_point, Attribute, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
     Order as IteratorOrder, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128,
@@ -34,7 +34,7 @@ pub fn validate_migration(
     let ver = cw2::get_contract_version(deps.storage)?;
     // ensure we are migrating from an allowed contract
     if ver.contract != contract_name {
-        return Err(StdError::generic_err("Can only upgrade from same type").into());
+        return Err(StdError::generic_err("Can only upgrade from same type"));
     }
     Ok(())
 }
@@ -276,13 +276,13 @@ pub fn set_metadata(
         symbol: "SUB".to_string(),
         denom_units: vec![
             DenomUnit {
-                denom: tokenfactory_denom.clone(),
-                exponent: 0 as u32,
+                denom: tokenfactory_denom,
+                exponent: 0,
                 aliases: vec!["usubdenom".to_string()],
             },
             DenomUnit {
                 denom: "SUBDENOM".to_string(),
-                exponent: 6 as u32,
+                exponent: 6,
                 aliases: vec!["subdenom".to_string()],
             },
         ],
@@ -338,7 +338,7 @@ pub fn process_bulk_order_placements(
     response = response.set_data(binary);
     deps.api
         .debug(&format!("process_bulk_order_placements: {:?}", response));
-    return Ok(Response::new());
+    Ok(Response::new())
 }
 
 pub fn process_bulk_order_cancellations(
