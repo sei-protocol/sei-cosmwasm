@@ -1,5 +1,5 @@
 use cosmwasm_std::{
-    coin, from_binary,
+    coin, from_json,
     testing::{MockApi, MockStorage},
     Addr, Api, BalanceResponse, Coin, CosmosMsg, Decimal, Empty, GovMsg, IbcMsg, IbcQuery,
     QueryRequest, StdError, Storage, Uint128,
@@ -9,15 +9,16 @@ use cw_multi_test::{
     App, BankKeeper, ContractWrapper, DistributionKeeper, Executor, FailingModule, Router,
     StakeKeeper, WasmKeeper,
 };
+
 use sei_cosmwasm::{
     Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse,
-    ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleExchangeRate,
-    OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus, OrderType, PositionDirection,
-    SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute, SudoMsg as SeiSudoMsg,
+    EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse,
+    OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus,
+    OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute,
 };
 use sei_integration_tests::{
     helper::{get_balance, mock_app},
-    module::SeiModule,
+    module::{SeiModule, EVM_ADDRESS, SEI_ADDRESS},
 };
 use sei_tester::{
     contract::{execute, instantiate, query},
@@ -142,7 +143,7 @@ fn test_tokenfactory_integration_foundation() {
     let res = arr.first().unwrap().clone().data;
     let data = res.unwrap();
 
-    let out: String = from_binary(&data).unwrap();
+    let out: String = from_json(&data).unwrap();
     assert_eq!(out.to_string(), "factory/admin/test");
 
     app.execute_multi(
@@ -306,7 +307,7 @@ fn test_dex_module_integration_orders() {
         .unwrap();
     let res = arr.first().unwrap().clone().data;
     let data = res.unwrap();
-    let out: String = from_binary(&data).unwrap();
+    let out: String = from_json(&data).unwrap();
     assert_eq!(out.to_string(), contract_addr.to_string());
 
     // Query GetOrders() after order 1
@@ -466,7 +467,7 @@ fn test_dex_module_integration_orders() {
         .unwrap();
     let res = arr.first().unwrap().clone().data;
     let data = res.unwrap();
-    let out: String = from_binary(&data).unwrap();
+    let out: String = from_json(&data).unwrap();
     assert_eq!(out.to_string(), contract_addr.to_string());
 
     // Query GetOrders() after order 0 cancelled
@@ -930,4 +931,85 @@ fn test_dex_module_query_dex_twap() {
     };
 
     assert_eq!(res, expected_twap);
+}
+
+/// EVM Module - query EVM address
+#[test]
+fn test_evm_address_query() {
+    let mut app = mock_app(init_default_balances, vec![]);
+    let sei_tester_addr = setup_test(&mut app);
+
+    // Test associated EVM address
+    let res: EvmAddressResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::GetEvmAddressBySeiAddress {
+                sei_address: SEI_ADDRESS.to_string(),
+            },
+        )
+        .unwrap();
+
+    let expected_res = EvmAddressResponse {
+        evm_address: EVM_ADDRESS.to_string(),
+        associated: true,
+    };
+    assert_eq!(res, expected_res);
+
+    // Test non-associated EVM address
+    let res: EvmAddressResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::GetEvmAddressBySeiAddress {
+                sei_address: "fake_address".to_string(),
+            },
+        )
+        .unwrap();
+
+    let expected_res = EvmAddressResponse {
+        evm_address: String::new(),
+        associated: false,
+    };
+    assert_eq!(res, expected_res);
+}
+
+#[test]
+fn test_sei_address_query() {
+    let mut app = mock_app(init_default_balances, vec![]);
+    let sei_tester_addr = setup_test(&mut app);
+
+    // // Test associated SEI address
+    let res: SeiAddressResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::GetSeiAddressByEvmAddress {
+                evm_address: "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B".to_string(),
+            },
+        )
+        .unwrap();
+
+    let expected_res = SeiAddressResponse {
+        sei_address: SEI_ADDRESS.to_string(),
+        associated: true,
+    };
+    assert_eq!(res, expected_res);
+
+    // Test non-associated SEI address
+    let res: SeiAddressResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::GetSeiAddressByEvmAddress {
+                evm_address: "0x999999cf1046e68e36E1aA2E0E07105eDDD1f08E".to_string(),
+            },
+        )
+        .unwrap();
+
+    let expected_res = SeiAddressResponse {
+        sei_address: String::new(),
+        associated: false,
+    };
+    assert_eq!(res, expected_res);
 }

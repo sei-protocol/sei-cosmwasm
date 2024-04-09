@@ -14,10 +14,11 @@ use crate::{
 use protobuf::Message;
 use sei_cosmwasm::{
     BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse, DenomUnit,
-    DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, ExchangeRatesResponse,
-    GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, Metadata,
-    MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType,
-    PositionDirection, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg,
+    DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, EvmAddressResponse,
+    ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
+    Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse,
+    OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuerier, SeiQueryWrapper,
+    SettlementEntry, SudoMsg,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
@@ -33,7 +34,7 @@ pub fn validate_migration(
     let ver = cw2::get_contract_version(deps.storage)?;
     // ensure we are migrating from an allowed contract
     if ver.contract != contract_name {
-        return Err(StdError::generic_err("Can only upgrade from same type").into());
+        return Err(StdError::generic_err("Can only upgrade from same type"));
     }
     Ok(())
 }
@@ -275,13 +276,13 @@ pub fn set_metadata(
         symbol: "SUB".to_string(),
         denom_units: vec![
             DenomUnit {
-                denom: tokenfactory_denom.clone(),
-                exponent: 0 as u32,
+                denom: tokenfactory_denom,
+                exponent: 0,
                 aliases: vec!["usubdenom".to_string()],
             },
             DenomUnit {
                 denom: "SUBDENOM".to_string(),
-                exponent: 6 as u32,
+                exponent: 6,
                 aliases: vec!["subdenom".to_string()],
             },
         ],
@@ -337,7 +338,7 @@ pub fn process_bulk_order_placements(
     response = response.set_data(binary);
     deps.api
         .debug(&format!("process_bulk_order_placements: {:?}", response));
-    return Ok(Response::new());
+    Ok(Response::new())
 }
 
 pub fn process_bulk_order_cancellations(
@@ -435,6 +436,12 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
         }
         QueryMsg::GetDenomsFromCreator { creator } => {
             to_json_binary(&query_denoms_from_creator(deps, creator)?)
+        }
+        QueryMsg::GetEvmAddressBySeiAddress { sei_address } => {
+            to_json_binary(&query_evm_address(deps, sei_address)?)
+        }
+        QueryMsg::GetSeiAddressByEvmAddress { evm_address } => {
+            to_json_binary(&query_sei_address(deps, evm_address)?)
         }
     }
 }
@@ -546,6 +553,27 @@ pub fn query_denoms_from_creator(
     let creator_addr = deps.api.addr_validate(&creator)?;
     let querier = SeiQuerier::new(&deps.querier);
     let res: DenomsFromCreatorResponse = querier.query_denoms_from_creator(creator_addr)?;
+
+    Ok(res)
+}
+
+pub fn query_evm_address(
+    deps: Deps<SeiQueryWrapper>,
+    sei_address: String,
+) -> StdResult<EvmAddressResponse> {
+    let valid_addr = deps.api.addr_validate(&sei_address)?;
+    let querier = SeiQuerier::new(&deps.querier);
+    let res = querier.get_evm_address(valid_addr.to_string())?;
+
+    Ok(res)
+}
+
+pub fn query_sei_address(
+    deps: Deps<SeiQueryWrapper>,
+    evm_address: String,
+) -> StdResult<SeiAddressResponse> {
+    let querier = SeiQuerier::new(&deps.querier);
+    let res = querier.get_sei_address(evm_address)?;
 
     Ok(res)
 }

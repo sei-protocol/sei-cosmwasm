@@ -87,6 +87,10 @@ Currently, Sei Bindings support query and message support for the sei custom mod
             - Gets the Erc721 name and symbol based on the `caller` and `contract address`
         - Erc721Uri
             - Gets the Erc721 URI based on `caller`, `contract_address` and `token_id`
+        - GetEvmAddress
+          - Get the EVM address associated with a Sei address
+        - GetSeiAddress
+            - Get the Sei address associated with an EVM address
     - Message
         - DelegateCallEvm
             - Performs an EVM delegate call. Requires `to` and `data`

@@ -1,5 +1,5 @@
 use cosmwasm_std::{
-    from_binary,
+    from_json,
     testing::{MockApi, MockQuerier, MockStorage},
     Api, BalanceResponse, BankQuery, BlockInfo, Empty, GovMsg, IbcMsg, IbcQuery, MemoryStorage,
     Storage, Timestamp,
@@ -34,7 +34,7 @@ pub fn get_balance(
             },
         )
     });
-    from_binary(&arr.unwrap()).unwrap()
+    from_json(&arr.unwrap()).unwrap()
 }
 
 // Mock app

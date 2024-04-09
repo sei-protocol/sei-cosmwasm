@@ -57,4 +57,10 @@ pub enum QueryMsg {
     GetDenomsFromCreator {
         creator: String,
     },
+    GetEvmAddressBySeiAddress {
+        sei_address: String,
+    },
+    GetSeiAddressByEvmAddress {
+        evm_address: String,
+    },
 }
