@@ -544,7 +544,6 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
-
     /// Query to get the hex payload for the ERC-721 `transferFrom` function
     ///
     /// # Arguments
