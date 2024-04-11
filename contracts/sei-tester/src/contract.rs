@@ -1,5 +1,5 @@
 use cosmwasm_std::to_json_binary;
-#[cfg(not(feature = "library"))]
+// #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
     coin, entry_point, Attribute, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
     Order as IteratorOrder, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128,

@@ -41,13 +41,25 @@ pub enum SeiMsg {
     SetMetadata {
         metadata: Metadata,
     },
+    /// Calls EVM contract deployed  at `to` address with the given `data`.
+    /// The from address is the callers address.
+    /// Please note that the CW contract has to be in allow list in order to execute delegate call.
+    /// The EVM (Solidity) contract `msg.sender` in this case will be the callers address.
     DelegateCallEvm {
+        /// The address of the EVM contract to call
         to: String,
+        /// Base64 encoded data to pass to the contract
         data: String, // base64 encoded
     },
+    /// Calls EVM contract deployed at `to` address with specified `value` and `data`.
+    /// The from address is the contract address of the contract executing the call.
+    /// The EVM (Solidity) contract `msg.sender` in this case will be the CW contract address.
     CallEvm {
+        /// The amount to send along with the transaction
         value: Uint128,
+        /// The address of the EVM contract to call
         to: String,
+        /// Base64 encoded data to pass to the contract
         data: String, // base64 encoded
     },
 }
