@@ -54,7 +54,7 @@ Queries:
 
 - `GetOrders(contract_address, account)`: returns `orders` for a given account
 - `GetOrderById(contract_address, price_denom, asset_denom, id)`: returns particular `order` based on `id` and `price_denom`, and `asset_denom`. 
-- `OrderSimulation(contract_address, order)`: retuns the simulation of an `order` against the existing placed orders for a given `contract_address`. 
+- `OrderSimulation(contract_address, order)`: returns the simulation of an `order` against the existing placed orders for a given `contract_address`. 
 
 Examples:
 
