@@ -42,7 +42,7 @@ pub enum SeiMsg {
         metadata: Metadata,
     },
     /// Calls EVM contract deployed  at `to` address with the given `data`.
-    /// The from address is the callers address.
+    /// Calls EVM contract as if the contract's caller called it directly.
     /// Please note that the CW contract has to be in allow list in order to execute delegate call.
     /// The EVM (Solidity) contract `msg.sender` in this case will be the callers address.
     DelegateCallEvm {
@@ -53,7 +53,8 @@ pub enum SeiMsg {
     },
     /// Calls EVM contract deployed at `to` address with specified `value` and `data`.
     /// The from address is the contract address of the contract executing the call.
-    /// The EVM (Solidity) contract `msg.sender` in this case will be the CW contract address.
+    /// The EVM (Solidity) contract `msg.sender` in this case will be the 32-byte long
+    /// [`cosmwasm_std::CanonicalAddr`] of this contract.
     CallEvm {
         /// The amount to send along with the transaction
         value: Uint128,
