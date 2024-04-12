@@ -61,7 +61,7 @@ pub enum SeiQuery {
     /// StaticCall executes the contract associated deployed at `to` address with the given `data`
     /// as parameters while disallowing any modifications to the state during the call.
     StaticCall {
-        /// Sei (bech32) address calling the contract
+        /// Sei native address calling the contract
         from: String,
         /// The address of the EVM contract to call
         to: String,
@@ -70,23 +70,23 @@ pub enum SeiQuery {
     },
     /// Query to get hex payload for the ERC-20 `transfer` function
     Erc20TransferPayload {
-        /// Sei recipient address
+        /// Recipient Sei native address
         recipient: String,
         /// Amount to transfer
         amount: Uint128,
     },
     /// Query to get hex payload for the ERC-20 `transferFrom` function
     Erc20TransferFromPayload {
-        /// Sei owner address
+        /// Owner Sei native address
         owner: String,
-        /// Sei recipient address
+        /// Recipient Sei native address
         recipient: String,
         /// Amount to transfer
         amount: Uint128,
     },
     /// Query to get hex payload for the ERC-20 `approve` function
     Erc20ApprovePayload {
-        /// Sei spender address
+        /// Spender Sei native address
         spender: String,
         /// Amount to approve
         amount: Uint128,
@@ -96,46 +96,46 @@ pub enum SeiQuery {
     Erc20Allowance {
         /// ERC-20 contract address
         contract_address: String,
-        /// Owner Sei address
+        /// Owner Sei native address
         owner: String,
-        /// Spender Sei address
+        /// Spender Sei native address
         spender: String,
     },
     /// Query to get the token info, including the name, symbol, decimals and total supply
     Erc20TokenInfo {
         /// ERC-20 contract address
         contract_address: String,
-        /// Caller Sei address
+        /// Caller Sei native address
         caller: String,
     },
-    /// Query to get the balance of the account with the given address.
+    /// Query to get the balance of the account with the given Sei native address.
     /// Executes the `balanceOf` ERC-20 function under the hood.
     Erc20Balance {
         /// ERC-20 contract address
         contract_address: String,
-        /// Account Sei address
+        /// Account Sei native address
         account: String,
     },
     /// Query to get the hex payload for the ERC-721 `transferFrom` function
     Erc721TransferPayload {
-        /// Sei address of the sender
+        /// Sei native address of the sender
         from: String,
-        /// Sei address of the recipient
+        /// Sei native address of the recipient
         recipient: String,
         /// The identifier for an NFT. String representation of the token ID
         token_id: String,
     },
     /// Query to get the hex payload for the ERC-721 `approve` function
     Erc721ApprovePayload {
-        /// Sei address of the spender
+        /// Sei native address of the spender
         spender: String,
         /// The identifier for an NFT. String representation of the token ID
         token_id: String,
     },
-    /// Query to get the address of the owner of the NFT.
+    /// Query to get the Sei native address of the owner of the NFT.
     /// Executes ERC-721 `ownerOf` function under the hood.
     Erc721Owner {
-        /// caller Sei address
+        /// Caller Sei native address
         caller: String,
         /// ERC-721 contract address
         contract_address: String,
@@ -144,7 +144,7 @@ pub enum SeiQuery {
     },
     /// Query to get the approved address for a single NFT. Executes ERC-721 `getApproved` function
     Erc721Approved {
-        /// caller Sei address
+        /// Caller Sei native address
         caller: String,
         /// ERC-721 contract address
         contract_address: String,
@@ -154,18 +154,18 @@ pub enum SeiQuery {
     /// Query if an address is an authorized operator for another address. Executes ERC-721
     /// `isApprovedForAll` function.
     Erc721IsApprovedForAll {
-        /// caller Sei address
+        /// Caller Sei native address
         caller: String,
         /// ERC-721 contract address
         contract_address: String,
-        /// The owner of the NFT Sei address
+        /// The owner of the NFT Sei native address
         owner: String,
         /// The operator Sei address that acts on behalf of the owner
         operator: String,
     },
     /// Query to get the hex payload for the ERC-721 `setApprovalForAll` function.
     Erc721SetApprovalAllPayload {
-        /// Sei address of the operator
+        /// Sei native address of the operator
         to: String,
         /// Boolean representing the status to set
         approved: bool,
@@ -173,14 +173,14 @@ pub enum SeiQuery {
     /// Query to get the name and symbol of the ERC-721 contract. Executes ERC-721 `name` and
     /// `symbol` functions under the hood.
     Erc721NameSymbol {
-        /// caller Sei address
+        /// Caller Sei native address
         caller: String,
         /// ERC-721 contract address
         contract_address: String,
     },
     /// Query to get the URI for a given NFT. Executes ERC-721 `tokenURI` function under the hood.
     Erc721Uri {
-        /// caller Sei address
+        /// Caller Sei native address
         caller: String,
         /// ERC-721 contract address
         contract_address: String,
@@ -291,11 +291,11 @@ pub struct Erc20AllowanceResponse {
     pub allowance: Uint128,
 }
 
-/// `Erc721OwnerResponse` is a struct that represents a response containing the address of the
-/// owner.
+/// `Erc721OwnerResponse` is a struct that represents a response containing the Sei native address
+/// of the owner.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct Erc721OwnerResponse {
-    /// The address of the owner of the NFT
+    /// The Sei native address of the owner of the NFT
     pub owner: String,
 }
 
@@ -337,7 +337,7 @@ pub struct Erc721UriResponse {
 pub struct EvmAddressResponse {
     /// The 20-byte EVM address associated to Sei address that's derived from the public part of a
     /// public-private key pair. It's represented as a hex string.
-    /// Address is empty if the Sei address is not associated with any EVM address.
+    /// Address is empty if the Sei native address is not associated with any EVM address.
     pub evm_address: String,
 
     /// A boolean value indicating whether the EVM address is associated.
@@ -347,10 +347,10 @@ pub struct EvmAddressResponse {
 /// `SeiAddressResponse` is a struct that represents a response containing a SEI address.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct SeiAddressResponse {
-    /// The SEI address associated to EVM address. Empty if the EVM address is not associated with
-    /// any SEI address.
+    /// The SEI native address associated to EVM address. Empty if the EVM address is
+    /// not associated with any SEI native address.
     pub sei_address: String,
 
-    /// A boolean value indicating whether the SEI address is associated to EVM address.
+    /// A boolean value indicating whether the SEI native address is associated to EVM address.
     pub associated: bool,
 }

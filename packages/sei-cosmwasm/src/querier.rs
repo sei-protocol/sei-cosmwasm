@@ -173,14 +173,14 @@ impl<'a> SeiQuerier<'a> {
     }
 
     /// Calls the EVM contract deployed at the `to` address with the given `data`.
-    /// The from address is the caller's address.
+    /// The from address is the caller's Sei native address.
     /// Please note that the CW contract has to be in the allow list in order to execute a delegate
     /// call.
     ///
     /// The EVM (Solidity) contract `msg.sender` in this case will be the caller's address.
     ///
     /// # Arguments
-    /// * `from` - Sei address of the caller.
+    /// * `from` - Sei native address of the caller.
     /// * `to` - The address of the EVM contract to call.
     /// * `data` - Base64 encoded data to pass to the contract.
     ///
@@ -209,7 +209,7 @@ impl<'a> SeiQuerier<'a> {
     /// Query to get hex payload for the ERC-20 `transfer` function
     ///
     /// # Arguments
-    /// * `recipient` - Sei recipient address.
+    /// * `recipient` - Recipient Sei native address.
     /// * `amount` - The amount to transfer.
     ///
     /// # Returns
@@ -236,8 +236,8 @@ impl<'a> SeiQuerier<'a> {
     /// Query to get hex payload for the ERC-20 `transferFrom` function
     ///
     /// # Arguments
-    /// * `owner` - Sei owner address.
-    /// * `recipient` - Sei recipient address.
+    /// * `owner` - Owner Sei native address.
+    /// * `recipient` - Recipient Sei native address.
     /// * `amount` - The amount to transfer.
     ///
     /// # Returns
@@ -269,7 +269,7 @@ impl<'a> SeiQuerier<'a> {
     /// Query to get hex payload for the ERC-20 `approve` function
     ///
     /// # Arguments
-    /// * `spender` - Sei spender address.
+    /// * `spender` - Spender Sei native address.
     /// * `amount` - The amount to approve.
     ///
     /// # Returns
@@ -297,8 +297,8 @@ impl<'a> SeiQuerier<'a> {
     ///
     /// # Arguments
     /// * `contract_address` - The contract address of the ERC-20 token.
-    /// * `owner` - Sei owner address.
-    /// * `spender` - Sei spender address.
+    /// * `owner` - Owner Sei native address.
+    /// * `spender` - Spender Sei native address.
     ///
     /// # Returns
     /// * `StdResult<Erc20AllowanceResponse>` - A standard result that wraps the
@@ -330,7 +330,7 @@ impl<'a> SeiQuerier<'a> {
     ///
     /// # Arguments
     /// * `contract_address` - The contract address of the ERC-20 token.
-    /// * `caller` - Sei caller address.
+    /// * `caller` - Caller Sei native address.
     ///
     /// # Returns
     /// * `StdResult<TokenInfoResponse>` - A standard result that wraps the `TokenInfoResponse`.
@@ -359,7 +359,7 @@ impl<'a> SeiQuerier<'a> {
     ///
     /// # Arguments
     /// * `contract_address` - The contract address of the ERC-20 token.
-    /// * `account` - Sei account address.
+    /// * `account` - Sei native account address.
     ///
     /// # Returns
     /// * `StdResult<BalanceResponse>` - A standard result that wraps the `BalanceResponse`.
@@ -387,7 +387,7 @@ impl<'a> SeiQuerier<'a> {
     /// Executes ERC-721 `ownerOf` function under the hood.
     ///
     /// # Arguments
-    /// * `caller` - Sei caller address.
+    /// * `caller` - Caller Sei native address.
     /// * `contract_address` - The contract address of the ERC-721 token.
     /// * `token_id` -  The identifier for an NFT. String representation of the token ID.
     ///
@@ -418,7 +418,7 @@ impl<'a> SeiQuerier<'a> {
     /// Query to get the approved address for a single NFT. Executes ERC-721 `getApproved` function.
     ///
     /// # Arguments
-    /// * `caller` - Sei caller address.
+    /// * `caller` - Caller Sei native address.
     /// * `contract_address` - The contract address of the ERC-721 token.
     /// * `token_id` -  The identifier for an NFT. String representation of the token ID.
     ///
@@ -451,9 +451,9 @@ impl<'a> SeiQuerier<'a> {
     /// `isApprovedForAll` function.
     ///
     /// # Arguments
-    /// * `caller` - Sei caller address.
+    /// * `caller` - Caller Sei native address.
     /// * `contract_address` - The contract address of the ERC-721 token.
-    /// * `owner` - The owner of the NFT Sei address
+    /// * `owner` - The owner of the NFT Sei native address
     /// * `operator` - The operator Sei address that acts on behalf of the owner
     ///
     /// # Returns
@@ -487,7 +487,7 @@ impl<'a> SeiQuerier<'a> {
     /// `symbol` functions under the hood.
     ///
     /// # Arguments
-    /// * `caller` - Sei caller address.
+    /// * `caller` - Caller Sei native address.
     /// * `contract_address` - The contract address of the ERC-721 token.
     ///
     /// # Returns
@@ -516,7 +516,7 @@ impl<'a> SeiQuerier<'a> {
     /// Query to get the URI for a given NFT. Executes ERC-721 `tokenURI` function under the hood.
     ///
     /// # Arguments
-    /// * `caller` - Sei caller address.
+    /// * `caller` - Caller Sei native address.
     /// * `contract_address` - The contract address of the ERC-721 token.
     /// * `token_id` - The identifier for an NFT. String representation of the token ID.
     ///
@@ -547,8 +547,8 @@ impl<'a> SeiQuerier<'a> {
     /// Query to get the hex payload for the ERC-721 `transferFrom` function
     ///
     /// # Arguments
-    /// * `from` - Sei from address.
-    /// * `recipient` - Sei recipient address.
+    /// * `from` - Sender Sei native address.
+    /// * `recipient` - Recipient Sei native address.
     /// * `token_id` - The identifier for an NFT. String representation of the token ID.
     ///
     /// # Returns
@@ -579,7 +579,7 @@ impl<'a> SeiQuerier<'a> {
     /// Query to get the hex payload for the ERC-721 `approve` function
     ///
     /// # Arguments
-    /// * `spender` - Sei spender address.
+    /// * `spender` - Spender Sei native address.
     /// * `token_id` - The identifier for an NFT. String representation of the token ID.
     ///
     /// # Returns
@@ -605,7 +605,7 @@ impl<'a> SeiQuerier<'a> {
     /// Query to get the hex payload for the ERC-721 `setApprovalForAll` function.
     ///
     /// # Arguments
-    /// * `to` - Sei address of the operator
+    /// * `to` - Sei native address of the operator
     /// * `approved` - Boolean representing the status to set
     ///
     /// # Returns
@@ -637,7 +637,7 @@ impl<'a> SeiQuerier<'a> {
     ///
     /// # Arguments
     ///
-    /// * `sei_address` - A `String` that represents the Sei address.
+    /// * `sei_address` - A `String` that represents the Sei native address.
     ///
     /// # Returns
     ///
