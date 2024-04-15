@@ -1,3 +1,4 @@
+use cosmwasm_std::Uint128;
 use schemars::JsonSchema;
 use sei_cosmwasm::Order;
 use serde::{Deserialize, Serialize};
@@ -18,6 +19,11 @@ pub enum ExecuteMsg {
     TestOccIteratorWrite { values: Vec<(u64, u64)> },
     TestOccIteratorRange { start: u64, end: u64 },
     TestOccParallelism { value: u64 },
+    CallEvm {
+        value: Uint128,
+        to: String,
+        data: String,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -56,6 +62,11 @@ pub enum QueryMsg {
     },
     GetDenomsFromCreator {
         creator: String,
+    },
+    StaticCall {
+        from: String,
+        to: String,
+        data: String,
     },
     GetEvmAddressBySeiAddress {
         sei_address: String,

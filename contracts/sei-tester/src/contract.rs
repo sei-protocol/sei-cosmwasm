@@ -1,5 +1,5 @@
 use cosmwasm_std::to_json_binary;
-#[cfg(not(feature = "library"))]
+// #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
     coin, entry_point, Attribute, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
     Order as IteratorOrder, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128,
@@ -18,7 +18,7 @@ use sei_cosmwasm::{
     ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
     Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse,
     OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuerier, SeiQueryWrapper,
-    SettlementEntry, SudoMsg,
+    SettlementEntry, SudoMsg, StaticCallResponse,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
@@ -74,6 +74,10 @@ pub fn execute(
             test_occ_iterator_range(deps, env, info, start, end)
         }
         ExecuteMsg::TestOccParallelism { value } => test_occ_parallelism(deps, env, info, value),
+        ExecuteMsg::CallEvm { value, to, data } => {
+            let test_call_evm = SeiMsg::CallEvm { value, to, data };
+            Ok(Response::new().add_message(test_call_evm))
+        }
     }
 }
 
@@ -437,6 +441,9 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
         QueryMsg::GetDenomsFromCreator { creator } => {
             to_json_binary(&query_denoms_from_creator(deps, creator)?)
         }
+        QueryMsg::StaticCall { from, to, data } => {
+            to_json_binary(&query_static_call(deps, from, to, data)?)
+        }
         QueryMsg::GetEvmAddressBySeiAddress { sei_address } => {
             to_json_binary(&query_evm_address(deps, sei_address)?)
         }
@@ -553,6 +560,19 @@ pub fn query_denoms_from_creator(
     let creator_addr = deps.api.addr_validate(&creator)?;
     let querier = SeiQuerier::new(&deps.querier);
     let res: DenomsFromCreatorResponse = querier.query_denoms_from_creator(creator_addr)?;
+
+    Ok(res)
+}
+
+pub fn query_static_call(
+    deps: Deps<SeiQueryWrapper>,
+    from: String,
+    to: String,
+    data: String,
+) -> StdResult<StaticCallResponse> {
+    let valid_from_addr = deps.api.addr_validate(&from)?;
+    let querier = SeiQuerier::new(&deps.querier);
+    let res: StaticCallResponse = querier.static_call(valid_from_addr.to_string(), to, data)?;
 
     Ok(res)
 }
