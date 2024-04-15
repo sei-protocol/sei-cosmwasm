@@ -41,14 +41,29 @@ pub enum SeiMsg {
     SetMetadata {
         metadata: Metadata,
     },
+    /// Calls EVM contract deployed  at `to` address with the given `data`.
+    /// Calls EVM contract as if the contract's caller called it directly.
+    /// Please note that the CW contract has to be in
+    /// [allow list](https://github.com/sei-protocol/sei-chain/blob/seiv2/x/evm/types/params.go#L142)
+    /// in order to execute delegate call.
+    /// The EVM (Solidity) contract `msg.sender` in this case will be the callers address.
     DelegateCallEvm {
+        /// The address of the EVM contract to call
         to: String,
-        data: String, // base64 encoded
+        /// Base64 encoded binary data to pass to the contract
+        data: String,
     },
+    /// Calls EVM contract deployed at `to` address with specified `value` and `data`.
+    /// The from address is the contract address of the contract executing the call.
+    /// The EVM (Solidity) contract `msg.sender` in this case will be the 32-byte long
+    /// [`cosmwasm_std::CanonicalAddr`] of this contract.
     CallEvm {
+        /// The amount to send along with the transaction
         value: Uint128,
+        /// The address of the EVM contract to call
         to: String,
-        data: String, // base64 encoded
+        /// Base64 encoded binary data to pass to the contract
+        data: String,
     },
 }
 

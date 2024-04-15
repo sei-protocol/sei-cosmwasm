@@ -172,6 +172,25 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
+    /// Calls the EVM contract deployed at the `to` address with the given `data`.
+    /// The from address is the caller's Sei native (bech32-encoded 'sei*') address.
+    /// Please note that the CW contract has to be in the allow list in order to execute a delegate
+    /// call.
+    ///
+    /// The EVM (Solidity) contract `msg.sender` in this case will be the caller's address.
+    ///
+    /// # Arguments
+    /// * `from` - Sei native (bech32-encoded 'sei*') address of the caller.
+    /// * `to` - The address of the EVM contract to call.
+    /// * `data` - Base64 encoded data to pass to the contract.
+    ///
+    /// # Returns
+    ///
+    /// * `StdResult<StaticCallResponse>` - A standard result that wraps the `StaticCallResponse`
+    /// struct.
+    ///
+    /// # Errors
+    /// This function will return an error if the query to the EVM fails.
     pub fn static_call(
         &self,
         from: String,
@@ -187,7 +206,19 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
-    // returns base64-encoded bytes
+    /// Query to get hex payload for the ERC-20 `transfer` function
+    ///
+    /// # Arguments
+    /// * `recipient` - Recipient Sei native (bech32-encoded 'sei*') address.
+    /// * `amount` - The amount to transfer.
+    ///
+    /// # Returns
+    ///
+    /// * `StdResult<ErcPayloadResponse>` - A standard result that wraps the `ErcPayloadResponse`
+    /// struct. The `ErcPayloadResponse` struct contains the base64-encoded bytes.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc20_transfer_payload(
         &self,
         recipient: String,
@@ -202,7 +233,20 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
-    // returns base64-encoded bytes
+    /// Query to get hex payload for the ERC-20 `transferFrom` function
+    ///
+    /// # Arguments
+    /// * `owner` - Owner Sei native (bech32-encoded 'sei*') address.
+    /// * `recipient` - Recipient Sei native (bech32-encoded 'sei*') address.
+    /// * `amount` - The amount to transfer.
+    ///
+    /// # Returns
+    ///
+    /// * `StdResult<ErcPayloadResponse>` - A standard result that wraps the `ErcPayloadResponse`
+    /// struct. The `ErcPayloadResponse` struct contains the base64-encoded bytes.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc20_transfer_from_payload(
         &self,
         owner: String,
@@ -222,7 +266,18 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
-    // returns base64-encoded bytes
+    /// Query to get hex payload for the ERC-20 `approve` function
+    ///
+    /// # Arguments
+    /// * `spender` - Spender Sei native (bech32-encoded 'sei*') address.
+    /// * `amount` - The amount to approve.
+    ///
+    /// # Returns
+    /// * `StdResult<ErcPayloadResponse>` - A standard result that wraps the `ErcPayloadResponse`
+    /// struct. The `ErcPayloadResponse` struct contains the base64-encoded bytes.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc20_approve_payload(
         &self,
         spender: String,
@@ -237,6 +292,21 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
+    /// Query to get the remaining number of tokens that spender will be allowed to spend on behalf
+    ///  of owner through
+    ///
+    /// # Arguments
+    /// * `contract_address` - The contract address of the ERC-20 token.
+    /// * `owner` - Owner Sei native (bech32-encoded 'sei*') address.
+    /// * `spender` - Spender Sei native (bech32-encoded 'sei*') address.
+    ///
+    /// # Returns
+    /// * `StdResult<Erc20AllowanceResponse>` - A standard result that wraps the
+    /// `Erc20AllowanceResponse`. `Erc20AllowanceResponse` contains the amount which spender
+    /// is still allowed to withdraw from owner
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc20_allowance(
         &self,
         contract_address: String,
@@ -256,6 +326,17 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
+    /// Query to get the token info, including the name, symbol, decimals and total supply
+    ///
+    /// # Arguments
+    /// * `contract_address` - The contract address of the ERC-20 token.
+    /// * `caller` - Caller Sei native (bech32-encoded 'sei*') address.
+    ///
+    /// # Returns
+    /// * `StdResult<TokenInfoResponse>` - A standard result that wraps the `TokenInfoResponse`.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc20_token_info(
         &self,
         contract_address: String,
@@ -273,6 +354,18 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
+    /// Query to get the balance of the account with the given address.
+    /// Executes the `balanceOf` ERC-20 function under the hood.
+    ///
+    /// # Arguments
+    /// * `contract_address` - The contract address of the ERC-20 token.
+    /// * `account` - Sei native (bech32-encoded 'sei*') account address.
+    ///
+    /// # Returns
+    /// * `StdResult<BalanceResponse>` - A standard result that wraps the `BalanceResponse`.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc20_balance(
         &self,
         contract_address: String,
@@ -290,6 +383,19 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
+    /// Query to get the address of the owner of the NFT.
+    /// Executes ERC-721 `ownerOf` function under the hood.
+    ///
+    /// # Arguments
+    /// * `caller` - Caller Sei native (bech32-encoded 'sei*') address.
+    /// * `contract_address` - The contract address of the ERC-721 token.
+    /// * `token_id` -  The identifier for an NFT. String representation of the token ID.
+    ///
+    /// # Returns
+    /// * `StdResult<Erc721OwnerResponse>` - A standard result that wraps the `Erc721OwnerResponse`.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc721_owner(
         &self,
         caller: String,
@@ -309,6 +415,19 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
+    /// Query to get the approved address for a single NFT. Executes ERC-721 `getApproved` function.
+    ///
+    /// # Arguments
+    /// * `caller` - Caller Sei native (bech32-encoded 'sei*') address.
+    /// * `contract_address` - The contract address of the ERC-721 token.
+    /// * `token_id` -  The identifier for an NFT. String representation of the token ID.
+    ///
+    /// # Returns
+    /// * `StdResult<Erc721ApprovedResponse>` - A standard result that wraps the
+    /// `Erc721ApprovedResponse`.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc721_approved(
         &self,
         caller: String,
@@ -328,6 +447,21 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
+    /// Query if an address is an authorized operator for another address. Executes ERC-721
+    /// `isApprovedForAll` function.
+    ///
+    /// # Arguments
+    /// * `caller` - Caller Sei native (bech32-encoded 'sei*') address.
+    /// * `contract_address` - The contract address of the ERC-721 token.
+    /// * `owner` - The owner of the NFT Sei native (bech32-encoded 'sei*') address
+    /// * `operator` - The operator Sei address that acts on behalf of the owner
+    ///
+    /// # Returns
+    /// * `StdResult<Erc721IsApprovedForAllResponse>` - A standard result that wraps the
+    /// `Erc721IsApprovedForAllResponse`.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc721_is_approved_for_all(
         &self,
         caller: String,
@@ -349,6 +483,19 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
+    /// Query to get the name and symbol of the ERC-721 contract. Executes ERC-721 `name` and
+    /// `symbol` functions under the hood.
+    ///
+    /// # Arguments
+    /// * `caller` - Caller Sei native (bech32-encoded 'sei*') address.
+    /// * `contract_address` - The contract address of the ERC-721 token.
+    ///
+    /// # Returns
+    /// * `StdResult<Erc721NameSymbolResponse>` - A standard result that wraps the
+    /// `Erc721NameSymbolResponse`.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc721_name_symbol(
         &self,
         caller: String,
@@ -366,6 +513,18 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
+    /// Query to get the URI for a given NFT. Executes ERC-721 `tokenURI` function under the hood.
+    ///
+    /// # Arguments
+    /// * `caller` - Caller Sei native (bech32-encoded 'sei*') address.
+    /// * `contract_address` - The contract address of the ERC-721 token.
+    /// * `token_id` - The identifier for an NFT. String representation of the token ID.
+    ///
+    /// # Returns
+    /// * `StdResult<Erc721UriResponse>` - A standard result that wraps the `Erc721UriResponse`.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc721_uri(
         &self,
         caller: String,
@@ -385,7 +544,19 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
-    // returns base64-encoded bytes
+    /// Query to get the hex payload for the ERC-721 `transferFrom` function
+    ///
+    /// # Arguments
+    /// * `from` - Sender Sei native (bech32-encoded 'sei*') address.
+    /// * `recipient` - Recipient Sei native (bech32-encoded 'sei*') address.
+    /// * `token_id` - The identifier for an NFT. String representation of the token ID.
+    ///
+    /// # Returns
+    /// * `StdResult<ErcPayloadResponse>` - A standard result that wraps the `ErcPayloadResponse`.
+    /// `ErcPayloadResponse` contains the base64-encoded bytes.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc721_transfer_payload(
         &self,
         from: String,
@@ -405,7 +576,18 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
-    // returns base64-encoded bytes
+    /// Query to get the hex payload for the ERC-721 `approve` function
+    ///
+    /// # Arguments
+    /// * `spender` - Spender Sei native (bech32-encoded 'sei*') address.
+    /// * `token_id` - The identifier for an NFT. String representation of the token ID.
+    ///
+    /// # Returns
+    /// * `StdResult<ErcPayloadResponse>` - A standard result that wraps the `ErcPayloadResponse`.
+    /// `ErcPayloadResponse` contains the base64-encoded bytes.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc721_approve_payload(
         &self,
         spender: String,
@@ -420,7 +602,18 @@ impl<'a> SeiQuerier<'a> {
         self.querier.query(&request)
     }
 
-    // returns base64-encoded bytes
+    /// Query to get the hex payload for the ERC-721 `setApprovalForAll` function.
+    ///
+    /// # Arguments
+    /// * `to` - Sei native (bech32-encoded 'sei*') address of the operator
+    /// * `approved` - Boolean representing the status to set
+    ///
+    /// # Returns
+    /// * `StdResult<ErcPayloadResponse>` - A standard result that wraps the `ErcPayloadResponse`.
+    /// `ErcPayloadResponse` contains the base64-encoded bytes.
+    ///
+    /// # Errors
+    /// This function will return an error if the query fails.
     pub fn erc721_set_approval_all_payload(
         &self,
         to: String,
@@ -444,7 +637,7 @@ impl<'a> SeiQuerier<'a> {
     ///
     /// # Arguments
     ///
-    /// * `sei_address` - A `String` that represents the Sei address.
+    /// * `sei_address` - A `String` that represents the Sei native (bech32-encoded 'sei*') address.
     ///
     /// # Returns
     ///
