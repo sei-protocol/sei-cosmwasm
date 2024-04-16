@@ -7,7 +7,7 @@ use crate::query::{
     Erc721NameSymbolResponse, Erc721OwnerResponse, Erc721UriResponse, ErcPayloadResponse,
     EvmAddressResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse,
     GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiAddressResponse, SeiQuery,
-    SeiQueryWrapper, StaticCallResponse,
+    SeiQueryWrapper,
 };
 use crate::route::SeiRoute;
 use crate::Order;
@@ -196,7 +196,7 @@ impl<'a> SeiQuerier<'a> {
         from: String,
         to: String,
         data: String,
-    ) -> StdResult<StaticCallResponse> {
+    ) -> StdResult<String> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Evm,
             query_data: SeiQuery::StaticCall { from, to, data },

@@ -18,7 +18,7 @@ use sei_cosmwasm::{
     ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
     Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse,
     OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuerier, SeiQueryWrapper,
-    SettlementEntry, SudoMsg, StaticCallResponse,
+    SettlementEntry, SudoMsg,
 };
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
@@ -74,10 +74,7 @@ pub fn execute(
             test_occ_iterator_range(deps, env, info, start, end)
         }
         ExecuteMsg::TestOccParallelism { value } => test_occ_parallelism(deps, env, info, value),
-        ExecuteMsg::CallEvm { value, to, data } => {
-            let test_call_evm = SeiMsg::CallEvm { value, to, data };
-            Ok(Response::new().add_message(test_call_evm))
-        }
+        ExecuteMsg::CallEvm { value, to, data } => call_evm(value, to, data),
     }
 }
 
@@ -137,6 +134,15 @@ fn test_occ_parallelism(
     Ok(Response::new()
         .add_attribute("user", info.sender.to_string())
         .add_attribute("val", value.to_string()))
+}
+
+fn call_evm(
+    value: Uint128,
+    to: String,
+    data: String,
+) -> Result<Response<SeiMsg>, StdError> {
+    let call_evm = SeiMsg::CallEvm { value, to, data };
+    Ok(Response::new().add_message(call_evm))
 }
 
 pub fn place_orders(
@@ -569,10 +575,10 @@ pub fn query_static_call(
     from: String,
     to: String,
     data: String,
-) -> StdResult<StaticCallResponse> {
+) -> StdResult<String> {
     let valid_from_addr = deps.api.addr_validate(&from)?;
     let querier = SeiQuerier::new(&deps.querier);
-    let res: StaticCallResponse = querier.static_call(valid_from_addr.to_string(), to, data)?;
+    let res: String = querier.static_call(valid_from_addr.to_string(), to, data)?;
 
     Ok(res)
 }

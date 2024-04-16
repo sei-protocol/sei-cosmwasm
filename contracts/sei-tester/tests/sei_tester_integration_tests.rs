@@ -10,7 +10,7 @@ use cw_multi_test::{
     StakeKeeper, WasmKeeper,
 };
 
-use sei_cosmwasm::{Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus, OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute, StaticCallResponse};
+use sei_cosmwasm::{Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus, OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute};
 use sei_integration_tests::{
     helper::{get_balance, mock_app},
     module::{SeiModule, EVM_ADDRESS, SEI_ADDRESS},
@@ -935,21 +935,19 @@ fn test_static_call_query() {
     let mut app = mock_app(init_default_balances, vec![]);
     let sei_tester_addr = setup_test(&mut app);
 
-    let res: StaticCallResponse = app
+    let res: String = app
         .wrap()
         .query_wasm_smart(
             sei_tester_addr.clone(),
             &QueryMsg::StaticCall {
                 from: SEI_ADDRESS.to_string(),
                 to: EVM_ADDRESS.to_string(),
-                data: "".to_string(),
+                data: "qH2ULA==".to_string(),
             },
         )
         .unwrap();
 
-    let expected_res = StaticCallResponse {
-        data: "static call response".to_string(),
-    };
+    let expected_res = "static call response".to_string();
     assert_eq!(res, expected_res);
 
 }

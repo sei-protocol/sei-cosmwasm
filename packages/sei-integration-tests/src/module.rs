@@ -10,7 +10,7 @@ use sei_cosmwasm::{
     EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse,
     GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse,
     OrderSimulationResponse, OrderStatus, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery,
-    SeiQueryWrapper, SudoMsg as SeiSudoMsg, StaticCallResponse
+    SeiQueryWrapper, SudoMsg as SeiSudoMsg,
 };
 use serde::de::DeserializeOwned;
 use std::{
@@ -192,9 +192,7 @@ impl Module for SeiModule {
                 );
             }
             SeiQuery::StaticCall { .. } => {
-                Ok(to_json_binary(&StaticCallResponse {
-                    data: "static call response".to_string(),
-                })?)
+                Ok(to_json_binary("static call response")?)
             }
             SeiQuery::GetEvmAddress { sei_address } => {
                 Ok(to_json_binary(&get_evm_address(sei_address))?)
@@ -660,11 +658,6 @@ fn get_epoch(epoch: Epoch) -> EpochResponse {
     EpochResponse { epoch: epoch }
 }
 
-fn get_static_call_response() -> StaticCallResponse {
-    StaticCallResponse {
-        data: "static call response".to_string(),
-    }
-}
 fn get_evm_address(sei_address: String) -> EvmAddressResponse {
     let (evm_address, associated) = match sei_address.as_str() {
         SEI_ADDRESS => (EVM_ADDRESS.to_string(), true),
