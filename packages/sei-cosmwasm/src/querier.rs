@@ -7,10 +7,10 @@ use crate::query::{
     Erc721NameSymbolResponse, Erc721OwnerResponse, Erc721UriResponse, ErcPayloadResponse,
     EvmAddressResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse,
     GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiAddressResponse, SeiQuery,
-    SeiQueryWrapper,
+    SeiQueryWrapper,StaticCallResponse
 };
 use crate::route::SeiRoute;
-use crate::Order;
+use crate::{Order};
 
 /// This is a helper wrapper to easily use our custom queries
 pub struct SeiQuerier<'a> {
@@ -196,7 +196,7 @@ impl<'a> SeiQuerier<'a> {
         from: String,
         to: String,
         data: String,
-    ) -> StdResult<String> {
+    ) -> StdResult<StaticCallResponse> {
         let request = SeiQueryWrapper {
             route: SeiRoute::Evm,
             query_data: SeiQuery::StaticCall { from, to, data },

@@ -5,19 +5,14 @@ use cosmwasm_std::{
 };
 use cw_multi_test::{AppResponse, BankSudo, CosmosRouter, Module, SudoMsg};
 use schemars::JsonSchema;
-use sei_cosmwasm::{
-    Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, Epoch,
-    EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse,
-    GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse,
-    OrderSimulationResponse, OrderStatus, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery,
-    SeiQueryWrapper, SudoMsg as SeiSudoMsg,
-};
+use sei_cosmwasm::{Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, Epoch, EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderSimulationResponse, OrderStatus, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, StaticCallResponse, SudoMsg as SeiSudoMsg};
 use serde::de::DeserializeOwned;
 use std::{
     collections::HashMap,
     fmt::Debug,
     ops::{Add, Div, Mul, Sub},
 };
+use base64::{Engine as _, engine::{general_purpose}};
 
 pub struct SeiModule {
     epoch: Epoch,
@@ -192,7 +187,7 @@ impl Module for SeiModule {
                 );
             }
             SeiQuery::StaticCall { .. } => {
-                Ok(to_json_binary("static call response")?)
+                Ok(to_json_binary(&get_static_call_response())?)
             }
             SeiQuery::GetEvmAddress { sei_address } => {
                 Ok(to_json_binary(&get_evm_address(sei_address))?)
@@ -656,6 +651,12 @@ fn query_get_order_by_id_helper(
 
 fn get_epoch(epoch: Epoch) -> EpochResponse {
     EpochResponse { epoch: epoch }
+}
+
+fn get_static_call_response() -> StaticCallResponse {
+    StaticCallResponse {
+        encoded_data: general_purpose::STANDARD.encode(b"static call response")
+    }
 }
 
 fn get_evm_address(sei_address: String) -> EvmAddressResponse {

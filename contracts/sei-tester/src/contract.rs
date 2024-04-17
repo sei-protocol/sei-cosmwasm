@@ -1,5 +1,6 @@
+use base64::{Engine as _, engine::{general_purpose}};
 use cosmwasm_std::to_json_binary;
-// #[cfg(not(feature = "library"))]
+#[cfg(not(feature = "library"))]
 use cosmwasm_std::{
     coin, entry_point, Attribute, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
     Order as IteratorOrder, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128,
@@ -12,14 +13,7 @@ use crate::{
     types::{OrderData, PositionEffect},
 };
 use protobuf::Message;
-use sei_cosmwasm::{
-    BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse, DenomUnit,
-    DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, EvmAddressResponse,
-    ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
-    Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse,
-    OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuerier, SeiQueryWrapper,
-    SettlementEntry, SudoMsg,
-};
+use sei_cosmwasm::{BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse, DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg, StaticCallResponse};
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
 // version info for migration info
@@ -338,7 +332,7 @@ pub fn process_bulk_order_placements(
         Ok(val) => val,
         Err(error) => panic!("Problem parsing response: {:?}", error),
     };
-    let base64_json_str = base64::encode(serialized_json);
+    let base64_json_str = general_purpose::STANDARD.encode(serialized_json);
     let binary = match Binary::from_base64(base64_json_str.as_ref()) {
         Ok(val) => val,
         Err(error) => panic!("Problem converting binary for order request: {:?}", error),
@@ -575,10 +569,10 @@ pub fn query_static_call(
     from: String,
     to: String,
     data: String,
-) -> StdResult<String> {
+) -> StdResult<StaticCallResponse> {
     let valid_from_addr = deps.api.addr_validate(&from)?;
     let querier = SeiQuerier::new(&deps.querier);
-    let res: String = querier.static_call(valid_from_addr.to_string(), to, data)?;
+    let res: StaticCallResponse = querier.static_call(valid_from_addr.to_string(), to, data)?;
 
     Ok(res)
 }

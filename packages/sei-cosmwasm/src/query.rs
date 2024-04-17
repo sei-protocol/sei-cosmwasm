@@ -272,7 +272,7 @@ pub struct DenomsFromCreatorResponse {
 pub struct StaticCallResponse {
     /// The result of the static call to the EVM contract. It's represented as a base64 encoded
     /// string.
-    pub data: String, // base64
+    pub encoded_data: String, // base64
 }
 
 /// `ErcPayloadResponse` is a struct that represents a response containing the encoded payload for
