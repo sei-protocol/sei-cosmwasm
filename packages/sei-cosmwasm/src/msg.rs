@@ -58,7 +58,7 @@ pub enum SeiMsg {
     /// The EVM (Solidity) contract `msg.sender` in this case will be the 32-byte long
     /// [`cosmwasm_std::CanonicalAddr`] of this contract.
     CallEvm {
-        /// The amount to send along with the transaction
+        /// The amount to send along with the transaction. 0 if non-payable function is called.
         value: Uint128,
         /// The address of the EVM contract to call
         to: String,
