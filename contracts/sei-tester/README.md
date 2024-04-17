@@ -1,4 +1,4 @@
-# Testing and Example Contract
+# Purpose
 
 This package primarily serves as testing support for the sei-cosmwasm package.
 It includes an example contract that can be used to test package behavior 
