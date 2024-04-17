@@ -1,4 +1,4 @@
-use base64::{Engine as _, engine::{general_purpose}};
+use base64::{engine::general_purpose, Engine as _};
 use cosmwasm_std::to_json_binary;
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
@@ -13,7 +13,14 @@ use crate::{
     types::{OrderData, PositionEffect},
 };
 use protobuf::Message;
-use sei_cosmwasm::{BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse, DenomUnit, DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse, Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse, OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuerier, SeiQueryWrapper, SettlementEntry, SudoMsg, StaticCallResponse};
+use sei_cosmwasm::{
+    BulkOrderPlacementsResponse, Cancellation, DenomAuthorityMetadataResponse, DenomUnit,
+    DenomsFromCreatorResponse, DepositInfo, DexTwapsResponse, EpochResponse, EvmAddressResponse,
+    ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse, GetOrdersResponse,
+    Metadata, MsgPlaceOrdersResponse, OracleTwapsResponse, Order, OrderSimulationResponse,
+    OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuerier, SeiQueryWrapper,
+    SettlementEntry, StaticCallResponse, SudoMsg,
+};
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
 // version info for migration info
@@ -130,11 +137,7 @@ fn test_occ_parallelism(
         .add_attribute("val", value.to_string()))
 }
 
-fn call_evm(
-    value: Uint128,
-    to: String,
-    data: String,
-) -> Result<Response<SeiMsg>, StdError> {
+fn call_evm(value: Uint128, to: String, data: String) -> Result<Response<SeiMsg>, StdError> {
     let call_evm = SeiMsg::CallEvm { value, to, data };
     Ok(Response::new().add_message(call_evm))
 }

@@ -1,4 +1,4 @@
-use base64::{Engine as _, engine::{general_purpose}};
+use base64::{engine::general_purpose, Engine as _};
 use cosmwasm_std::{
     coin, from_json,
     testing::{MockApi, MockStorage},
@@ -11,7 +11,13 @@ use cw_multi_test::{
     StakeKeeper, WasmKeeper,
 };
 
-use sei_cosmwasm::{Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus, OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute, StaticCallResponse};
+use sei_cosmwasm::{
+    Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, EpochResponse,
+    EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse,
+    OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus,
+    OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute,
+    StaticCallResponse,
+};
 use sei_integration_tests::{
     helper::{get_balance, mock_app},
     module::{SeiModule, EVM_ADDRESS, SEI_ADDRESS},
@@ -949,10 +955,9 @@ fn test_static_call_query() {
         .unwrap();
 
     let expected_res = StaticCallResponse {
-        encoded_data: general_purpose::STANDARD.encode(b"static call response")
+        encoded_data: general_purpose::STANDARD.encode(b"static call response"),
     };
     assert_eq!(res, expected_res);
-
 }
 
 #[test]

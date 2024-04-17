@@ -10,15 +10,24 @@ pub struct InstantiateMsg {}
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
     PlaceOrders {},
-    CancelOrders { order_ids: Vec<u64> },
+    CancelOrders {
+        order_ids: Vec<u64>,
+    },
     CreateDenom {},
     Mint {},
     Burn {},
     ChangeAdmin {},
     SetMetadata {},
-    TestOccIteratorWrite { values: Vec<(u64, u64)> },
-    TestOccIteratorRange { start: u64, end: u64 },
-    TestOccParallelism { value: u64 },
+    TestOccIteratorWrite {
+        values: Vec<(u64, u64)>,
+    },
+    TestOccIteratorRange {
+        start: u64,
+        end: u64,
+    },
+    TestOccParallelism {
+        value: u64,
+    },
     CallEvm {
         value: Uint128,
         to: String,
