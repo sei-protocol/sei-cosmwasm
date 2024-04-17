@@ -7,10 +7,10 @@ use crate::query::{
     Erc721NameSymbolResponse, Erc721OwnerResponse, Erc721UriResponse, ErcPayloadResponse,
     EvmAddressResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse,
     GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, SeiAddressResponse, SeiQuery,
-    SeiQueryWrapper,StaticCallResponse
+    SeiQueryWrapper, StaticCallResponse,
 };
 use crate::route::SeiRoute;
-use crate::{Order};
+use crate::Order;
 
 /// This is a helper wrapper to easily use our custom queries
 pub struct SeiQuerier<'a> {

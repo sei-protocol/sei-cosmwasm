@@ -1,18 +1,24 @@
 use anyhow::Result as AnyResult;
+use base64::{engine::general_purpose, Engine as _};
 use cosmwasm_std::{
     from_json, to_json_binary, Addr, Api, BankMsg, Binary, BlockInfo, Coin, CosmosMsg, CustomQuery,
     Decimal, Querier, Storage, Uint128, Uint64,
 };
 use cw_multi_test::{AppResponse, BankSudo, CosmosRouter, Module, SudoMsg};
 use schemars::JsonSchema;
-use sei_cosmwasm::{Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, Epoch, EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse, OrderSimulationResponse, OrderStatus, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, StaticCallResponse, SudoMsg as SeiSudoMsg};
+use sei_cosmwasm::{
+    Cancellation, DenomOracleExchangeRatePair, DexPair, DexTwap, DexTwapsResponse, Epoch,
+    EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse,
+    GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse,
+    OrderSimulationResponse, OrderStatus, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery,
+    SeiQueryWrapper, StaticCallResponse, SudoMsg as SeiSudoMsg,
+};
 use serde::de::DeserializeOwned;
 use std::{
     collections::HashMap,
     fmt::Debug,
     ops::{Add, Div, Mul, Sub},
 };
-use base64::{Engine as _, engine::{general_purpose}};
 
 pub struct SeiModule {
     epoch: Epoch,
@@ -186,9 +192,7 @@ impl Module for SeiModule {
                     id,
                 );
             }
-            SeiQuery::StaticCall { .. } => {
-                Ok(to_json_binary(&get_static_call_response())?)
-            }
+            SeiQuery::StaticCall { .. } => Ok(to_json_binary(&get_static_call_response())?),
             SeiQuery::GetEvmAddress { sei_address } => {
                 Ok(to_json_binary(&get_evm_address(sei_address))?)
             }
@@ -655,7 +659,7 @@ fn get_epoch(epoch: Epoch) -> EpochResponse {
 
 fn get_static_call_response() -> StaticCallResponse {
     StaticCallResponse {
-        encoded_data: general_purpose::STANDARD.encode(b"static call response")
+        encoded_data: general_purpose::STANDARD.encode(b"static call response"),
     }
 }
 
