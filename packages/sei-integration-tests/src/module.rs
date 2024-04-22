@@ -1,4 +1,5 @@
 use anyhow::Result as AnyResult;
+use base64::{engine::general_purpose, Engine as _};
 use cosmwasm_std::{
     from_json, to_json_binary, Addr, Api, BankMsg, Binary, BlockInfo, Coin, CosmosMsg, CustomQuery,
     Decimal, Querier, Storage, Uint128, Uint64,
@@ -10,7 +11,7 @@ use sei_cosmwasm::{
     EpochResponse, EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse,
     GetOrdersResponse, OracleTwap, OracleTwapsResponse, Order, OrderResponse,
     OrderSimulationResponse, OrderStatus, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery,
-    SeiQueryWrapper, SudoMsg as SeiSudoMsg,
+    SeiQueryWrapper, StaticCallResponse, SudoMsg as SeiSudoMsg,
 };
 use serde::de::DeserializeOwned;
 use std::{
@@ -191,6 +192,7 @@ impl Module for SeiModule {
                     id,
                 );
             }
+            SeiQuery::StaticCall { .. } => Ok(to_json_binary(&get_static_call_response())?),
             SeiQuery::GetEvmAddress { sei_address } => {
                 Ok(to_json_binary(&get_evm_address(sei_address))?)
             }
@@ -653,6 +655,12 @@ fn query_get_order_by_id_helper(
 
 fn get_epoch(epoch: Epoch) -> EpochResponse {
     EpochResponse { epoch: epoch }
+}
+
+fn get_static_call_response() -> StaticCallResponse {
+    StaticCallResponse {
+        encoded_data: general_purpose::STANDARD.encode(b"static call response"),
+    }
 }
 
 fn get_evm_address(sei_address: String) -> EvmAddressResponse {

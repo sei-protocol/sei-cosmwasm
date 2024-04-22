@@ -15,7 +15,7 @@ pub use query::{
     DenomAuthorityMetadataResponse, DenomsFromCreatorResponse, DexTwapsResponse, EpochResponse,
     EvmAddressResponse, ExchangeRatesResponse, GetLatestPriceResponse, GetOrderByIdResponse,
     GetOrdersResponse, OracleTwapsResponse, OrderSimulationResponse, PriceResponse,
-    SeiAddressResponse, SeiQuery, SeiQueryWrapper,
+    SeiAddressResponse, SeiQuery, SeiQueryWrapper, StaticCallResponse,
 };
 pub use route::SeiRoute;
 pub use sei_types::{

@@ -47,7 +47,7 @@ cw2 = "0.13.2"
 schemars = "0.8.8"
 serde = { version = "1.0.137", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
-base64 = { version = "0.13.0" }
+base64 = { version = "0.21.7" }
 thiserror = { version = "1.0.31" }
 protobuf = { version = "3.2.0", features = ["with-bytes"] }
 

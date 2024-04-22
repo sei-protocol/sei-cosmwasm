@@ -1,3 +1,4 @@
+use base64::{engine::general_purpose, Engine as _};
 use cosmwasm_std::{
     coin, from_json,
     testing::{MockApi, MockStorage},
@@ -15,6 +16,7 @@ use sei_cosmwasm::{
     EvmAddressResponse, ExchangeRatesResponse, GetOrderByIdResponse, GetOrdersResponse,
     OracleExchangeRate, OracleTwapsResponse, Order, OrderSimulationResponse, OrderStatus,
     OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuery, SeiQueryWrapper, SeiRoute,
+    StaticCallResponse,
 };
 use sei_integration_tests::{
     helper::{get_balance, mock_app},
@@ -934,6 +936,30 @@ fn test_dex_module_query_dex_twap() {
 }
 
 /// EVM Module - query EVM address
+
+#[test]
+fn test_static_call_query() {
+    let mut app = mock_app(init_default_balances, vec![]);
+    let sei_tester_addr = setup_test(&mut app);
+
+    let res: StaticCallResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::StaticCall {
+                from: SEI_ADDRESS.to_string(),
+                to: EVM_ADDRESS.to_string(),
+                data: "".to_string(),
+            },
+        )
+        .unwrap();
+
+    let expected_res = StaticCallResponse {
+        encoded_data: general_purpose::STANDARD.encode(b"static call response"),
+    };
+    assert_eq!(res, expected_res);
+}
+
 #[test]
 fn test_evm_address_query() {
     let mut app = mock_app(init_default_balances, vec![]);
