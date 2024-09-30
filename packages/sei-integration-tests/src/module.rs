@@ -19,6 +19,7 @@ use std::{
     fmt::Debug,
     ops::{Add, Div, Mul, Sub},
 };
+use cw20::TokenInfoResponse;
 
 pub struct SeiModule {
     epoch: Epoch,
@@ -198,6 +199,14 @@ impl Module for SeiModule {
             }
             SeiQuery::GetSeiAddress { evm_address } => {
                 Ok(to_json_binary(&get_sei_address(evm_address))?)
+            }
+            SeiQuery::Erc20TokenInfo { .. } => {
+                Ok(to_json_binary(&TokenInfoResponse {
+                    name: "Erc20Token".to_string(),
+                    symbol: "TT".to_string(),
+                    decimals: 18,
+                    total_supply: Uint128::new(1000000),
+                })?)
             }
             // TODO: Implement get denom authority metadata in integration tests
             SeiQuery::DenomAuthorityMetadata { .. } => {

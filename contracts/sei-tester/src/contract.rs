@@ -1,6 +1,6 @@
+// #[cfg(not(feature = "library"))]
 use base64::{engine::general_purpose, Engine as _};
 use cosmwasm_std::to_json_binary;
-#[cfg(not(feature = "library"))]
 use cosmwasm_std::{
     coin, entry_point, Attribute, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
     Order as IteratorOrder, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128,
@@ -21,6 +21,7 @@ use sei_cosmwasm::{
     OrderType, PositionDirection, SeiAddressResponse, SeiMsg, SeiQuerier, SeiQueryWrapper,
     SettlementEntry, StaticCallResponse, SudoMsg,
 };
+use cw20::{TokenInfoResponse};
 
 const PLACE_ORDER_REPLY_ID: u64 = 1;
 // version info for migration info
@@ -453,6 +454,10 @@ pub fn query(deps: Deps<SeiQueryWrapper>, _env: Env, msg: QueryMsg) -> StdResult
         QueryMsg::GetSeiAddressByEvmAddress { evm_address } => {
             to_json_binary(&query_sei_address(deps, evm_address)?)
         }
+        QueryMsg::Erc20TokenInfo {
+            contract_address,
+            caller,
+        } => to_json_binary(&query_erc20_token_info(deps, contract_address, caller)?),
     }
 }
 
@@ -599,4 +604,10 @@ pub fn query_sei_address(
     let res = querier.get_sei_address(evm_address)?;
 
     Ok(res)
+}
+
+fn query_erc20_token_info(deps: Deps<SeiQueryWrapper>, contract_address: String, caller: String) -> StdResult<TokenInfoResponse> {
+    let querier = SeiQuerier::new(&deps.querier);
+    let erc20_token_info = querier.erc20_token_info(contract_address, caller)?;
+    Ok(erc20_token_info)
 }

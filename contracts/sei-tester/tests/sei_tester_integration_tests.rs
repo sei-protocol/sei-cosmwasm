@@ -6,6 +6,7 @@ use cosmwasm_std::{
     QueryRequest, StdError, Storage, Uint128,
 };
 use cosmwasm_std::{BlockInfo, Uint64};
+use cw20::TokenInfoResponse;
 use cw_multi_test::{
     App, BankKeeper, ContractWrapper, DistributionKeeper, Executor, FailingModule, Router,
     StakeKeeper, WasmKeeper,
@@ -1036,6 +1037,31 @@ fn test_sei_address_query() {
     let expected_res = SeiAddressResponse {
         sei_address: String::new(),
         associated: false,
+    };
+    assert_eq!(res, expected_res);
+}
+
+#[test]
+fn test_erc20_token_info_query() {
+    let mut app = mock_app(init_default_balances, vec![]);
+    let sei_tester_addr = setup_test(&mut app);
+
+    let res: TokenInfoResponse = app
+        .wrap()
+        .query_wasm_smart(
+            sei_tester_addr.clone(),
+            &QueryMsg::Erc20TokenInfo {
+                contract_address: EVM_ADDRESS.to_string(),
+                caller: SEI_ADDRESS.to_string(),
+            },
+        )
+        .unwrap();
+
+    let expected_res = TokenInfoResponse {
+        name: "Erc20Token".to_string(),
+        symbol: "TT".to_string(),
+        decimals: 18,
+        total_supply: Uint128::new(1000000),
     };
     assert_eq!(res, expected_res);
 }

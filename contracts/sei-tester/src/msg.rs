@@ -32,7 +32,7 @@ pub enum ExecuteMsg {
         value: Uint128,
         to: String,
         data: String,
-    },
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -82,5 +82,9 @@ pub enum QueryMsg {
     },
     GetSeiAddressByEvmAddress {
         evm_address: String,
+    },
+    Erc20TokenInfo {
+        contract_address: String,
+        caller: String,
     },
 }
