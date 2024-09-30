@@ -14,6 +14,15 @@ pub enum ExecuteMsg {
         order_ids: Vec<u64>,
     },
     CreateDenom {},
+    CreateDenomFromErcToken {
+        contract_address: String,
+        caller: String,
+    },
+    CallOtherContract {
+        contract_address: String,
+        erc_contract_address: String,
+        caller: String,
+    },
     Mint {},
     Burn {},
     ChangeAdmin {},

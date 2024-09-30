@@ -1,6 +1,6 @@
 // #[cfg(not(feature = "library"))]
 use base64::{engine::general_purpose, Engine as _};
-use cosmwasm_std::to_json_binary;
+use cosmwasm_std::{to_json_binary, CosmosMsg, WasmMsg};
 use cosmwasm_std::{
     coin, entry_point, Attribute, BankMsg, Binary, Coin, Decimal, Deps, DepsMut, Env, MessageInfo,
     Order as IteratorOrder, Reply, Response, StdError, StdResult, SubMsg, SubMsgResponse, Uint128,
@@ -65,6 +65,15 @@ pub fn execute(
         ExecuteMsg::PlaceOrders {} => place_orders(deps, env, info),
         ExecuteMsg::CancelOrders { order_ids } => cancel_orders(deps, env, info, order_ids),
         ExecuteMsg::CreateDenom {} => create_denom(deps, env, info),
+        ExecuteMsg::CreateDenomFromErcToken {
+            contract_address,
+            caller,
+        } => create_denom_from_erc_token(deps, env, info, contract_address, caller),
+        ExecuteMsg::CallOtherContract {
+            contract_address,
+            erc_contract_address,
+            caller,
+        } => call_other_contract(env, info, contract_address, erc_contract_address, caller),
         ExecuteMsg::Mint {} => mint(deps, env, info),
         ExecuteMsg::Burn {} => burn(deps, env, info),
         ExecuteMsg::ChangeAdmin {} => change_admin(deps, env, info),
@@ -215,6 +224,47 @@ pub fn create_denom(
         subdenom: "subdenom".to_string(),
     };
     Ok(Response::new().add_message(test_create_denom))
+}
+
+pub fn create_denom_from_erc_token(
+    _deps: DepsMut<SeiQueryWrapper>,
+    _env: Env,
+    _info: MessageInfo,
+    contract_address: String,
+    caller: String,
+) -> Result<Response<SeiMsg>, StdError> {
+    let querier = SeiQuerier::new(&_deps.querier);
+    let erc20_token_info = querier.erc20_token_info(contract_address, caller)?;
+    let test_create_denom = sei_cosmwasm::SeiMsg::CreateDenom {
+        subdenom: erc20_token_info.symbol,
+    };
+    Ok(Response::new().add_message(test_create_denom))
+}
+
+
+// Function to call another contract
+pub fn call_other_contract(
+    _env: Env,
+    _info: MessageInfo,
+    contract_addr: String,
+    erc_token_address: String,
+    caller: String,
+) -> Result<Response<SeiMsg>, StdError> {
+    // Create the message to be sent to the other contract
+    let msg = ExecuteMsg::CreateDenomFromErcToken {
+        contract_address: erc_token_address,
+        caller,
+    };
+
+    // Create the WasmMsg::Execute message
+    let execute_msg = WasmMsg::Execute {
+        contract_addr,
+        msg: to_json_binary(&msg)?,
+        funds: vec![],
+    };
+
+    // Add the message to the response
+    Ok(Response::new().add_message(CosmosMsg::Wasm(execute_msg)))
 }
 
 // mint a token and send to a designated receiver
